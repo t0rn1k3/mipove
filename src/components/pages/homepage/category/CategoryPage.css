@@ -1,0 +1,31 @@
+.category-container {
+    margin-top: 100px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 1000px;
+    margin: 0 auto;
+}
+.category a {
+    color: #383D59;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+    font-size: 15px;
+}
+.category:hover a {
+    color: #f5f5f5;
+}
+.category {
+    margin-top: 30px;
+    width: 277px; 
+    padding: 18px 20px;
+    background-color: #f5f5f5;
+    border: 1px solid #383D59;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.category:hover {
+    background-color: #383D59;
+}

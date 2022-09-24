@@ -1,0 +1,54 @@
+.boxes {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    font-size: 18px;
+}
+.box {
+    width: 220px;
+    height: 300px;
+    margin: 5px;
+}
+.picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    overflow: hidden;
+}
+.picture img {
+    width: 100%;
+    height: 100%;
+
+}
+.box .hovers {
+    color: #f5f5f5;
+}
+.hovers {
+    width: 100%;
+    position: absolute;
+    background-color: #383D59;
+    bottom: 0;
+    transform: translateY(50%);
+    transition: 0.3s;
+    padding: 0 0 10px 10px;
+}
+.box {
+    position: relative;
+    cursor: pointer;
+}
+.names {
+    margin-bottom: 25%;
+    padding: 0;
+}   
+.names p {
+    margin-top: 10px;
+    font-size: 15px;
+}
+.names h4 {
+    font-size: 20px;
+}
+.box:hover .hovers {
+    transform: translateY(0);
+}

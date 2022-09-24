@@ -1,0 +1,29 @@
+.documents {
+    width: 40%;
+    margin: 30px auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.doc {
+    width: 300px;
+    border: 1px solid #383D59;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+.doc a {
+    width: 80%;
+    margin: 0 auto;
+    padding: 5px;
+    text-decoration: underline;
+    color: #383d59;
+    font-weight: bold;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.doc svg {
+    width: 20px;
+    height: 20px;
+}

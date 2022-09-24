@@ -1,0 +1,10 @@
+.enter-login {
+    width: 7rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+.enter {
+    color: #383d59;
+}

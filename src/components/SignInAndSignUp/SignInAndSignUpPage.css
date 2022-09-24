@@ -1,0 +1,11 @@
+.SignInAndSignUpPage {
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+}
+.SignInAndSignUpPage h2 {
+    text-align: center;
+    color: #383D59;
+    font-size: 1.7rem;
+}

@@ -1,0 +1,9 @@
+.contact {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+}
+.contact h2 {
+    font-weight: normal;
+    padding-top: 30px;
+}

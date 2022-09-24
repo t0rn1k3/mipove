@@ -1,0 +1,29 @@
+.nav {
+    width: 40rem;
+}
+.nav ul {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: bold;
+    list-style: none;
+}
+.nav ul li {
+    background-color: #BAD3D3;
+    padding: 10px 15px;
+    border-radius: 30px;
+    box-shadow: 2px 2px 2px grey;
+    transition: 0.3s;
+    cursor: pointer;
+}
+.nav ul li:hover {
+    background-color: #383D59;
+}
+.nav ul li a {
+    color: #383D59;
+    transition: 0.3s;
+    text-decoration: none;
+}
+.nav ul li:hover a {
+    color: #D2E4F0;
+}
