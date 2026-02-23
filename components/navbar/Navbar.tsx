@@ -2,10 +2,25 @@
 
 import Link from "next/link";
 import styles from "./navbar.module.css";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   return (
-    <header className={styles.header}>
+    <header
+      className={`${styles.header} ${isScrolled ? "bg-white/70 backdrop-blur-xs shadow-sm" : ""} `}
+    >
       <div className={styles.container}>
         {/* Logo */}
         <Link href="/" className={styles.logo}>

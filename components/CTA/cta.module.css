@@ -1,0 +1,31 @@
+.container {
+  background-color: #000000;
+  padding: 100px 0;
+  margin-top: 100px;
+}
+.content {
+  text-align: center;
+}
+.title {
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.description {
+  font-size: 1.2rem;
+  color: #fff;
+}
+.button {
+  display: inline-block;
+  margin-top: 20px;
+  background-color: rgb(89, 151, 155);
+  color: #ffffff;
+  padding: 15px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+}
+.button:hover {
+  background-color: rgb(89, 151, 155, 0.8);
+  transform: scale(1.05);
+  transition: 0.3s ease;
+}

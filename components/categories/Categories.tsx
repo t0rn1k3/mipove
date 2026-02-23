@@ -1,3 +1,6 @@
+import styles from "./categories.module.css";
+import Image from "next/image";
+
 export default function Categories() {
   const items = [
     {
@@ -19,26 +22,30 @@ export default function Categories() {
   ];
 
   return (
-    <section className="">
-      <div className="">
+    <section className={styles.container}>
+      <div className={styles.content}>
         {/* Heading */}
-        <h2 className="">Discover Craftsmanship</h2>
-        <p className="">
+        <h2 className={styles.title}>Discover Craftsmanship</h2>
+        <p className={styles.description}>
           Connect with skilled artisans across various disciplines
         </p>
 
         {/* Cards */}
-        <div className="">
+        <div className={styles.cards}>
           {items.map((item) => (
-            <div key={item.title} className="">
-              <div className="">
+            <div key={item.title} className={styles.card}>
+              <div className={styles.cardIcon}>
                 {/* Placeholder icon circle */}
-                <div className="" />
+                <Image
+                  src="/icons/palette.svg"
+                  alt="card icon"
+                  width={30}
+                  height={30}
+                />
               </div>
+              <h3 className={styles.cardTitle}>{item.title}</h3>
 
-              <h3 className="">{item.title}</h3>
-
-              <p className="">{item.description}</p>
+              <p className={styles.cardDescription}>{item.description}</p>
             </div>
           ))}
         </div>
