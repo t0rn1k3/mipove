@@ -1,7 +1,7 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Categories from "@/components/Categories";
-import CTA from "@/components/CTA";
+import Navbar from "@/components/navbar/Navbar";
+import Hero from "@/components/hero/Hero";
+import Categories from "@/components/categories/Categories";
+import CTA from "@/components/cta/CTA";
 
 export default function Home() {
   return (

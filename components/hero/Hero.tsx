@@ -1,51 +1,65 @@
 "use client";
 
 import Image from "next/image";
+import styles from "./hero.module.css";
 
 export default function Hero() {
   return (
-    <section className="">
-      {/* Background Image */}
-      <div className="">
-        <Image
-          src="/images/hero-bg.png"
-          alt="Workshop background"
-          fill
-          priority
-          className=""
-        />
-        <div className="" />
-      </div>
-
-      <div className="r">
+    <section className={styles.section}>
+      <div className={styles.backgroundImage}></div>
+      <div className={styles.backgroundOverlay}></div>
+      <div className={styles.container}>
         {/* LEFT SIDE */}
-        <div className="">
-          <h1 className="">
+        <div className={styles.leftSide}>
+          <h1 className={styles.title}>
             Find the Master <br /> Behind the Craft
           </h1>
 
-          <p className="">
+          <p className={styles.description}>
             Connect with exceptional artisans, sculptors, painters, and
             craftspeople who bring vision to life.
           </p>
 
           {/* Search Bar */}
-          <div className="">
-            <input type="text" placeholder="Search by skill..." className="" />
+          <div className={styles.searchBar}>
+            <div className={styles.searchBarSeparator}>
+              <div className={styles.searchInput}>
+                <Image
+                  src="/icons/search.svg"
+                  alt="Search"
+                  width={20}
+                  height={20}
+                />
+                <input
+                  type="text"
+                  placeholder="Search by skill..."
+                  className={styles.searchBarInput}
+                />
+              </div>
+              <div className={styles.searchInput}>
+                <Image
+                  src="/icons/location.svg"
+                  alt="Location"
+                  width={20}
+                  height={20}
+                />
+                <input
+                  type="text"
+                  placeholder="Location..."
+                  className={styles.searchBarInput}
+                />
+              </div>
+            </div>
 
-            <div className="" />
-
-            <input type="text" placeholder="Location..." className="" />
-
-            <button className="">Search</button>
+            <button className={styles.searchBarButton}>Search</button>
           </div>
 
           {/* Popular Tags */}
-          <div className="">
-            <span className="">Popular:</span>
+          <div className={styles.popularTags}>
+            <span className={styles.popularTagsTitle}>Popular:</span>
 
             {["Painting", "Sculpture", "Pottery", "Woodwork"].map((item) => (
-              <button key={item} className="">
+              <button key={item} className={styles.popularTagsButton}>
                 {item}
               </button>
             ))}
@@ -53,24 +67,22 @@ export default function Hero() {
         </div>
 
         {/* RIGHT SIDE IMAGES */}
-        <div className="">
-          {/* Main Image */}
-          <div className="">
+        <div className={styles.rightSide}>
+          <div className={styles.mainImage}>
             <Image
-              src="/images/artisan2.jpg"
-              alt="Artisan working"
-              fill
-              className=""
+              src="/images/artisan-2.jpg"
+              alt="Hero Main"
+              width={280}
+              height={280}
             />
           </div>
 
-          {/* Secondary Image */}
-          <div className="">
+          <div className={styles.secondaryImage}>
             <Image
-              src="/images/artisan2.jpg"
-              alt="Sculpture workshop"
-              fill
-              className=""
+              src="/images/artisan-2.jpg"
+              alt="Hero Secondary"
+              width={280}
+              height={280}
             />
           </div>
         </div>
