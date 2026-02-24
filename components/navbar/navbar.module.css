@@ -20,7 +20,7 @@
   align-items: center;
 }
 .navContainer {
-  width: 30%;
+  width: 40%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -33,6 +33,25 @@
   color: #000;
   text-decoration: none;
   font-size: 1.2rem;
+  position: relative;
+}
+/* .navLink::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: rgba(89, 151, 155, 0.8);
+  transition: 0.3s ease;
+}
+.navLink:hover::before {
+  width: 100%;
+} */
+.navLink:hover {
+  color: rgba(89, 151, 155, 0.8);
+  transform: scale(1.05);
+  transition: 0.3s ease;
 }
 
 .ctaButton {

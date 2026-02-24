@@ -17,6 +17,13 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const navLinks = [
+    { name: "Home", href: "/" },
+    { name: "Gallery", href: "/gallery" },
+    { name: "Professionals", href: "/professionals" },
+    { name: "About", href: "/about" },
+  ];
   return (
     <header
       className={`${styles.header} ${isScrolled ? "bg-white/70 backdrop-blur-xs shadow-sm" : ""} `}
@@ -30,16 +37,15 @@ export default function Navbar() {
         <div className={styles.navContainer}>
           {/* Navigation */}
           <nav className={styles.navigation}>
-            <Link href="/" className={styles.navLink}>
-              Home
-            </Link>
-            <Link href="/gallery" className={styles.navLink}>
-              Gallery
-            </Link>
+            {navLinks.map((link) => (
+              <Link key={link.name} href={link.href} className={styles.navLink}>
+                {link.name}
+              </Link>
+            ))}
           </nav>
 
           {/* CTA Button */}
-          <Link href="/join" className={styles.ctaButton}>
+          <Link key="join" href="/join" className={styles.ctaButton}>
             Join Us
           </Link>
         </div>

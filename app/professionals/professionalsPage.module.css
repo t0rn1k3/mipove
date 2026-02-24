@@ -1,0 +1,142 @@
+/* Container Background to match the warm white in the image */
+.container {
+  background-color: #f9f7f2;
+  padding: 60px 20px;
+  min-height: 100vh;
+  margin-top: 80px;
+}
+.title {
+  font-size: 3rem;
+  text-align: center;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+.description {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #5c5c68;
+  margin-bottom: 40px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+/* Card Styling */
+.card {
+  background: white;
+  border-radius: 32px; /* Very rounded corners as seen in pic */
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  width: 300px;
+  height: 350px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+.card:hover .name {
+  color: #008080;
+}
+
+/* Image section */
+.imageContainer {
+  width: 100%;
+  height: 190px;
+  overflow: hidden;
+}
+
+.artisanImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Content section */
+.content {
+  padding: 10px 20px;
+}
+
+.name {
+  font-family: "Playfair Display", serif; /* Or any elegant Serif font */
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #5c5c68;
+  font-size: 0.8rem;
+}
+
+.pin {
+  color: #4a4a55;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #eeeeee;
+  margin: 15px 0;
+}
+
+/* Footer Section */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.socialIcons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 40%;
+  height: 30px;
+}
+
+.iconBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: white;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #008080;
+  background-color: rgba(0, 128, 128, 0.1);
+}
+
+.iconBtn:hover {
+  background: #008080;
+  color: white;
+}
+
+/* The black "View Portfolio" button */
+.viewBtn {
+  background-color: #1a1a1a;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 50px; /* Pill shape */
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.6rem;
+  transition: all 0.2s;
+}
+
+.viewBtn:hover {
+  background-color: #008080;
+  transform: scale(1.05);
+  color: white;
+}

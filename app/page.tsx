@@ -6,7 +6,6 @@ import CTA from "@/components/cta/CTA";
 export default function Home() {
   return (
     <>
-      <Navbar />
       <Hero />
       <Categories />
       <CTA />

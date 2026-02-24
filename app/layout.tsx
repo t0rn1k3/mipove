@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 
+import Navbar from "@/components/navbar/Navbar";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -25,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+        <Navbar />
         {children}
       </body>
     </html>
