@@ -5,6 +5,7 @@
   text-align: center;
   font-weight: 700;
   font-size: 2.5rem;
+  font-family: var(--font-sharpe);
 }
 .description {
   text-align: center;
@@ -47,6 +48,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   margin-top: 20px;
+  font-family: var(--font-sharpe);
 }
 .cardDescription {
   font-size: 1rem;

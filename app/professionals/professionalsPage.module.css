@@ -10,6 +10,7 @@
   text-align: center;
   color: #1a1a1a;
   margin-bottom: 20px;
+  font-family: var(--font-sharpe);
 }
 .description {
   font-size: 1.2rem;
@@ -62,7 +63,7 @@
 }
 
 .name {
-  font-family: "Playfair Display", serif; /* Or any elegant Serif font */
+  font-family: var(--font-sharpe);
   font-size: 1.4rem;
   font-weight: 700;
   color: #1a1a1a;

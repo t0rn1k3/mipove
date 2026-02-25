@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Barlow } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import Navbar from "@/components/navbar/Navbar";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
+const sharpe = localFont({
+  src: "../public/fonts/SharpePERSONAL-Bold.woff2",
+  variable: "--font-sharpe",
+  display: "swap",
 });
 
-const playfair = Playfair_Display({
+const barlow = Barlow({
   subsets: ["latin"],
-  variable: "--font-serif",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-barlow",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +30,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+      <head></head>
+      <body className={`${sharpe.variable} ${barlow.variable} font-sans`}>
         <Navbar />
         {children}
       </body>

@@ -5,12 +5,13 @@
 }
 .header {
   text-align: center;
-  margin-top: 80px;
+  margin: 80px 0;
 }
 .title {
   font-family: "Serif", serif;
   font-size: 3rem;
   color: #1a1a1a;
+  font-family: var(--font-sharpe);
 }
 .filters {
   display: flex;
@@ -62,4 +63,7 @@
 .price {
   color: #008080;
   font-weight: bold;
+}
+.info h3 {
+  font-family: var(--font-sharpe);
 }
