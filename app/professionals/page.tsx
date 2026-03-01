@@ -92,7 +92,7 @@ export default function ProfessionalsPage() {
                   </button>
                 </div>
                 <Link
-                  href={`/professionals/${artisan.slug}`}
+                  href={`/profile/${artisan.slug}`}
                   className={styles.viewBtn}
                 >
                   View Portfolio
