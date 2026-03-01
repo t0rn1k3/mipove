@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import styles from "./navbar.module.css";
-import Image from "next/image";
+import Logo from "@/components/logo/Logo";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
@@ -35,44 +35,7 @@ export default function Navbar() {
       <div className={styles.container}>
         {/* Logo */}
         <Link href="/" className={styles.logoContainer}>
-          <div className={styles.logo}>
-            <svg
-              width="35px"
-              height="35px"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                className={styles.searchCircle}
-                cx="10.5"
-                cy="10.5"
-                r="7.5"
-                stroke="#59979b"
-                strokeWidth="2"
-                fill="none"
-              />
-              <circle
-                cx="10.5"
-                cy="10.5"
-                r="2"
-                fill="black"
-                className={styles.middleDot}
-              />
-              <path
-                d="M15.7955 15.8111L21 21"
-                stroke="#59979b"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div className={styles.logoText}>
-            <span className={styles.logoSpan}>
-              mi<span className={styles.logoSpanHighlight}>po</span>ve
-            </span>
-          </div>
+          <Logo showText size={35} />
         </Link>
 
         <div className={styles.navContainer}>

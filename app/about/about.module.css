@@ -1,0 +1,455 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.revealDelay1 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+.revealDelay2 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+.revealDelay3 {
+  animation-delay: 0.35s;
+  opacity: 0;
+}
+
+.scrollReveal {
+  opacity: 0;
+}
+.visible .scrollReveal {
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.visible .scrollRevealDelay1 {
+  animation-delay: 0.1s;
+}
+.visible .scrollRevealDelay2 {
+  animation-delay: 0.2s;
+}
+.visible .scrollRevealDelay3 {
+  animation-delay: 0.3s;
+}
+.visible .scrollRevealDelay4 {
+  animation-delay: 0.4s;
+}
+.visible .scrollRevealDelay5 {
+  animation-delay: 0.5s;
+}
+.visible .scrollRevealDelay6 {
+  animation-delay: 0.6s;
+}
+.visible .scrollRevealDelay7 {
+  animation-delay: 0.7s;
+}
+.visible .scrollRevealDelay8 {
+  animation-delay: 0.8s;
+}
+.visible .scrollRevealDelay9 {
+  animation-delay: 0.9s;
+}
+.visible .scrollRevealDelay10 {
+  animation-delay: 1s;
+}
+.visible .scrollRevealDelay11 {
+  animation-delay: 1.1s;
+}
+.visible .scrollRevealDelay12 {
+  animation-delay: 1.2s;
+}
+
+.page {
+  background: #fdfbf7;
+}
+
+:root {
+  --color-teal: #59979b;
+  --color-teal-dark: #2d5a5d;
+  --color-dark: #1a1a1a;
+  --color-gray: #4a4a4a;
+  --color-gray-light: #768283;
+}
+
+.hero {
+  padding: 120px 5% 80px;
+  text-align: center;
+  background: #fdfbf7;
+}
+
+.heroLogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.heroLogoIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-teal);
+}
+
+.heroBrand {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  font-family: var(--font-sharpe);
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  font-family: var(--font-sharpe);
+  margin-bottom: 16px;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: var(--color-gray);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.sectionInner {
+  padding: 100px 0;
+}
+
+.sectionTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  font-family: var(--font-sharpe);
+  margin-bottom: 12px;
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  color: var(--color-gray);
+  margin-bottom: 48px;
+}
+
+.sectionTitleCenter {
+  text-align: center;
+}
+
+.sectionSubtitleCenter {
+  text-align: center;
+}
+
+.storyCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  padding: 48px;
+  margin-top: 40px;
+}
+
+.storyTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  font-family: var(--font-sharpe);
+  margin-bottom: 24px;
+}
+
+.storyText {
+  font-size: 1.05rem;
+  color: var(--color-gray);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.storyText:last-child {
+  margin-bottom: 0;
+}
+
+.storyText strong {
+  color: var(--color-teal-dark);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.metricCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-4px);
+}
+
+.metricNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-teal);
+  font-family: var(--font-sharpe);
+  margin-bottom: 8px;
+}
+
+.metricLabel {
+  font-size: 0.95rem;
+  color: var(--color-gray);
+}
+
+.drivesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.driveCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+  transition: transform 0.3s ease;
+}
+
+.driveCard:hover {
+  transform: translateY(-4px);
+}
+
+.driveIcon {
+  width: 56px;
+  height: 56px;
+  background: rgba(89, 151, 155, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--color-teal);
+}
+
+.driveIcon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.driveTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  font-family: var(--font-sharpe);
+  margin-bottom: 12px;
+}
+
+.driveText {
+  font-size: 1rem;
+  color: var(--color-gray);
+  line-height: 1.6;
+}
+
+.creatorsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.creatorCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.creatorCard:hover {
+  transform: translateY(-4px);
+}
+
+.creatorImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 20px;
+  display: block;
+}
+
+.creatorName {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  font-family: var(--font-sharpe);
+  margin-bottom: 4px;
+}
+
+.creatorRole {
+  font-size: 0.95rem;
+  color: var(--color-teal);
+  margin-bottom: 12px;
+}
+
+.creatorBio {
+  font-size: 0.9rem;
+  color: var(--color-gray);
+  line-height: 1.5;
+}
+
+.joinSection {
+  padding: 80px 5%;
+}
+
+.joinCard {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--color-teal);
+  border-radius: 20px;
+  padding: 64px 48px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(89, 151, 155, 0.3);
+}
+
+.joinTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  font-family: var(--font-sharpe);
+  margin-bottom: 16px;
+}
+
+.joinDescription {
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.joinButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.joinBtnPrimary {
+  background: white;
+  color: var(--color-dark);
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 2px solid white;
+  transition: all 0.3s ease;
+}
+
+.joinBtnPrimary:hover {
+  background: transparent;
+  color: white;
+}
+
+.joinBtnSecondary {
+  background: var(--color-dark);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 2px solid var(--color-dark);
+  transition: all 0.3s ease;
+}
+
+.joinBtnSecondary:hover {
+  background: transparent;
+  color: var(--color-dark);
+}
+
+/* ========== Footer ========== */
+.footer {
+  background: #f8f6f2;
+  padding: 48px 5%;
+  text-align: center;
+}
+
+.footerLogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--color-dark);
+  text-decoration: none;
+  font-weight: 700;
+  font-family: var(--font-sharpe);
+}
+
+.footerLogoIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-teal);
+}
+
+.footerCopyright {
+  font-size: 0.9rem;
+  color: var(--color-gray);
+  margin-bottom: 4px;
+}
+
+.footerMade {
+  font-size: 0.9rem;
+  color: var(--color-gray-light);
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .creatorsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  .heroSubtitle {
+    font-size: 1.1rem;
+  }
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  .drivesGrid {
+    grid-template-columns: 1fr;
+  }
+  .creatorsGrid {
+    grid-template-columns: 1fr;
+  }
+  .joinButtons {
+    flex-direction: column;
+  }
+  .joinCard {
+    padding: 48px 24px;
+  }
+}
