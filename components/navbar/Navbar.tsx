@@ -72,7 +72,6 @@ export default function Navbar() {
             <span className={styles.logoSpan}>
               mi<span className={styles.logoSpanHighlight}>po</span>ve
             </span>
-            <span className={styles.logoTextSpan}>მიპოვე</span>
           </div>
         </Link>
 

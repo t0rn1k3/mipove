@@ -11,17 +11,17 @@ export default function Hero() {
       <div className={styles.container}>
         {/* LEFT SIDE */}
         <div className={styles.leftSide}>
-          <h1 className={styles.title}>
+          <h1 className={`${styles.title} ${styles.reveal} ${styles.revealDelay1}`}>
             Find the Master <br /> Behind the Craft
           </h1>
 
-          <p className={styles.description}>
+          <p className={`${styles.description} ${styles.reveal} ${styles.revealDelay2}`}>
             Connect with exceptional artisans, sculptors, painters, and
             craftspeople who bring vision to life.
           </p>
 
           {/* Search Bar */}
-          <div className={styles.searchBar}>
+          <div className={`${styles.searchBar} ${styles.reveal} ${styles.revealDelay3}`}>
             <div className={styles.searchBarSeparator}>
               <div className={styles.searchInput}>
                 <Image
@@ -55,7 +55,7 @@ export default function Hero() {
           </div>
 
           {/* Popular Tags */}
-          <div className={styles.popularTags}>
+          <div className={`${styles.popularTags} ${styles.reveal} ${styles.revealDelay4}`}>
             <span className={styles.popularTagsTitle}>Popular:</span>
 
             {["Painting", "Sculpture", "Pottery", "Woodwork"].map((item) => (
@@ -68,7 +68,7 @@ export default function Hero() {
 
         {/* RIGHT SIDE IMAGES */}
         <div className={styles.rightSide}>
-          <div className={styles.mainImage}>
+          <div className={`${styles.mainImage} ${styles.reveal} ${styles.revealDelay5}`}>
             <Image
               src="/images/artisan-2.jpg"
               alt="Hero Main"
@@ -77,7 +77,7 @@ export default function Hero() {
             />
           </div>
 
-          <div className={styles.secondaryImage}>
+          <div className={`${styles.secondaryImage} ${styles.reveal} ${styles.revealDelay6}`}>
             <Image
               src="/images/artisan-2.jpg"
               alt="Hero Secondary"
