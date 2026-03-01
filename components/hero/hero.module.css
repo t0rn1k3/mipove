@@ -16,6 +16,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-top: 8rem;
+  padding-bottom: 5rem;
 }
 
 /* Page entrance animations */
@@ -73,17 +75,17 @@
 }
 
 .title {
-  font-size: 4rem;
+  font-size: clamp(3rem, 7vw, 4.5rem);
   width: 75%;
   font-weight: 700;
-  color: #000;
+  color: var(--charcoal);
   margin-top: 3rem;
-  font-family: var(--font-sharpe);
+  font-family: var(--font-serif);
 }
 .description {
-  font-size: 1.5rem;
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
   font-weight: 400;
-  color: #000;
+  color: #374151;
   margin-top: 1rem;
 }
 .searchBar {
@@ -158,14 +160,15 @@
   color: #000;
 }
 .popularTagsButton {
-  background-color: rgba(89, 151, 155, 0.1);
-  color: rgba(89, 151, 155, 1);
+  background: var(--teal-light);
+  color: var(--teal);
   padding: 0.5rem 1rem;
-  border-radius: 1.6rem;
+  border-radius: 9999px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 .popularTagsButton:hover {
-  background-color: rgba(89, 151, 155, 0.8);
+  background: var(--teal);
   color: white;
   transform: scale(1.05);
 }
@@ -202,4 +205,148 @@
 }
 .secondaryImage img:hover {
   transform: rotate(-3deg) scale(1.1);
+}
+
+/* ========== Responsive ========== */
+/* Tablet: 768px - 1025px - horizontal search bar, full nav visible */
+@media (max-width: 1025px) {
+  .container {
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    gap: 2rem;
+    align-items: center;
+  }
+  .leftSide {
+    width: 100%;
+    max-width: 700px;
+    text-align: left;
+  }
+  .title {
+    font-size: 2.75rem;
+    width: 100%;
+    margin-top: 0;
+    text-align: left;
+  }
+  .description {
+    font-size: 1.2rem;
+    text-align: left;
+    color: #333;
+  }
+  /* Horizontal search: skill | location | button in one row */
+  .searchBar {
+    flex-direction: row;
+    width: 100%;
+    max-width: 580px;
+    margin-top: 2rem;
+  }
+  .searchBarSeparator {
+    flex-direction: row;
+    flex: 1;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 16px 0 0 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    gap: 12px;
+    width: auto;
+  }
+  .searchBarSeparator:after {
+    display: block;
+  }
+  .searchBarButton {
+    padding: 16px 1.75rem;
+    border-radius: 0 16px 16px 0;
+    margin-top: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .popularTags {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    margin-top: 2rem;
+  }
+  .rightSide {
+    display: none;
+  }
+}
+
+/* Mobile: ≤768px - stacked search */
+@media (max-width: 768px) {
+  .section {
+    min-height: auto;
+    padding: 80px 0 60px;
+  }
+  .container {
+    padding: 1rem;
+  }
+  .title {
+    font-size: 2rem;
+  }
+  .description {
+    font-size: 1.1rem;
+  }
+  .searchBar {
+    margin-top: 1.5rem;
+    max-width: 100%;
+  }
+  .searchBarSeparator {
+    flex-direction: column;
+    padding: 0;
+    background: transparent;
+    gap: 12px;
+  }
+  .searchBarSeparator:after {
+    display: none;
+  }
+  .searchInput {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  .searchBarInput {
+    padding: 14px 16px 14px 40px;
+  }
+  .searchBarButton {
+    width: 100%;
+    padding: 14px 1.5rem;
+    margin-top: 12px;
+  }
+  .rightSide {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 60px 0 48px;
+  }
+  .container {
+    padding: 0.75rem;
+  }
+  .leftSide {
+    text-align: left;
+  }
+  .title {
+    font-size: 1.75rem;
+    text-align: left;
+  }
+  .description {
+    text-align: left;
+    font-size: 1rem;
+  }
+  .searchInput img {
+    left: 12px;
+  }
+  .popularTags {
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .popularTagsTitle {
+    width: 100%;
+  }
+  .popularTagsButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
 }

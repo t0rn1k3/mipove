@@ -12,7 +12,7 @@ export default function Hero() {
         {/* LEFT SIDE */}
         <div className={styles.leftSide}>
           <h1 className={`${styles.title} ${styles.reveal} ${styles.revealDelay1}`}>
-            Find the Master <br /> Behind the Craft
+            Find Your Perfect Craftsperson
           </h1>
 
           <p className={`${styles.description} ${styles.reveal} ${styles.revealDelay2}`}>

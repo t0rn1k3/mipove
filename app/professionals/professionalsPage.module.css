@@ -141,3 +141,59 @@
   transform: scale(1.05);
   color: white;
 }
+
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .container {
+    padding: 60px 1.5rem;
+    margin-top: 60px;
+  }
+  .grid {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 80px 1rem 60px;
+  }
+  .title {
+    font-size: 2rem;
+  }
+  .description {
+    font-size: 1rem;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    justify-items: center;
+  }
+  .card {
+    width: 100%;
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 70px 0.75rem 40px;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    max-width: 100%;
+  }
+  .footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .socialIcons {
+    width: 100%;
+    justify-content: center;
+  }
+}

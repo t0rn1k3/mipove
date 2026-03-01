@@ -22,7 +22,7 @@
   width: 4.5px;
   height: 4.5px;
   border-radius: 50%;
-  background-color: #59979b;
+  background-color: var(--teal);
   animation: logoDots 0.3s ease-out forwards;
   animation-delay: 1.4s;
   opacity: 0;
@@ -36,7 +36,7 @@
   width: 4.5px;
   height: 4.5px;
   border-radius: 50%;
-  background-color: #59979b;
+  background-color: var(--teal);
   animation: logoDots 0.3s ease-out forwards;
   animation-delay: 1.6s;
   opacity: 0;
@@ -99,5 +99,5 @@
 }
 
 .logoSpanHighlight {
-  color: rgba(89, 151, 155, 0.8);
+  color: var(--teal);
 }

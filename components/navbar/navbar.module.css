@@ -12,18 +12,25 @@
   left: 0;
   width: 100%;
   z-index: 100;
-  padding: 1rem 2rem;
+  height: 5rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  background: transparent;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
   animation: headerAnimation 0.3s ease-out forwards;
   animation-delay: 0.3s;
-  transition: 0.3s ease;
   transform: translateY(-100%);
+}
+.header.scrolled {
+  background: var(--white-80);
+  backdrop-filter: blur(1rem);
+  -webkit-backdrop-filter: blur(1rem);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 .container {
   width: 100%;
-  max-width: 1400px;
+  max-width: var(--container-max);
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
@@ -41,43 +48,61 @@
   gap: 2rem;
 }
 .navLink {
-  color: #000;
+  color: var(--charcoal);
   text-decoration: none;
-  font-size: 1.2rem;
+  font-size: 1rem;
   position: relative;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
-/* .navLink::before {
+.navLink::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: -2px;
   left: 0;
   width: 0;
   height: 2px;
-  background-color: rgba(89, 151, 155, 0.8);
-  transition: 0.3s ease;
+  background: var(--teal);
+  transition: width 0.3s ease;
 }
-.navLink:hover::before {
+.navLink:hover::after {
   width: 100%;
-} */
+}
 .navLink:hover {
-  color: rgba(89, 151, 155, 0.8);
-  transform: scale(1.05);
-  transition: 0.3s ease;
+  color: var(--teal);
+  transform: translateY(-2px);
+}
+
+.navLinkActive {
+  color: var(--teal);
+}
+.navLinkActive::after {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .navLinkActive {
+    background: var(--teal-light);
+    margin: 0 -24px;
+    padding: 16px 24px;
+    color: var(--teal);
+  }
 }
 
 .ctaButton {
-  background-color: rgba(89, 151, 155, 0.8);
+  background: var(--teal);
   color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 1.5rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
   text-decoration: none;
   font-size: 1rem;
-  transition: 0.3s ease;
+  font-weight: 600;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 .ctaButton:hover {
-  background-color: rgba(89, 151, 155, 0.5);
+  background: #4d8589;
   transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 .logoContainer {
   display: flex;
@@ -85,4 +110,123 @@
   justify-content: space-between;
   width: 8.125rem;
   font-weight: bold;
+}
+
+/* ========== Responsive ========== */
+/* Tablet (768-1025px): full nav visible, slightly reduced spacing */
+@media (max-width: 1024px) {
+  .navContainer {
+    width: auto;
+    gap: 1.25rem;
+  }
+  .navigation {
+    gap: 1.5rem;
+  }
+  .navLink {
+    font-size: 1rem;
+  }
+}
+
+/* Mobile: hamburger menu with slide-out drawer */
+@media (max-width: 768px) {
+  .navContainer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    background: var(--white-95);
+    backdrop-filter: blur(1rem);
+    z-index: 101;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 80px 24px 24px;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .navContainer.open {
+    transform: translateX(0);
+  }
+  .navigation {
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+  }
+  .navLink {
+    padding: 16px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+  }
+  .ctaButton {
+    margin-top: 16px;
+  }
+  .logoContainer {
+    width: auto;
+  }
+  .header {
+    padding: 0.75rem 1rem;
+  }
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+}
+
+.hamburgerLine {
+  width: 100%;
+  height: 2px;
+  background: #1a1a1a;
+  transition: transform 0.3s ease;
+}
+
+.hamburger.open .hamburgerLine:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger.open .hamburgerLine:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.open .hamburgerLine:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }

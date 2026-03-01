@@ -2,7 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./categories.module.css";
-import Image from "next/image";
+import {
+  Hammer,
+  Wrench,
+  Flower2,
+  Shirt,
+  Gem,
+  Camera,
+  Palette,
+  Mountain,
+} from "lucide-react";
+
+const CATEGORIES = [
+  { title: "Woodworking", count: 124, icon: Hammer },
+  { title: "Metalwork", count: 89, icon: Wrench },
+  { title: "Pottery & Ceramics", count: 156, icon: Flower2 },
+  { title: "Textile & Fashion", count: 98, icon: Shirt },
+  { title: "Jewelry Making", count: 72, icon: Gem },
+  { title: "Photography", count: 145, icon: Camera },
+  { title: "Painting & Murals", count: 112, icon: Palette },
+  { title: "Sculpture", count: 67, icon: Mountain },
+];
 
 export default function Categories() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -23,57 +43,30 @@ export default function Categories() {
     return () => observer.disconnect();
   }, []);
 
-  const items = [
-    {
-      title: "Painting",
-      description: "Expert painters bringing visions to canvas",
-    },
-    {
-      title: "Sculpture",
-      description: "Master sculptors crafting timeless pieces",
-    },
-    {
-      title: "Textiles",
-      description: "Skilled artisans weaving tradition",
-    },
-    {
-      title: "Restoration",
-      description: "Preserving art with precision",
-    },
-  ];
-
   return (
-    <section ref={sectionRef} className={styles.container}>
+    <section ref={sectionRef} className={styles.section}>
       <div className={`${styles.content} ${isVisible ? styles.visible : ""}`}>
-        {/* Heading */}
         <h2 className={`${styles.title} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}>
-          Discover Craftsmanship
+          Browse by Category
         </h2>
-        <p className={`${styles.description} ${styles.scrollReveal} ${styles.scrollRevealDelay2}`}>
-          Connect with skilled artisans across various disciplines
-        </p>
-
-        {/* Cards */}
-        <div className={styles.cards}>
-          {items.map((item, index) => (
+        <div className={styles.grid}>
+          {CATEGORIES.map((cat, index) => (
             <div
-              key={item.title}
+              key={cat.title}
               className={`${styles.card} ${styles.scrollReveal} ${
-                [styles.scrollRevealDelay3, styles.scrollRevealDelay4, styles.scrollRevealDelay5, styles.scrollRevealDelay6][index]
+                [
+                  styles.scrollRevealDelay2, styles.scrollRevealDelay3,
+                  styles.scrollRevealDelay4, styles.scrollRevealDelay5,
+                  styles.scrollRevealDelay6, styles.scrollRevealDelay7,
+                  styles.scrollRevealDelay8, styles.scrollRevealDelay9,
+                ][index]
               }`}
             >
-              <div className={styles.cardIcon}>
-                {/* Placeholder icon circle */}
-                <Image
-                  src="/icons/palette.svg"
-                  alt="card icon"
-                  width={30}
-                  height={30}
-                />
+              <div className={styles.iconWrap}>
+                <cat.icon className={styles.icon} />
               </div>
-              <h3 className={styles.cardTitle}>{item.title}</h3>
-
-              <p className={styles.cardDescription}>{item.description}</p>
+              <h3 className={styles.cardTitle}>{cat.title}</h3>
+              <p className={styles.cardCount}>{cat.count} professionals</p>
             </div>
           ))}
         </div>

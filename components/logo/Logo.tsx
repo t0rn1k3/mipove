@@ -23,13 +23,14 @@ export default function Logo({
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          style={{ color: "var(--teal)" }}
         >
           <circle
             className={styles.searchCircle}
             cx="10.5"
             cy="10.5"
             r="7.5"
-            stroke="#59979b"
+            stroke="currentColor"
             strokeWidth="2"
             fill="none"
           />
@@ -42,7 +43,7 @@ export default function Logo({
           />
           <path
             d="M15.7955 15.8111L21 21"
-            stroke="#59979b"
+            stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"

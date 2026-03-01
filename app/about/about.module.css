@@ -73,7 +73,7 @@
 }
 
 :root {
-  --color-teal: #59979b;
+  --color-teal: #5b9a9e;
   --color-teal-dark: #2d5a5d;
   --color-dark: #1a1a1a;
   --color-gray: #4a4a4a;
@@ -415,23 +415,50 @@
 
 /* ========== Responsive ========== */
 @media (max-width: 1024px) {
+  .section {
+    padding: 0 1.5rem;
+  }
+  .sectionInner {
+    padding: 60px 0;
+  }
+  .hero {
+    padding: 100px 1rem 60px;
+  }
+  .heroTitle {
+    font-size: 2.75rem;
+  }
   .metricsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
   .creatorsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .storyCard {
+    padding: 32px;
+  }
 }
 
 @media (max-width: 768px) {
+  .hero {
+    padding: 80px 1rem 48px;
+  }
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
   }
   .heroSubtitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+  .sectionTitle {
+    font-size: 2rem;
+  }
+  .sectionInner {
+    padding: 48px 0;
   }
   .metricsGrid {
     grid-template-columns: 1fr;
+  }
+  .metricNumber {
+    font-size: 2rem;
   }
   .drivesGrid {
     grid-template-columns: 1fr;
@@ -439,10 +466,40 @@
   .creatorsGrid {
     grid-template-columns: 1fr;
   }
-  .joinButtons {
-    flex-direction: column;
+  .creatorCard {
+    padding: 24px;
+  }
+  .joinSection {
+    padding: 48px 1rem;
   }
   .joinCard {
     padding: 48px 24px;
+  }
+  .joinTitle {
+    font-size: 2rem;
+  }
+  .joinButtons {
+    flex-direction: column;
+  }
+  .footer {
+    padding: 32px 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+  .storyCard {
+    padding: 24px;
+  }
+  .sectionTitle {
+    font-size: 1.5rem;
+  }
+  .metricCard {
+    padding: 24px;
+  }
+  .driveCard {
+    padding: 24px;
   }
 }

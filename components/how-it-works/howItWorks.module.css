@@ -10,11 +10,11 @@
 }
 
 .section {
+  background: linear-gradient(to bottom, transparent, var(--white-70));
   padding: 5rem 0;
-  background: var(--cream);
 }
 
-.content {
+.container {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: 0 1rem;
@@ -27,58 +27,63 @@
   animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .visible .scrollRevealDelay1 { animation-delay: 0.1s; }
-.visible .scrollRevealDelay2 { animation-delay: 0.15s; }
-.visible .scrollRevealDelay3 { animation-delay: 0.2s; }
-.visible .scrollRevealDelay4 { animation-delay: 0.25s; }
-.visible .scrollRevealDelay5 { animation-delay: 0.3s; }
-.visible .scrollRevealDelay6 { animation-delay: 0.35s; }
-.visible .scrollRevealDelay7 { animation-delay: 0.4s; }
-.visible .scrollRevealDelay8 { animation-delay: 0.45s; }
-.visible .scrollRevealDelay9 { animation-delay: 0.5s; }
+.visible .scrollRevealDelay2 { animation-delay: 0.25s; }
+.visible .scrollRevealDelay3 { animation-delay: 0.3s; }
+.visible .scrollRevealDelay4 { animation-delay: 0.45s; }
 
 .title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.875rem, 4vw, 3rem);
   font-weight: 700;
   color: var(--charcoal);
   text-align: center;
   margin-bottom: 3rem;
 }
 
-.grid {
+.stepsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 2rem;
 }
 
-.card {
+.stepCard {
   background: var(--white-70);
   backdrop-filter: blur(1rem);
   -webkit-backdrop-filter: blur(1rem);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-3xl);
-  padding: 1.5rem;
+  padding: 2rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  cursor: pointer;
+  position: relative;
 }
 
-.card:hover {
-  transform: translateY(-5px) scale(1.02);
+.stepCard:hover {
+  transform: translateY(-5px);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
 }
 
-.card:hover .iconWrap {
-  transform: scale(1.1);
-  color: #4d8589;
+.badge {
+  position: absolute;
+  top: -12px;
+  left: 2rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: var(--teal);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .iconWrap {
-  width: 3rem;
-  height: 3rem;
-  color: var(--teal);
+  width: 3.5rem;
+  height: 3.5rem;
   margin-bottom: 1rem;
-  transition: transform 0.3s ease;
+  color: var(--teal);
 }
 
 .icon {
@@ -86,33 +91,32 @@
   height: 100%;
 }
 
-.cardTitle {
+.stepTitle {
   font-family: var(--font-serif);
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--charcoal);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.75rem;
 }
 
-.cardCount {
-  font-size: 0.875rem;
+.stepDesc {
+  font-size: 1rem;
   color: #4b5563;
+  line-height: 1.6;
 }
 
 @media (min-width: 768px) {
-  .content {
+  .container {
     padding: 0 1.5rem;
   }
-  .grid {
+  .stepsGrid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .content {
+  .container {
     padding: 0 2rem;
-  }
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
