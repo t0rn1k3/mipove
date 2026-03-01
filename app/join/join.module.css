@@ -1,0 +1,338 @@
+/* ========== Animations ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.revealDelay1 { animation-delay: 0.1s; opacity: 0; }
+.revealDelay2 { animation-delay: 0.2s; opacity: 0; }
+.revealDelay3 { animation-delay: 0.35s; opacity: 0; }
+.revealDelay4 { animation-delay: 0.5s; opacity: 0; }
+.revealDelay5 { animation-delay: 0.65s; opacity: 0; }
+
+/* ========== Variables ========== */
+.page {
+  min-height: 100vh;
+  background: #f8f5f0;
+  padding: 120px 5% 80px;
+}
+
+/* ========== Hero / Title Section ========== */
+.hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.heroLogo {
+  display: inline-flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  font-family: var(--font-sharpe);
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: #4a4a4a;
+}
+
+/* ========== Main Content - Two Column Layout ========== */
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ========== Left Card - Role & Benefits ========== */
+.leftCard {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.sectionHeading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  font-family: var(--font-sharpe);
+  margin-bottom: 16px;
+}
+
+.roleOptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.roleOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  border-radius: 16px;
+  border: 2px solid #e5e5e5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.roleOption:hover {
+  border-color: rgba(89, 151, 155, 0.5);
+}
+
+.roleOption.selected {
+  border-color: #59979b;
+  box-shadow: 0 4px 20px rgba(89, 151, 155, 0.15);
+}
+
+.roleIcon {
+  width: 40px;
+  height: 40px;
+  color: #4a4a4a;
+  margin-bottom: 12px;
+}
+
+.roleOption.selected .roleIcon {
+  color: #59979b;
+}
+
+.roleName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.roleDesc {
+  font-size: 0.85rem;
+  color: #4a4a4a;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Benefits list */
+.benefitsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefitItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.benefitIcon {
+  width: 22px;
+  height: 22px;
+  color: #59979b;
+  flex-shrink: 0;
+}
+
+/* Bottom callout */
+.trustedCallout {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+  margin-top: auto;
+}
+
+.trustedText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.communityText {
+  font-size: 0.9rem;
+  color: #768283;
+}
+
+/* ========== Right Card - Form ========== */
+.rightCard {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  padding: 40px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  background: #f0f0f0;
+  color: #4a4a4a;
+}
+
+.tab:hover {
+  background: #e5e5e5;
+}
+
+.tab.active {
+  background: #59979b;
+  color: white;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  color: #768283;
+  pointer-events: none;
+}
+
+.formInput {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  border: 2px solid #e5e5e5;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #59979b;
+}
+
+.formInput::placeholder {
+  color: #a0a0a0;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #768283;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passwordToggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.passwordToggle:hover {
+  color: #1a1a1a;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 16px 24px;
+  background: #59979b;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.submitBtn:hover {
+  background: #4a8589;
+  transform: translateY(-1px);
+}
+
+.legalText {
+  font-size: 0.8rem;
+  color: #768283;
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
+.legalLink {
+  color: #59979b;
+  text-decoration: underline;
+}
+
+.legalLink:hover {
+  color: #4a8589;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 900px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .roleOptions {
+    grid-template-columns: 1fr;
+  }
+  .title {
+    font-size: 2.25rem;
+  }
+}
