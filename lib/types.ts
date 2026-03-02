@@ -16,7 +16,7 @@ export type AuthResponse = {
   token: string;
   message?: string;
   user?: User;
-  data?: { role?: string };
+  data?: { role?: string; slug?: string; id?: string };
 };
 
 /* ========== User / Master ========== */

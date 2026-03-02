@@ -1,13 +1,38 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
+import {
+  getMe,
+  getProfileBySlug,
+  getStoredToken,
+  updateProfile,
+  clearToken,
+} from "@/lib/api";
 import styles from "../profilePage.module.css";
 
-const MOCK_PROFILE = {
+type ProfileData = {
+  name: string;
+  specialty: string;
+  location: string;
+  bio: string;
+  phone: string;
+  email: string;
+  instagram?: string;
+  website?: string;
+  image: string;
+  works: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    image: string;
+  }>;
+};
+
+const DEFAULT_PROFILE: ProfileData = {
   name: "Elena Martinez",
   specialty: "Contemporary Painting",
   location: "Barcelona, Spain",
@@ -20,42 +45,42 @@ const MOCK_PROFILE = {
     "https://images.unsplash.com/photo-1651889512068-f1c588fe6649?w=400&q=80",
   works: [
     {
-      id: 1,
+      id: "1",
       title: "Abstract Horizon",
       description: "Mixed media on canvas, 2024",
       image:
         "https://images.unsplash.com/photo-1748285279107-13e8799eab76?w=800&q=80",
     },
     {
-      id: 2,
+      id: "2",
       title: "Modern Forms",
       description: "Acrylic on wood, 2024",
       image:
         "https://images.unsplash.com/photo-1767134426275-059972692c23?w=800&q=80",
     },
     {
-      id: 3,
+      id: "3",
       title: "Ceramic Dreams",
       description: "Hand-painted ceramic, 2023",
       image:
         "https://images.unsplash.com/photo-1656626277991-0fd06ae52d5c?w=800&q=80",
     },
     {
-      id: 4,
+      id: "4",
       title: "Wooden Elegance",
       description: "Mixed media installation, 2024",
       image:
         "https://images.unsplash.com/photo-1732575886697-0ddcbce961dd?w=800&q=80",
     },
     {
-      id: 5,
+      id: "5",
       title: "Portrait in Motion",
       description: "Oil on canvas, 2023",
       image:
         "https://images.unsplash.com/photo-1763070606104-fc2ae79182db?w=800&q=80",
     },
     {
-      id: 6,
+      id: "6",
       title: "Decorative Symphony",
       description: "Mixed media, 2024",
       image:
@@ -64,14 +89,54 @@ const MOCK_PROFILE = {
   ],
 };
 
-type Work = (typeof MOCK_PROFILE.works)[0];
+type Work = ProfileData["works"][0];
+
+function mapMeToProfile(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  specialty?: string;
+  location?: string;
+  bio?: string;
+  image?: string;
+  instagram?: string;
+  website?: string;
+  works?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    image: string;
+  }>;
+}): ProfileData {
+  return {
+    name: data.name,
+    email: data.email,
+    phone: data.phone || "",
+    specialty: data.specialty || "—",
+    location: data.location || "—",
+    bio: data.bio || "",
+    image:
+      data.image ||
+      "https://images.unsplash.com/photo-1651889512068-f1c588fe6649?w=400&q=80",
+    instagram: data.instagram,
+    website: data.website,
+    works: data.works ?? DEFAULT_PROFILE.works,
+  };
+}
 
 export default function ProfilePage() {
   const params = useParams();
-  const _id = params?.id as string | undefined; // For future API fetch
+  const router = useRouter();
+  const slug = params?.id as string | undefined;
+  const [profile, setProfile] = useState<ProfileData>(DEFAULT_PROFILE);
+  const [loading, setLoading] = useState(true);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -80,21 +145,127 @@ export default function ProfilePage() {
       ([entry]) => {
         if (entry.isIntersecting) setIsVisible(true);
       },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
+      { threshold: 0, rootMargin: "0px" },
     );
     observer.observe(section);
     return () => observer.disconnect();
   }, []);
 
-  const profile = MOCK_PROFILE;
+  useEffect(() => {
+    if (!slug) {
+      setLoading(false);
+      return;
+    }
+
+    if (slug === "me") {
+      const token = getStoredToken();
+      if (!token) {
+        router.replace("/join");
+        return;
+      }
+      getMe()
+        .then(({ data }) => {
+          if (data.role === "admin") {
+            router.replace("/admin");
+            return;
+          }
+          if (data.role === "master" && data.slug) {
+            router.replace(`/profile/${data.slug}`);
+            return;
+          }
+          setProfile(mapMeToProfile(data));
+          setIsOwnProfile(true);
+        })
+        .catch(() => router.replace("/join"))
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    const token = getStoredToken();
+    if (token) {
+      getMe()
+        .then(({ data }) => {
+          if (data.slug === slug) {
+            setProfile(mapMeToProfile(data));
+            setIsOwnProfile(true);
+            setLoading(false);
+            return;
+          }
+          return getProfileBySlug(slug).then((p) => {
+            setProfile(p);
+            setIsOwnProfile(false);
+          });
+        })
+        .catch(() => getProfileBySlug(slug).then((p) => {
+          setProfile(p);
+          setIsOwnProfile(false);
+        }))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    } else {
+      getProfileBySlug(slug)
+        .then((p) => {
+          setProfile(p);
+          setIsOwnProfile(false);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }
+  }, [slug, router]);
+
+  const handleLogout = () => {
+    clearToken();
+    router.replace("/");
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    setEditError("");
+    setEditLoading(true);
+    try {
+      const data = await updateProfile({
+        name: (form.elements.namedItem("name") as HTMLInputElement)?.value,
+        email: (form.elements.namedItem("email") as HTMLInputElement)?.value,
+        phone: (form.elements.namedItem("phone") as HTMLInputElement)?.value,
+        specialty: (form.elements.namedItem("specialty") as HTMLInputElement)?.value,
+        location: (form.elements.namedItem("location") as HTMLInputElement)?.value,
+        bio: (form.elements.namedItem("bio") as HTMLTextAreaElement)?.value,
+        instagram: (form.elements.namedItem("instagram") as HTMLInputElement)?.value || undefined,
+        website: (form.elements.namedItem("website") as HTMLInputElement)?.value || undefined,
+        image: (form.elements.namedItem("image") as HTMLInputElement)?.value || undefined,
+      });
+      setProfile(mapMeToProfile(data.data));
+      setShowEditModal(false);
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <p className={styles.portfolioSubtitle}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.page}>
-      <div ref={sectionRef} className={isVisible ? styles.visible : ""}>
+    <div className={styles.page} ref={sectionRef}>
+      <div className={isVisible ? styles.visible : ""}>
         <div className={styles.container}>
           <div className={styles.grid}>
             <div className={styles.sidebar}>
-              <ProfileSidebar {...profile} />
+              <ProfileSidebar
+                {...profile}
+                isOwnProfile={isOwnProfile}
+                onEdit={() => setShowEditModal(true)}
+                onLogout={handleLogout}
+              />
             </div>
 
             <div className={styles.main}>
@@ -161,50 +332,132 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <section className={styles.contactSection}>
-        <div className={styles.contactContainer}>
-          <div className={`${styles.contactHeader} ${styles.scrollReveal}`}>
-            <h2 className={styles.contactTitle}>Let&apos;s Work Together</h2>
-            <p className={styles.contactSubtitle}>
-              Interested in commissioning a piece? Get in touch!
-            </p>
+      {showEditModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Edit Profile</h2>
+              <button
+                type="button"
+                className={styles.modalClose}
+                onClick={() => setShowEditModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleEditSubmit} className={styles.editForm}>
+              {editError && <p className={styles.editError}>{editError}</p>}
+              <div className={styles.formRow}>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-name">Name</label>
+                  <input
+                    id="edit-name"
+                    name="name"
+                    defaultValue={profile.name}
+                    required
+                  />
+                </div>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-email">Email</label>
+                  <input
+                    id="edit-email"
+                    name="email"
+                    type="email"
+                    defaultValue={profile.email}
+                    required
+                  />
+                </div>
+              </div>
+              <div className={styles.formField}>
+                <label htmlFor="edit-phone">Phone</label>
+                <input
+                  id="edit-phone"
+                  name="phone"
+                  type="tel"
+                  defaultValue={profile.phone}
+                />
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-specialty">Specialty</label>
+                  <input
+                    id="edit-specialty"
+                    name="specialty"
+                    defaultValue={profile.specialty === "—" ? "" : profile.specialty}
+                  />
+                </div>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-location">Location</label>
+                  <input
+                    id="edit-location"
+                    name="location"
+                    defaultValue={profile.location === "—" ? "" : profile.location}
+                  />
+                </div>
+              </div>
+              <div className={styles.formField}>
+                <label htmlFor="edit-bio">Bio</label>
+                <textarea
+                  id="edit-bio"
+                  name="bio"
+                  rows={4}
+                  defaultValue={profile.bio}
+                />
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-instagram">Instagram</label>
+                  <input
+                    id="edit-instagram"
+                    name="instagram"
+                    defaultValue={profile.instagram || ""}
+                    placeholder="@username"
+                  />
+                </div>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-website">Website</label>
+                  <input
+                    id="edit-website"
+                    name="website"
+                    type="url"
+                    defaultValue={profile.website || ""}
+                    placeholder="https://"
+                  />
+                </div>
+              </div>
+              <div className={styles.formField}>
+                <label htmlFor="edit-image">Profile Image URL</label>
+                <input
+                  id="edit-image"
+                  name="image"
+                  type="url"
+                  defaultValue={profile.image}
+                />
+              </div>
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  disabled={editLoading}
+                >
+                  {editLoading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
           </div>
-
-          <form className={`${styles.contactForm} ${styles.scrollReveal}`}>
-            <div className={styles.formRow}>
-              <div className={styles.formField}>
-                <label className={styles.label}>Your Name</label>
-                <input
-                  type="text"
-                  className={styles.input}
-                  placeholder="John Doe"
-                />
-              </div>
-              <div className={styles.formField}>
-                <label className={styles.label}>Your Email</label>
-                <input
-                  type="email"
-                  className={styles.input}
-                  placeholder="john@example.com"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formField}>
-              <label className={styles.label}>Message</label>
-              <textarea
-                rows={6}
-                className={styles.textarea}
-                placeholder="Tell me about your project..."
-              />
-            </div>
-
-            <button type="submit" className={styles.submitBtn}>
-              Send Message
-            </button>
-          </form>
         </div>
-      </section>
+      )}
 
       {selectedWork && (
         <LightboxModal

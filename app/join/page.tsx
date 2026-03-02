@@ -9,6 +9,7 @@ import {
   registerMaster,
   login,
   storeToken,
+  getAuthRedirectPath,
 } from "@/lib/api";
 import {
   User,
@@ -85,9 +86,7 @@ export default function JoinPage() {
     }
   };
 
-  const handleRegisterSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     if (registerForm.password !== registerForm.confirmPassword) {
@@ -107,11 +106,7 @@ export default function JoinPage() {
           ? await registerMaster(data)
           : await registerUser(data);
       storeToken(json.token);
-      if (json.data?.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push(role === "master" ? "/masters" : "/");
-      }
+      router.push(getAuthRedirectPath(json));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -119,9 +114,7 @@ export default function JoinPage() {
     }
   };
 
-  const handleLoginSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -131,7 +124,7 @@ export default function JoinPage() {
         password: loginForm.password,
       });
       storeToken(json.token);
-      router.push(json.data?.role === "admin" ? "/admin" : "/");
+      router.push(getAuthRedirectPath(json));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -139,20 +132,25 @@ export default function JoinPage() {
     }
   };
 
-  const benefits =
-    role === "user" ? USER_BENEFITS : MASTER_BENEFITS;
+  const benefits = role === "user" ? USER_BENEFITS : MASTER_BENEFITS;
 
   return (
     <main className={styles.page}>
       {/* Hero */}
       <section className={styles.hero}>
-        <div className={`${styles.heroLogo} ${styles.reveal} ${styles.revealDelay1}`}>
+        <div
+          className={`${styles.heroLogo} ${styles.reveal} ${styles.revealDelay1}`}
+        >
           <Logo showText size={48} />
         </div>
-        <h1 className={`${styles.title} ${styles.reveal} ${styles.revealDelay2}`}>
+        <h1
+          className={`${styles.title} ${styles.reveal} ${styles.revealDelay2}`}
+        >
           Join Mipove
         </h1>
-        <p className={`${styles.subtitle} ${styles.reveal} ${styles.revealDelay3}`}>
+        <p
+          className={`${styles.subtitle} ${styles.reveal} ${styles.revealDelay3}`}
+        >
           Create your account and start connecting
         </p>
       </section>
@@ -160,7 +158,9 @@ export default function JoinPage() {
       {/* Main Content */}
       <div className={styles.content}>
         {/* Left Card - Role & Benefits */}
-        <div className={`${styles.leftCard} ${styles.reveal} ${styles.revealDelay4}`}>
+        <div
+          className={`${styles.leftCard} ${styles.reveal} ${styles.revealDelay4}`}
+        >
           <div>
             <h2 className={styles.sectionHeading}>Choose Your Role</h2>
             <div className={styles.roleOptions}>
@@ -177,8 +177,8 @@ export default function JoinPage() {
               </button>
               <button
                 type="button"
-                className={`${styles.roleOption} ${role === "professional" ? styles.selected : ""}`}
-                onClick={() => setRole("professional")}
+                className={`${styles.roleOption} ${role === "master" ? styles.selected : ""}`}
+                onClick={() => setRole("master")}
               >
                 <Briefcase className={styles.roleIcon} />
                 <span className={styles.roleName}>Professional</span>
@@ -204,9 +204,7 @@ export default function JoinPage() {
           </div>
 
           <div className={styles.trustedCallout}>
-            <p className={styles.trustedText}>
-              Trusted by 500+ masters
-            </p>
+            <p className={styles.trustedText}>Trusted by 500+ masters</p>
             <p className={styles.communityText}>
               Join our growing community today
             </p>
@@ -214,7 +212,9 @@ export default function JoinPage() {
         </div>
 
         {/* Right Card - Form */}
-        <div className={`${styles.rightCard} ${styles.reveal} ${styles.revealDelay5}`}>
+        <div
+          className={`${styles.rightCard} ${styles.reveal} ${styles.revealDelay5}`}
+        >
           <div className={styles.tabs}>
             <button
               type="button"
@@ -311,7 +311,9 @@ export default function JoinPage() {
                     type="button"
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? (
                       <EyeOff className={styles.inputIcon} />
@@ -387,16 +389,16 @@ export default function JoinPage() {
                 </label>
                 <div className={styles.inputWrapper}>
                   <Mail className={styles.inputIcon} />
-<input
-                id="loginEmail"
-                name="email"
-                type="email"
-                value={loginForm.email}
-                onChange={handleLoginChange}
-                className={styles.formInput}
-                placeholder="your@email.com"
-                required
-              />
+                  <input
+                    id="loginEmail"
+                    name="email"
+                    type="email"
+                    value={loginForm.email}
+                    onChange={handleLoginChange}
+                    className={styles.formInput}
+                    placeholder="your@email.com"
+                    required
+                  />
                 </div>
               </div>
 
@@ -406,21 +408,23 @@ export default function JoinPage() {
                 </label>
                 <div className={styles.inputWrapper}>
                   <Lock className={styles.inputIcon} />
-<input
-                id="loginPassword"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={loginForm.password}
-                onChange={handleLoginChange}
-                className={styles.formInput}
-                placeholder="Enter your password"
-                required
-              />
+                  <input
+                    id="loginPassword"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={loginForm.password}
+                    onChange={handleLoginChange}
+                    className={styles.formInput}
+                    placeholder="Enter your password"
+                    required
+                  />
                   <button
                     type="button"
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>

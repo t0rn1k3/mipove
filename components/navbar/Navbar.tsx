@@ -1,27 +1,42 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./navbar.module.css";
 import Logo from "@/components/logo/Logo";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { getMe, getStoredToken } from "@/lib/api";
 
+type UserInfo = { name: string; image?: string } | null;
+
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<UserInfo>(null);
   const pathname = usePathname();
 
   useEffect(() => {
     const token = getStoredToken();
     if (!token) {
       setIsAdmin(false);
+      setUser(null);
       return;
     }
     getMe()
-      .then(({ data }) => setIsAdmin(data.role === "admin"))
-      .catch(() => setIsAdmin(false));
+      .then(({ data }) => {
+        setIsAdmin(data.role === "admin");
+        if (data.role !== "admin") {
+          setUser({ name: data.name, image: data.image });
+        } else {
+          setUser(null);
+        }
+      })
+      .catch(() => {
+        setIsAdmin(false);
+        setUser(null);
+      });
   }, [pathname]);
 
   useEffect(() => {
@@ -92,6 +107,30 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Admin
+            </Link>
+          ) : user ? (
+            <Link
+              href="/profile"
+              className={styles.profileLink}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {user.image ? (
+                <div className={styles.profileAvatar}>
+                  <Image
+                    src={user.image}
+                    alt={user.name}
+                    width={36}
+                    height={36}
+                    className={styles.profileAvatarImg}
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <div className={styles.profileAvatarPlaceholder}>
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <span className={styles.profileName}>{user.name}</span>
             </Link>
           ) : (
             <Link
