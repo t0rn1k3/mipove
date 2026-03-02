@@ -357,7 +357,10 @@ export default function JoinPage() {
                 className={styles.submitBtn}
                 disabled={loading}
               >
-                {loading ? "Creating account..." : "Create Account"}
+                <span className={styles.submitBtnContent}>
+                  {loading && <span className={styles.spinner} aria-hidden />}
+                  {loading ? "Creating account..." : "Create Account"}
+                </span>
               </button>
 
               <p className={styles.legalText}>
@@ -426,7 +429,10 @@ export default function JoinPage() {
                 className={styles.submitBtn}
                 disabled={loading}
               >
-                {loading ? "Logging in..." : "Login"}
+                <span className={styles.submitBtnContent}>
+                  {loading && <span className={styles.spinner} aria-hidden />}
+                  {loading ? "Logging in..." : "Login"}
+                </span>
               </button>
             </form>
           )}
