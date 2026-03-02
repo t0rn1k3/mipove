@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Logo from "@/components/logo/Logo";
 import styles from "./join.module.css";
+import {
+  registerUser,
+  registerMaster,
+  login,
+  storeToken,
+} from "@/lib/api";
 import {
   User,
   Briefcase,
@@ -31,11 +38,102 @@ const PROFESSIONAL_BENEFITS = [
   "Manage projects and communications",
 ];
 
+const initialRegisterForm = {
+  fullName: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+};
+
+const initialLoginForm = {
+  email: "",
+  password: "",
+};
+
 export default function JoinPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"register" | "login">("register");
   const [role, setRole] = useState<"user" | "professional">("user");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [registerForm, setRegisterForm] = useState(initialRegisterForm);
+  const [loginForm, setLoginForm] = useState(initialLoginForm);
+
+  const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRegisterForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTabSwitch = (tab: "register" | "login") => {
+    setActiveTab(tab);
+    setError("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    if (tab === "login") {
+      setRegisterForm(initialRegisterForm);
+    } else {
+      setLoginForm(initialLoginForm);
+    }
+  };
+
+  const handleRegisterSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    setError("");
+    if (registerForm.password !== registerForm.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = {
+        name: registerForm.fullName,
+        email: registerForm.email,
+        phone: registerForm.phone || undefined,
+        password: registerForm.password,
+      };
+      const json =
+        role === "professional"
+          ? await registerMaster(data)
+          : await registerUser(data);
+      storeToken(json.token);
+      router.push(role === "professional" ? "/professionals" : "/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoginSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const json = await login({
+        email: loginForm.email,
+        password: loginForm.password,
+      });
+      storeToken(json.token);
+      router.push("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const benefits =
     role === "user" ? USER_BENEFITS : PROFESSIONAL_BENEFITS;
@@ -117,21 +215,21 @@ export default function JoinPage() {
             <button
               type="button"
               className={`${styles.tab} ${activeTab === "register" ? styles.active : ""}`}
-              onClick={() => setActiveTab("register")}
+              onClick={() => handleTabSwitch("register")}
             >
               Register
             </button>
             <button
               type="button"
               className={`${styles.tab} ${activeTab === "login" ? styles.active : ""}`}
-              onClick={() => setActiveTab("login")}
+              onClick={() => handleTabSwitch("login")}
             >
               Login
             </button>
           </div>
 
           {activeTab === "register" ? (
-            <form className={styles.form}>
+            <form className={styles.form} onSubmit={handleRegisterSubmit}>
               <div className={styles.formGroup}>
                 <label htmlFor="fullName" className={styles.formLabel}>
                   Full Name *
@@ -140,7 +238,10 @@ export default function JoinPage() {
                   <User className={styles.inputIcon} />
                   <input
                     id="fullName"
+                    name="fullName"
                     type="text"
+                    value={registerForm.fullName}
+                    onChange={handleRegisterChange}
                     className={styles.formInput}
                     placeholder="Enter your full name"
                     required
@@ -156,7 +257,10 @@ export default function JoinPage() {
                   <Mail className={styles.inputIcon} />
                   <input
                     id="email"
+                    name="email"
                     type="email"
+                    value={registerForm.email}
+                    onChange={handleRegisterChange}
                     className={styles.formInput}
                     placeholder="your@email.com"
                     required
@@ -172,7 +276,10 @@ export default function JoinPage() {
                   <Phone className={styles.inputIcon} />
                   <input
                     id="phone"
+                    name="phone"
                     type="tel"
+                    value={registerForm.phone}
+                    onChange={handleRegisterChange}
                     className={styles.formInput}
                     placeholder="+995 XXX XXX XXX"
                     required
@@ -188,7 +295,10 @@ export default function JoinPage() {
                   <Lock className={styles.inputIcon} />
                   <input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
+                    value={registerForm.password}
+                    onChange={handleRegisterChange}
                     className={styles.formInput}
                     placeholder="Minimum 8 characters"
                     required
@@ -216,7 +326,10 @@ export default function JoinPage() {
                   <Lock className={styles.inputIcon} />
                   <input
                     id="confirmPassword"
+                    name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
+                    value={registerForm.confirmPassword}
+                    onChange={handleRegisterChange}
                     className={styles.formInput}
                     placeholder="Re-enter your password"
                     required
@@ -238,8 +351,13 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              <button type="submit" className={styles.submitBtn}>
-                Create Account
+              {error && <p className={styles.errorMessage}>{error}</p>}
+              <button
+                type="submit"
+                className={styles.submitBtn}
+                disabled={loading}
+              >
+                {loading ? "Creating account..." : "Create Account"}
               </button>
 
               <p className={styles.legalText}>
@@ -255,20 +373,23 @@ export default function JoinPage() {
               </p>
             </form>
           ) : (
-            <form className={styles.form}>
+            <form className={styles.form} onSubmit={handleLoginSubmit}>
               <div className={styles.formGroup}>
                 <label htmlFor="loginEmail" className={styles.formLabel}>
                   Email Address *
                 </label>
                 <div className={styles.inputWrapper}>
                   <Mail className={styles.inputIcon} />
-                  <input
-                    id="loginEmail"
-                    type="email"
-                    className={styles.formInput}
-                    placeholder="your@email.com"
-                    required
-                  />
+<input
+                id="loginEmail"
+                name="email"
+                type="email"
+                value={loginForm.email}
+                onChange={handleLoginChange}
+                className={styles.formInput}
+                placeholder="your@email.com"
+                required
+              />
                 </div>
               </div>
 
@@ -278,13 +399,16 @@ export default function JoinPage() {
                 </label>
                 <div className={styles.inputWrapper}>
                   <Lock className={styles.inputIcon} />
-                  <input
-                    id="loginPassword"
-                    type={showPassword ? "text" : "password"}
-                    className={styles.formInput}
-                    placeholder="Enter your password"
-                    required
-                  />
+<input
+                id="loginPassword"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={loginForm.password}
+                onChange={handleLoginChange}
+                className={styles.formInput}
+                placeholder="Enter your password"
+                required
+              />
                   <button
                     type="button"
                     className={styles.passwordToggle}
@@ -296,8 +420,13 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              <button type="submit" className={styles.submitBtn}>
-                Login
+              {error && <p className={styles.errorMessage}>{error}</p>}
+              <button
+                type="submit"
+                className={styles.submitBtn}
+                disabled={loading}
+              >
+                {loading ? "Logging in..." : "Login"}
               </button>
             </form>
           )}

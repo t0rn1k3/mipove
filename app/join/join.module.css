@@ -304,6 +304,22 @@
   transform: translateY(-1px);
 }
 
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submitBtn:disabled:hover {
+  transform: none;
+}
+
+.errorMessage {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 12px;
+  text-align: center;
+}
+
 .legalText {
   font-size: 0.8rem;
   color: #768283;
