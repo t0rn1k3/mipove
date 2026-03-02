@@ -5,11 +5,25 @@ import styles from "./navbar.module.css";
 import Logo from "@/components/logo/Logo";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { getMe, getStoredToken } from "@/lib/api";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const token = getStoredToken();
+    if (!token) {
+      setIsAdmin(false);
+      return;
+    }
+    getMe()
+      .then(({ data }) => setIsAdmin(data.role === "admin"))
+      .catch(() => setIsAdmin(false));
+  }, [pathname]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -25,7 +39,7 @@ export default function Navbar() {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Gallery", href: "/gallery" },
-    { name: "Professionals", href: "/professionals" },
+    { name: "Masters", href: "/masters" },
     { name: "About", href: "/about" },
   ];
   return (
@@ -71,14 +85,23 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <Link
-            key="join"
-            href="/join"
-            className={styles.ctaButton}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Join Us
-          </Link>
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className={styles.ctaButton}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Admin
+            </Link>
+          ) : (
+            <Link
+              href="/join"
+              className={styles.ctaButton}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Join Us
+            </Link>
+          )}
         </div>
       </div>
     </header>

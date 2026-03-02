@@ -29,7 +29,7 @@
 /* Card Styling */
 .card {
   background: white;
-  border-radius: 32px; /* Very rounded corners as seen in pic */
+  border-radius: 32px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
@@ -129,7 +129,7 @@
   background-color: #1a1a1a;
   color: white;
   padding: 12px 28px;
-  border-radius: 50px; /* Pill shape */
+  border-radius: 50px;
   font-weight: 600;
   text-decoration: none;
   font-size: 0.6rem;

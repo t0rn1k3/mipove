@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Phone, Mail, Instagram, MapPin } from "lucide-react"; // Example using lucide-react
-import styles from "./professionalsPage.module.css";
+import { Phone, Mail, Instagram, MapPin } from "lucide-react";
+import styles from "./mastersPage.module.css";
 import Image from "next/image";
 
 const ARTISANS = [
@@ -48,17 +48,16 @@ const ARTISANS = [
   },
 ];
 
-export default function ProfessionalsPage() {
+export default function MastersPage() {
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Professional Directory</h1>
+      <h1 className={styles.title}>Masters Directory</h1>
       <p className={styles.description}>
-        Find the best professionals in your area
+        Find the best masters in your area
       </p>
       <div className={styles.grid}>
         {ARTISANS.map((artisan) => (
           <div key={artisan.id} className={styles.card}>
-            {/* Image Section */}
             <div className={styles.imageContainer}>
               <Image
                 src={artisan.image}
@@ -69,7 +68,6 @@ export default function ProfessionalsPage() {
               />
             </div>
 
-            {/* Content Section */}
             <div className={styles.content}>
               <h2 className={styles.name}>{artisan.name}</h2>
               <div className={styles.location}>

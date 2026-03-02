@@ -201,7 +201,7 @@ function UserManagementTable({
                         <ActionMenu
                           onClose={() => setShowActionMenu(null)}
                           actions={[
-                            { icon: ArrowUpCircle, label: "Upgrade to Professional", onClick: () => onUpgradeToMaster(user.id), color: "blue" },
+                            { icon: ArrowUpCircle, label: "Upgrade to Master", onClick: () => onUpgradeToMaster(user.id), color: "blue" },
                             { icon: user.status === "active" ? UserX : UserCheck, label: user.status === "active" ? "Block User" : "Unblock User", onClick: () => onBlockUser(user.id), color: user.status === "active" ? "red" : "green" },
                             { icon: Trash2, label: "Delete User", onClick: () => onDeleteUser(user.id), color: "red" },
                           ]}
@@ -219,8 +219,8 @@ function UserManagementTable({
   );
 }
 
-function ProfessionalManagementTable({
-  professionals,
+function MasterManagementTable({
+  masters,
   searchQuery,
   setSearchQuery,
   filterStatus,
@@ -240,7 +240,7 @@ function ProfessionalManagementTable({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search professionals..."
+              placeholder="Search masters..."
               className={styles.searchInput}
             />
           </div>
@@ -259,7 +259,7 @@ function ProfessionalManagementTable({
         <table className={styles.table}>
           <thead className={styles.tableHead}>
             <tr>
-              <th className={styles.tableTh}>Professional</th>
+              <th className={styles.tableTh}>Master</th>
               <th className={styles.tableTh}>Contact</th>
               <th className={styles.tableTh}>Performance</th>
               <th className={styles.tableTh}>Status</th>
@@ -268,59 +268,59 @@ function ProfessionalManagementTable({
             </tr>
           </thead>
           <tbody className={styles.tableBody}>
-            {professionals.map((professional) => (
-              <tr key={professional.id}>
+            {masters.map((master) => (
+              <tr key={master.id}>
                 <td className={styles.tableTd}>
                   <div className={styles.userCell}>
-                    <div className={styles.userAvatar}>{professional.name.charAt(0)}</div>
+                    <div className={styles.userAvatar}>{master.name.charAt(0)}</div>
                     <div>
-                      <div className={styles.userName}>{professional.name}</div>
-                      <div className={styles.userId}>ID: {professional.id}</div>
+                      <div className={styles.userName}>{master.name}</div>
+                      <div className={styles.userId}>ID: {master.id}</div>
                     </div>
                   </div>
                 </td>
                 <td className={styles.tableTd}>
                   <div className={styles.contactRow}>
                     <Mail size={14} />
-                    {professional.email}
+                    {master.email}
                   </div>
                   <div className={`${styles.contactRow} ${styles.contactRowSecondary}`}>
                     <Phone size={14} />
-                    {professional.phone}
+                    {master.phone}
                   </div>
                 </td>
                 <td className={styles.tableTd}>
                   <div className={styles.performanceCell}>
-                    {professional.projectsCount || 0} Projects
+                    {master.projectsCount || 0} Projects
                   </div>
                   <div className={styles.performanceRating}>
                     <span>⭐</span>
-                    <span>{professional.rating?.toFixed(1) || "N/A"}</span>
+                    <span>{master.rating?.toFixed(1) || "N/A"}</span>
                   </div>
                 </td>
                 <td className={styles.tableTd}>
-                  <span className={`${styles.statusBadge} ${styles[professional.status]}`}>
-                    {professional.status === "active" ? <CheckCircle size={14} /> : <Lock size={14} />}
-                    {professional.status}
+                  <span className={`${styles.statusBadge} ${styles[master.status]}`}>
+                    {master.status === "active" ? <CheckCircle size={14} /> : <Lock size={14} />}
+                    {master.status}
                   </span>
                 </td>
-                <td className={styles.tableTd}>{professional.joinDate}</td>
+                <td className={styles.tableTd}>{master.joinDate}</td>
                 <td className={styles.tableTd}>
                   <div className={styles.actionsCell}>
                     <button
-                      onClick={() => setShowActionMenu(showActionMenu === professional.id ? null : professional.id)}
+                      onClick={() => setShowActionMenu(showActionMenu === master.id ? null : master.id)}
                       className={styles.actionMenuBtn}
                     >
                       <MoreVertical size={20} />
                     </button>
                     <AnimatePresence>
-                      {showActionMenu === professional.id && (
+                      {showActionMenu === master.id && (
                         <ActionMenu
                           onClose={() => setShowActionMenu(null)}
                           actions={[
                             { icon: Edit, label: "Edit Profile", onClick: () => setShowActionMenu(null), color: "blue" },
-                            { icon: professional.status === "active" ? UserX : UserCheck, label: professional.status === "active" ? "Block Professional" : "Unblock Professional", onClick: () => onBlockUser(professional.id), color: professional.status === "active" ? "red" : "green" },
-                            { icon: Trash2, label: "Delete Professional", onClick: () => onDeleteUser(professional.id), color: "red" },
+                            { icon: master.status === "active" ? UserX : UserCheck, label: master.status === "active" ? "Block Master" : "Unblock Master", onClick: () => onBlockUser(master.id), color: master.status === "active" ? "red" : "green" },
+                            { icon: Trash2, label: "Delete Master", onClick: () => onDeleteUser(master.id), color: "red" },
                           ]}
                         />
                       )}
@@ -336,14 +336,14 @@ function ProfessionalManagementTable({
   );
 }
 
-function AddProfessionalModal({ show, onClose, onAdd }) {
+function AddMasterModal({ show, onClose, onAdd }) {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", password: "" });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onAdd({
       ...formData,
-      role: "professional",
+      role: "master",
       status: "active",
       joinDate: new Date().toISOString().split("T")[0],
       lastActive: "Just now",
@@ -372,7 +372,7 @@ function AddProfessionalModal({ show, onClose, onAdd }) {
           className={styles.modalContent}
         >
           <div className={styles.modalHeader}>
-            <h2 className={styles.modalTitle}>Add New Professional</h2>
+            <h2 className={styles.modalTitle}>Add New Master</h2>
             <button onClick={onClose} className={styles.modalCloseBtn}>
               <X size={24} />
             </button>
@@ -428,7 +428,7 @@ function AddProfessionalModal({ show, onClose, onAdd }) {
                 Cancel
               </button>
               <button type="submit" className={`${styles.modalBtn} ${styles.modalBtnSubmit}`}>
-                Add Professional
+                Add Master
               </button>
             </div>
           </form>
@@ -448,7 +448,7 @@ export default function AdminDashboard() {
 
   const stats = {
     totalUsers: 1247,
-    totalProfessionals: 523,
+    totalMasters: 523,
     activeUsers: 1189,
     blockedAccounts: 58,
     newThisMonth: 87,
@@ -457,10 +457,10 @@ export default function AdminDashboard() {
 
   const [users, setUsers] = useState([
     { id: 1, name: "Giorgi Beridze", email: "giorgi@email.com", phone: "+995 555 123 456", role: "user", status: "active", joinDate: "2025-01-15", lastActive: "2 hours ago" },
-    { id: 2, name: "Mariam Gelashvili", email: "mariam@email.com", phone: "+995 555 234 567", role: "professional", status: "active", joinDate: "2024-11-20", lastActive: "1 day ago", projectsCount: 23, rating: 4.8 },
-    { id: 3, name: "Luka Kvaratskhelia", email: "luka@email.com", phone: "+995 555 345 678", role: "professional", status: "active", joinDate: "2024-09-10", lastActive: "5 minutes ago", projectsCount: 45, rating: 4.9 },
+    { id: 2, name: "Mariam Gelashvili", email: "mariam@email.com", phone: "+995 555 234 567", role: "master", status: "active", joinDate: "2024-11-20", lastActive: "1 day ago", projectsCount: 23, rating: 4.8 },
+    { id: 3, name: "Luka Kvaratskhelia", email: "luka@email.com", phone: "+995 555 345 678", role: "master", status: "active", joinDate: "2024-09-10", lastActive: "5 minutes ago", projectsCount: 45, rating: 4.9 },
     { id: 4, name: "Nino Abashidze", email: "nino@email.com", phone: "+995 555 456 789", role: "user", status: "blocked", joinDate: "2025-02-01", lastActive: "1 week ago" },
-    { id: 5, name: "Davit Chikovani", email: "davit@email.com", phone: "+995 555 567 890", role: "professional", status: "active", joinDate: "2024-12-05", lastActive: "3 hours ago", projectsCount: 12, rating: 4.6 },
+    { id: 5, name: "Davit Chikovani", email: "davit@email.com", phone: "+995 555 567 890", role: "master", status: "active", joinDate: "2024-12-05", lastActive: "3 hours ago", projectsCount: 12, rating: 4.6 },
   ]);
 
   const handleBlockUser = (userId) => {
@@ -469,7 +469,7 @@ export default function AdminDashboard() {
   };
 
   const handleUpgradeToMaster = (userId) => {
-    setUsers(users.map((user) => (user.id === userId ? { ...user, role: "professional", projectsCount: 0, rating: 5.0 } : user)));
+    setUsers(users.map((user) => (user.id === userId ? { ...user, role: "master", projectsCount: 0, rating: 5.0 } : user)));
     setShowActionMenu(null);
   };
 
@@ -488,7 +488,7 @@ export default function AdminDashboard() {
   });
 
   const usersList = filteredUsers.filter((u) => u.role === "user");
-  const professionalsList = filteredUsers.filter((u) => u.role === "professional");
+  const mastersList = filteredUsers.filter((u) => u.role === "master");
 
   return (
     <div className={styles.page}>
@@ -502,7 +502,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h1 className={styles.headerTitle}>Admin Dashboard</h1>
-              <p className={styles.headerSubtitle}>Manage users and professionals</p>
+              <p className={styles.headerSubtitle}>Manage users and masters</p>
             </div>
           </div>
         </motion.div>
@@ -515,8 +515,8 @@ export default function AdminDashboard() {
             <TabButton active={activeTab === "users"} onClick={() => setActiveTab("users")} icon={Users}>
               Users ({usersList.length})
             </TabButton>
-            <TabButton active={activeTab === "professionals"} onClick={() => setActiveTab("professionals")} icon={Briefcase}>
-              Professionals ({professionalsList.length})
+            <TabButton active={activeTab === "masters"} onClick={() => setActiveTab("masters")} icon={Briefcase}>
+              Masters ({mastersList.length})
             </TabButton>
           </div>
         </motion.div>
@@ -525,7 +525,7 @@ export default function AdminDashboard() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className={styles.statsGrid}>
               <StatCard icon={Users} title="Total Users" value={stats.totalUsers} color="blue" delay={0} />
-              <StatCard icon={Briefcase} title="Total Professionals" value={stats.totalProfessionals} color="teal" delay={0.1} />
+              <StatCard icon={Briefcase} title="Total Masters" value={stats.totalMasters} color="teal" delay={0.1} />
               <StatCard icon={UserCheck} title="Active Users" value={stats.activeUsers} color="green" delay={0.2} />
               <StatCard icon={UserX} title="Blocked Accounts" value={stats.blockedAccounts} color="red" delay={0.3} />
               <StatCard icon={TrendingUp} title="New This Month" value={stats.newThisMonth} color="purple" delay={0.4} />
@@ -535,9 +535,9 @@ export default function AdminDashboard() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className={`${styles.card} ${styles.cardLarge}`}>
               <h2 className={styles.cardTitle}>Quick Actions</h2>
               <div className={styles.quickActionsGrid}>
-                <QuickActionButton icon={Plus} label="Add New Professional" onClick={() => setShowAddModal(true)} />
+                <QuickActionButton icon={Plus} label="Add New Master" onClick={() => setShowAddModal(true)} />
                 <QuickActionButton icon={Users} label="View All Users" onClick={() => setActiveTab("users")} />
-                <QuickActionButton icon={Briefcase} label="View All Professionals" onClick={() => setActiveTab("professionals")} />
+                <QuickActionButton icon={Briefcase} label="View All Masters" onClick={() => setActiveTab("masters")} />
               </div>
             </motion.div>
 
@@ -546,7 +546,7 @@ export default function AdminDashboard() {
               <div className={styles.activityList}>
                 <ActivityItem icon={UserCheck} text="Mariam Gelashvili completed a project" time="2 hours ago" />
                 <ActivityItem icon={Plus} text="New user Giorgi Beridze joined" time="5 hours ago" />
-                <ActivityItem icon={ArrowUpCircle} text="Luka Kvaratskhelia upgraded to Professional" time="1 day ago" />
+                <ActivityItem icon={ArrowUpCircle} text="Luka Kvaratskhelia upgraded to Master" time="1 day ago" />
                 <ActivityItem icon={UserX} text="User account blocked for policy violation" time="2 days ago" />
               </div>
             </motion.div>
@@ -559,25 +559,25 @@ export default function AdminDashboard() {
           </motion.div>
         )}
 
-        {activeTab === "professionals" && (
+        {activeTab === "masters" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className={styles.headerRow}>
-              <h2 className={styles.headerRowTitle}>Professional Management</h2>
+              <h2 className={styles.headerRowTitle}>Master Management</h2>
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowAddModal(true)} className={styles.addProfessionalBtn}>
                 <Plus size={20} />
-                Add Professional
+                Add Master
               </motion.button>
             </div>
-            <ProfessionalManagementTable professionals={professionalsList} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filterStatus={filterStatus} setFilterStatus={setFilterStatus} onBlockUser={handleBlockUser} onDeleteUser={handleDeleteUser} showActionMenu={showActionMenu} setShowActionMenu={setShowActionMenu} />
+            <MasterManagementTable masters={mastersList} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filterStatus={filterStatus} setFilterStatus={setFilterStatus} onBlockUser={handleBlockUser} onDeleteUser={handleDeleteUser} showActionMenu={showActionMenu} setShowActionMenu={setShowActionMenu} />
           </motion.div>
         )}
       </div>
 
-      <AddProfessionalModal
+      <AddMasterModal
         show={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onAdd={(newProfessional) => {
-          setUsers([...users, { ...newProfessional, id: users.length + 1 }]);
+        onAdd={(newMaster) => {
+          setUsers([...users, { ...newMaster, id: users.length + 1 }]);
           setShowAddModal(false);
         }}
       />

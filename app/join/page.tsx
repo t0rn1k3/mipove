@@ -23,17 +23,17 @@ import {
 import Link from "next/link";
 
 const USER_BENEFITS = [
-  "Access to verified professionals",
+  "Access to verified masters",
   "Browse portfolios and reviews",
   "Direct messaging with artisans",
-  "Save your favorite professionals",
+  "Save your favorite masters",
   "Track your project inquiries",
 ];
 
-const PROFESSIONAL_BENEFITS = [
+const MASTER_BENEFITS = [
   "Showcase your portfolio to clients",
   "Receive direct project inquiries",
-  "Build your professional reputation",
+  "Build your reputation as a master",
   "Connect with clients seeking your craft",
   "Manage projects and communications",
 ];
@@ -54,7 +54,7 @@ const initialLoginForm = {
 export default function JoinPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"register" | "login">("register");
-  const [role, setRole] = useState<"user" | "professional">("user");
+  const [role, setRole] = useState<"user" | "master">("user");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
@@ -103,11 +103,15 @@ export default function JoinPage() {
         password: registerForm.password,
       };
       const json =
-        role === "professional"
+        role === "master"
           ? await registerMaster(data)
           : await registerUser(data);
       storeToken(json.token);
-      router.push(role === "professional" ? "/professionals" : "/");
+      if (json.data?.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push(role === "master" ? "/masters" : "/");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -127,7 +131,7 @@ export default function JoinPage() {
         password: loginForm.password,
       });
       storeToken(json.token);
-      router.push("/");
+      router.push(json.data?.role === "admin" ? "/admin" : "/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -136,7 +140,7 @@ export default function JoinPage() {
   };
 
   const benefits =
-    role === "user" ? USER_BENEFITS : PROFESSIONAL_BENEFITS;
+    role === "user" ? USER_BENEFITS : MASTER_BENEFITS;
 
   return (
     <main className={styles.page}>
@@ -168,7 +172,7 @@ export default function JoinPage() {
                 <User className={styles.roleIcon} />
                 <span className={styles.roleName}>User</span>
                 <span className={styles.roleDesc}>
-                  Find professionals for your projects
+                  Find masters for your projects
                 </span>
               </button>
               <button
@@ -187,7 +191,7 @@ export default function JoinPage() {
 
           <div>
             <h2 className={styles.sectionHeading}>
-              {role === "user" ? "User" : "Professional"} Benefits
+              {role === "user" ? "User" : "Master"} Benefits
             </h2>
             <ul className={styles.benefitsList}>
               {benefits.map((benefit) => (
@@ -201,7 +205,7 @@ export default function JoinPage() {
 
           <div className={styles.trustedCallout}>
             <p className={styles.trustedText}>
-              Trusted by 500+ professionals
+              Trusted by 500+ masters
             </p>
             <p className={styles.communityText}>
               Join our growing community today

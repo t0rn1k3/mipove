@@ -28,7 +28,7 @@ const TEAM = [
   {
     name: "Tamara Chkheidze",
     role: "Community Manager",
-    bio: "Fostering our community of artisans and professionals.",
+    bio: "Fostering our community of artisans and masters.",
     image: "/images/team/tamara.jpg",
   },
 ];
@@ -77,7 +77,7 @@ export default function AboutPage() {
           className={`${styles.heroSubtitle} ${styles.reveal} ${styles.revealDelay3}`}
         >
           Where &quot;Find Me&quot; meets exceptional craftsmanship. Connecting
-          you with Georgia&apos;s finest artisans and professionals.
+          you with Georgia&apos;s finest artisans and masters.
         </p>
       </section>
 
@@ -94,7 +94,7 @@ export default function AboutPage() {
               In the heart of Georgia, where centuries of craftsmanship
               tradition meet modern innovation, mipove was born from a simple
               yet powerful idea: what if finding the perfect artisan or
-              professional was as easy as it should be?
+              master was as easy as it should be?
             </p>
             <p className={styles.storyText}>
               We noticed that while Georgia is home to incredibly talented
@@ -132,7 +132,7 @@ export default function AboutPage() {
         >
           <div className={styles.metricsGrid}>
             {[
-              { number: "500+", label: "Verified Professionals" },
+              { number: "500+", label: "Verified Masters" },
               { number: "50+", label: "Craft Categories" },
               { number: "10K+", label: "Connections Made" },
               { number: "95%", label: "Satisfaction Rate" },
@@ -187,7 +187,7 @@ export default function AboutPage() {
               },
               {
                 title: "Our Community",
-                text: "Building a trusted network of verified artisans, craftspeople, and professionals who share a commitment to excellence and authentic craftsmanship.",
+                text: "Building a trusted network of verified artisans, craftspeople, and masters who share a commitment to excellence and authentic craftsmanship.",
                 icon: CommunityIcon,
               },
               {

@@ -27,7 +27,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Mipove",
-  description: "Mipove is a platform for professionals in different fields",
+  description: "Mipove is a platform for masters in different fields",
 };
 
 export default function RootLayout({

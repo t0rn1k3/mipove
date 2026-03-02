@@ -51,3 +51,16 @@ export function clearToken(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem("mipove_token");
 }
+
+export async function getMe(): Promise<{
+  data: { _id: string; name: string; email: string; role: string };
+}> {
+  const token = getStoredToken();
+  if (!token) throw new Error("Not logged in");
+  const res = await fetch(`${API_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to get user");
+  return json;
+}

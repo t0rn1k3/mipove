@@ -13,12 +13,12 @@ const STEPS = [
   {
     icon: ImageIcon,
     title: "Review Portfolios",
-    description: "Explore work samples, read reviews, and find professionals who match your vision.",
+    description: "Explore work samples, read reviews, and find masters who match your vision.",
   },
   {
     icon: MessageCircle,
     title: "Connect Directly",
-    description: "Message professionals and start your project with confidence.",
+    description: "Message masters and start your project with confidence.",
   },
 ];
 
