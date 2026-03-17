@@ -66,6 +66,80 @@ export type Artisan = {
   updatedAt?: string;
 };
 
+/* ========== Rated Masters (User Profile) ========== */
+
+export type RatedMasterItem = {
+  master: {
+    _id: string;
+    name: string;
+    slug: string;
+    image?: string;
+    specialty?: string;
+    location?: string;
+  };
+  stars: number;
+  ratedAt: string;
+};
+
+/* ========== Masters List ========== */
+
+export type MasterListItem = {
+  _id: string;
+  name: string;
+  slug: string;
+  image?: string;
+  specialty?: string;
+  location?: string;
+};
+
+/* ========== Profile Update ========== */
+
+export type UpdateProfileInput = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  specialty?: string;
+  location?: string;
+  bio?: string;
+  image?: string;
+  instagram?: string;
+  website?: string;
+};
+
+/* ========== Admin ========== */
+
+export type AdminStats = {
+  users?: number;
+  masters?: number;
+  totalUsers?: number;
+  totalMasters?: number;
+};
+
+export type AdminUser = {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  blocked?: boolean;
+  createdAt?: string;
+};
+
+export type AdminMaster = AdminUser & {
+  slug?: string;
+  specialty?: string;
+  location?: string;
+  bio?: string;
+  image?: string;
+};
+
+export type AdminRegisterInput = {
+  name: string;
+  email: string;
+  password: string;
+  adminSecret: string;
+};
+
 /* ========== API Error ========== */
 
 export type ApiErrorResponse = {

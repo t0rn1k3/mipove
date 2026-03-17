@@ -5,8 +5,8 @@ import {
   getAdminUsers,
   blockAdminUser,
   unblockAdminUser,
-  type AdminUser,
 } from "@/lib/api";
+import type { AdminUser } from "@/lib/types";
 import styles from "../admin.module.css";
 
 type FilterStatus = "all" | "active" | "blocked" | "new";

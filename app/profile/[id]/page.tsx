@@ -14,8 +14,8 @@ import {
   updateProfile,
   logout,
   getImageUrl,
-  type RatedMasterItem,
 } from "@/lib/api";
+import type { RatedMasterItem } from "@/lib/types";
 import styles from "../profilePage.module.css";
 
 type ProfileData = {

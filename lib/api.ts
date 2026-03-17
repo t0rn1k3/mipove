@@ -1,4 +1,15 @@
-import type { AuthResponse, LoginInput, RegisterInput } from "./types";
+import type {
+  AuthResponse,
+  LoginInput,
+  RegisterInput,
+  RatedMasterItem,
+  MasterListItem,
+  UpdateProfileInput,
+  AdminStats,
+  AdminUser,
+  AdminMaster,
+  AdminRegisterInput,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 const API_BASE = API_URL.replace(/\/api\/?$/, "") || "http://localhost:5000";
@@ -77,19 +88,6 @@ export function getAuthRedirectPath(json: {
   return "/profile/me";
 }
 
-export type RatedMasterItem = {
-  master: {
-    _id: string;
-    name: string;
-    slug: string;
-    image?: string;
-    specialty?: string;
-    location?: string;
-  };
-  stars: number;
-  ratedAt: string;
-};
-
 export async function getMe(): Promise<{
   data: {
     _id: string;
@@ -129,6 +127,21 @@ export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
   return json;
 }
 
+export async function getMasters(params?: {
+  specialty?: string;
+  search?: string;
+}): Promise<MasterListItem[]> {
+  const searchParams = new URLSearchParams();
+  if (params?.specialty) searchParams.set("specialty", params.specialty);
+  if (params?.search) searchParams.set("search", params.search);
+  const q = searchParams.toString() ? `?${searchParams}` : "";
+  const res = await fetch(`${API_URL}/masters${q}`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to fetch masters");
+  const data = json.data ?? json;
+  return Array.isArray(data) ? data : [];
+}
+
 export async function getProfileBySlug(slug: string): Promise<{
   name: string;
   specialty: string;
@@ -153,18 +166,6 @@ export async function getProfileBySlug(slug: string): Promise<{
     })),
   };
 }
-
-export type UpdateProfileInput = {
-  name?: string;
-  email?: string;
-  phone?: string;
-  specialty?: string;
-  location?: string;
-  bio?: string;
-  image?: string;
-  instagram?: string;
-  website?: string;
-};
 
 export async function updateProfile(
   data: UpdateProfileInput
@@ -199,29 +200,12 @@ function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
-export type AdminStats = {
-  users?: number;
-  masters?: number;
-  totalUsers?: number;
-  totalMasters?: number;
-};
-
 export async function getAdminStats(): Promise<AdminStats> {
   const res = await adminFetch("/admin/stats");
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to fetch stats");
   return json.data ?? json;
 }
-
-export type AdminUser = {
-  _id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: string;
-  blocked?: boolean;
-  createdAt?: string;
-};
 
 export async function getAdminUsers(params?: {
   status?: "active" | "blocked" | "new";
@@ -252,14 +236,6 @@ export async function unblockAdminUser(id: string): Promise<void> {
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to unblock user");
 }
-
-export type AdminMaster = AdminUser & {
-  slug?: string;
-  specialty?: string;
-  location?: string;
-  bio?: string;
-  image?: string;
-};
 
 export async function getAdminMasters(): Promise<AdminMaster[]> {
   const res = await adminFetch("/admin/masters");
@@ -306,13 +282,6 @@ export async function unblockAdminMaster(id: string): Promise<void> {
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to unblock master");
 }
-
-export type AdminRegisterInput = {
-  name: string;
-  email: string;
-  password: string;
-  adminSecret: string;
-};
 
 export async function registerAdmin(data: AdminRegisterInput): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/auth/admin/register`, {

@@ -18,6 +18,26 @@
   color: #5c5c68;
   margin-bottom: 40px;
 }
+
+.loading,
+.error,
+.empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #5c5c68;
+  font-size: 1.125rem;
+}
+
+.error {
+  color: #dc2626;
+}
+
+.specialty {
+  font-size: 0.9rem;
+  color: #008080;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

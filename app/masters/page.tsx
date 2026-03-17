@@ -1,54 +1,61 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Phone, Mail, Instagram, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import styles from "./mastersPage.module.css";
 import Image from "next/image";
-
-const ARTISANS = [
-  {
-    id: 1,
-    name: "Elena Martinez",
-    location: "Barcelona, Spain",
-    slug: "elena-martinez",
-    image: "/images/artisan-2.jpg",
-  },
-  {
-    id: 2,
-    name: "Elena Martinez",
-    location: "Barcelona, Spain",
-    slug: "elena-martinez",
-    image: "/images/artisan-2.jpg",
-  },
-  {
-    id: 3,
-    name: "Elena Martinez",
-    location: "Barcelona, Spain",
-    slug: "elena-martinez",
-    image: "/images/artisan-2.jpg",
-  },
-  {
-    id: 4,
-    name: "Elena Martinez",
-    location: "Barcelona, Spain",
-    slug: "elena-martinez",
-    image: "/images/artisan-2.jpg",
-  },
-  {
-    id: 5,
-    name: "Elena Martinez",
-    location: "Barcelona, Spain",
-    slug: "elena-martinez",
-    image: "/images/artisan-2.jpg",
-  },
-  {
-    id: 6,
-    name: "Elena Martinez",
-    location: "Barcelona, Spain",
-    slug: "elena-martinez",
-    image: "/images/artisan-2.jpg",
-  },
-];
+import { getMasters, getImageUrl } from "@/lib/api";
+import type { MasterListItem } from "@/lib/types";
 
 export default function MastersPage() {
+  const [masters, setMasters] = useState<MasterListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getMasters()
+      .then((data) => setMasters(data))
+      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load masters"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.title}>Masters Directory</h1>
+        <p className={styles.description}>Find the best masters in your area</p>
+        <div className={styles.loading}>
+          <p>Loading masters...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.title}>Masters Directory</h1>
+        <p className={styles.description}>Find the best masters in your area</p>
+        <div className={styles.error}>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (masters.length === 0) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.title}>Masters Directory</h1>
+        <p className={styles.description}>Find the best masters in your area</p>
+        <div className={styles.empty}>
+          <p>No masters found yet.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Masters Directory</h1>
@@ -56,41 +63,36 @@ export default function MastersPage() {
         Find the best masters in your area
       </p>
       <div className={styles.grid}>
-        {ARTISANS.map((artisan) => (
-          <div key={artisan.id} className={styles.card}>
+        {masters.map((master) => (
+          <div key={master._id} className={styles.card}>
             <div className={styles.imageContainer}>
               <Image
-                src={artisan.image}
-                width={100}
-                height={100}
-                alt={artisan.name}
+                src={
+                  getImageUrl(master.image) ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(master.name)}&size=200`
+                }
+                width={300}
+                height={190}
+                alt={master.name}
                 className={styles.artisanImage}
               />
             </div>
 
             <div className={styles.content}>
-              <h2 className={styles.name}>{artisan.name}</h2>
+              <h2 className={styles.name}>{master.name}</h2>
+              {master.specialty && (
+                <p className={styles.specialty}>{master.specialty}</p>
+              )}
               <div className={styles.location}>
                 <MapPin size={18} className={styles.pin} />
-                <span>{artisan.location}</span>
+                <span>{master.location || "—"}</span>
               </div>
 
               <hr className={styles.divider} />
 
               <div className={styles.footer}>
-                <div className={styles.socialIcons}>
-                  <button className={styles.iconBtn}>
-                    <Phone size={18} />
-                  </button>
-                  <button className={styles.iconBtn}>
-                    <Mail size={18} />
-                  </button>
-                  <button className={styles.iconBtn}>
-                    <Instagram size={18} />
-                  </button>
-                </div>
                 <Link
-                  href={`/profile/${artisan.slug}`}
+                  href={`/profile/${master.slug}`}
                   className={styles.viewBtn}
                 >
                   View Portfolio

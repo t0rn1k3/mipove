@@ -7,8 +7,8 @@ import {
   blockAdminMaster,
   unblockAdminMaster,
   createAdminMaster,
-  type AdminMaster,
 } from "@/lib/api";
+import type { AdminMaster } from "@/lib/types";
 import styles from "../admin.module.css";
 
 export default function AdminMastersPage() {
