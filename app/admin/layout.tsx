@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { getMe, getStoredToken, clearToken } from "@/lib/api";
+import { getMe, getStoredToken, logout } from "@/lib/api";
 import styles from "./admin.module.css";
 
 export default function AdminLayout({
@@ -17,8 +17,7 @@ export default function AdminLayout({
   const [adminName, setAdminName] = useState<string>("");
 
   useEffect(() => {
-    const token = getStoredToken();
-    if (!token) {
+    if (!getStoredToken()) {
       router.replace("/join");
       return;
     }
@@ -32,13 +31,13 @@ export default function AdminLayout({
         setAdminName(data.name);
       })
       .catch(() => {
-        clearToken();
+        logout();
         router.replace("/join");
       });
   }, [router]);
 
-  const handleLogout = () => {
-    clearToken();
+  const handleLogout = async () => {
+    await logout();
     router.replace("/join");
   };
 

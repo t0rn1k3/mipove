@@ -1,6 +1,29 @@
 import type { AuthResponse, LoginInput, RegisterInput } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE = API_URL.replace(/\/api\/?$/, "") || "http://localhost:5000";
+
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("mipove_token");
+}
+
+export function storeToken(token: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("mipove_token", token);
+}
+
+export function clearToken(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("mipove_token");
+}
+
+export function getImageUrl(path: string | undefined): string {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  if (path.startsWith("/")) return `${API_BASE}${path}`;
+  return path;
+}
 
 export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/auth/users/register`, {
@@ -37,19 +60,8 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
   return json;
 }
 
-export function getStoredToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("mipove_token");
-}
-
-export function storeToken(token: string): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem("mipove_token", token);
-}
-
-export function clearToken(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem("mipove_token");
+export async function logout(): Promise<void> {
+  clearToken();
 }
 
 export function getAuthRedirectPath(json: {
@@ -64,6 +76,19 @@ export function getAuthRedirectPath(json: {
   if (role === "user") return "/";
   return "/profile/me";
 }
+
+export type RatedMasterItem = {
+  master: {
+    _id: string;
+    name: string;
+    slug: string;
+    image?: string;
+    specialty?: string;
+    location?: string;
+  };
+  stars: number;
+  ratedAt: string;
+};
 
 export async function getMe(): Promise<{
   data: {
@@ -80,6 +105,7 @@ export async function getMe(): Promise<{
     instagram?: string;
     website?: string;
     works?: Array<{ id: string; title: string; description?: string; image: string }>;
+    ratedMasters?: RatedMasterItem[];
   };
 }> {
   const token = getStoredToken();
@@ -89,6 +115,17 @@ export async function getMe(): Promise<{
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to get user");
+  return json;
+}
+
+export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
+  const token = getStoredToken();
+  if (!token) throw new Error("Not logged in");
+  const res = await fetch(`${API_URL}/auth/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to get profile");
   return json;
 }
 
@@ -149,13 +186,8 @@ export async function updateProfile(
 
 /* ========== Admin ========== */
 
-function getAdminToken(): string | null {
-  const token = getStoredToken();
-  return token;
-}
-
 function adminFetch(path: string, init?: RequestInit) {
-  const token = getAdminToken();
+  const token = getStoredToken();
   if (!token) throw new Error("Not logged in");
   return fetch(`${API_URL}${path}`, {
     ...init,
@@ -279,13 +311,19 @@ export type AdminRegisterInput = {
   name: string;
   email: string;
   password: string;
+  adminSecret: string;
 };
 
 export async function registerAdmin(data: AdminRegisterInput): Promise<AuthResponse> {
-  const res = await fetch("/api/admin-register", {
+  const res = await fetch(`${API_URL}/auth/admin/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      adminSecret: data.adminSecret,
+    }),
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Admin registration failed");

@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import { MapPin, Star } from "lucide-react";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
 import {
@@ -10,7 +12,9 @@ import {
   getProfileBySlug,
   getStoredToken,
   updateProfile,
-  clearToken,
+  logout,
+  getImageUrl,
+  type RatedMasterItem,
 } from "@/lib/api";
 import styles from "../profilePage.module.css";
 
@@ -91,36 +95,42 @@ const DEFAULT_PROFILE: ProfileData = {
 
 type Work = ProfileData["works"][0];
 
-function mapMeToProfile(data: {
-  name: string;
-  email: string;
-  phone?: string;
-  specialty?: string;
-  location?: string;
-  bio?: string;
-  image?: string;
-  instagram?: string;
-  website?: string;
-  works?: Array<{
-    id: string;
-    title: string;
-    description?: string;
-    image: string;
-  }>;
-}): ProfileData {
+function mapMeToProfile(
+  data: {
+    name: string;
+    email: string;
+    phone?: string;
+    specialty?: string;
+    location?: string;
+    bio?: string;
+    image?: string;
+    instagram?: string;
+    website?: string;
+    works?: Array<{
+      id: string;
+      title: string;
+      description?: string;
+      image: string;
+    }>;
+  },
+  role?: string
+): ProfileData {
   return {
     name: data.name,
     email: data.email,
     phone: data.phone || "",
-    specialty: data.specialty || "—",
+    specialty:
+      role === "user" ? "Client" : data.specialty || "—",
     location: data.location || "—",
     bio: data.bio || "",
     image:
       data.image ||
-      "https://images.unsplash.com/photo-1651889512068-f1c588fe6649?w=400&q=80",
+      "https://ui-avatars.com/api/?name=" +
+        encodeURIComponent(data.name) +
+        "&size=400",
     instagram: data.instagram,
     website: data.website,
-    works: data.works ?? DEFAULT_PROFILE.works,
+    works: data.works ?? (role === "user" ? [] : DEFAULT_PROFILE.works),
   };
 }
 
@@ -137,7 +147,6 @@ export default function ProfilePage() {
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(true);
-
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -151,6 +160,9 @@ export default function ProfilePage() {
     return () => observer.disconnect();
   }, []);
 
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [ratedMasters, setRatedMasters] = useState<RatedMasterItem[]>([]);
+
   useEffect(() => {
     if (!slug) {
       setLoading(false);
@@ -158,13 +170,14 @@ export default function ProfilePage() {
     }
 
     if (slug === "me") {
-      const token = getStoredToken();
-      if (!token) {
+      if (!getStoredToken()) {
         router.replace("/join");
+        setLoading(false);
         return;
       }
       getMe()
         .then(({ data }) => {
+          setUserRole(data.role);
           if (data.role === "admin") {
             router.replace("/admin");
             return;
@@ -173,8 +186,9 @@ export default function ProfilePage() {
             router.replace(`/profile/${data.slug}`);
             return;
           }
-          setProfile(mapMeToProfile(data));
+          setProfile(mapMeToProfile(data, data.role));
           setIsOwnProfile(true);
+          setRatedMasters(data.ratedMasters ?? []);
         })
         .catch(() => router.replace("/join"))
         .finally(() => setLoading(false));
@@ -186,7 +200,7 @@ export default function ProfilePage() {
       getMe()
         .then(({ data }) => {
           if (data.slug === slug) {
-            setProfile(mapMeToProfile(data));
+            setProfile(mapMeToProfile(data, data.role));
             setIsOwnProfile(true);
             setLoading(false);
             return;
@@ -196,11 +210,14 @@ export default function ProfilePage() {
             setIsOwnProfile(false);
           });
         })
-        .catch(() => getProfileBySlug(slug).then((p) => {
-          setProfile(p);
-          setIsOwnProfile(false);
-        }))
-        .catch(() => {})
+        .catch(() =>
+          getProfileBySlug(slug)
+            .then((p) => {
+              setProfile(p);
+              setIsOwnProfile(false);
+            })
+            .catch(() => {})
+        )
         .finally(() => setLoading(false));
     } else {
       getProfileBySlug(slug)
@@ -213,8 +230,8 @@ export default function ProfilePage() {
     }
   }, [slug, router]);
 
-  const handleLogout = () => {
-    clearToken();
+  const handleLogout = async () => {
+    await logout();
     router.replace("/");
   };
 
@@ -235,7 +252,7 @@ export default function ProfilePage() {
         website: (form.elements.namedItem("website") as HTMLInputElement)?.value || undefined,
         image: (form.elements.namedItem("image") as HTMLInputElement)?.value || undefined,
       });
-      setProfile(mapMeToProfile(data.data));
+      setProfile(mapMeToProfile(data.data, userRole ?? undefined));
       setShowEditModal(false);
     } catch (err) {
       setEditError(err instanceof Error ? err.message : "Update failed");
@@ -269,64 +286,137 @@ export default function ProfilePage() {
             </div>
 
             <div className={styles.main}>
-              <div
-                className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
-              >
-                <h2 className={styles.portfolioTitle}>Portfolio</h2>
-                <p className={styles.portfolioSubtitle}>
-                  Explore my collection of works
-                </p>
-              </div>
-
-              <div className={styles.masonry}>
-                {profile.works.map((work, index) => (
+              {userRole === "user" ? (
+                <>
                   <div
-                    key={work.id}
-                    className={`${styles.workCard} ${styles.scrollReveal} ${
-                      [
-                        styles.scrollRevealDelay2,
-                        styles.scrollRevealDelay3,
-                        styles.scrollRevealDelay4,
-                        styles.scrollRevealDelay5,
-                        styles.scrollRevealDelay6,
-                        styles.scrollRevealDelay7,
-                        styles.scrollRevealDelay8,
-                        styles.scrollRevealDelay9,
-                        styles.scrollRevealDelay10,
-                        styles.scrollRevealDelay11,
-                        styles.scrollRevealDelay12,
-                        styles.scrollRevealDelay13,
-                      ][index]
-                    }`}
-                    onClick={() => setSelectedWork(work)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSelectedWork(work);
-                      }
-                    }}
+                    className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
                   >
-                    <div className={styles.workImageWrapper}>
-                      <Image
-                        src={work.image}
-                        alt={work.title}
-                        width={400}
-                        height={500}
-                        className={styles.workImage}
-                      />
-                      <div className={styles.workOverlay} />
-                    </div>
-                    <div className={styles.workCaption}>
-                      <h3 className={styles.workTitle}>{work.title}</h3>
-                      <p className={styles.workDescription}>
-                        {work.description}
-                      </p>
-                    </div>
+                    <h2 className={styles.portfolioTitle}>Rated Masters</h2>
+                    <p className={styles.portfolioSubtitle}>
+                      Masters you have rated
+                    </p>
                   </div>
-                ))}
-              </div>
+
+                  {ratedMasters.length === 0 ? (
+                    <p className={styles.emptyRated}>
+                      You haven&apos;t rated any masters yet.
+                    </p>
+                  ) : (
+                    <div className={styles.ratedMastersGrid}>
+                      {ratedMasters.map((item, index) => (
+                        <Link
+                          key={item.master._id + item.ratedAt}
+                          href={`/profile/${item.master.slug}`}
+                          className={`${styles.ratedMasterCard} ${styles.scrollReveal} ${
+                            [
+                              styles.scrollRevealDelay2,
+                              styles.scrollRevealDelay3,
+                              styles.scrollRevealDelay4,
+                              styles.scrollRevealDelay5,
+                              styles.scrollRevealDelay6,
+                              styles.scrollRevealDelay7,
+                            ][index] ?? styles.scrollRevealDelay7
+                          }`}
+                        >
+                          <div className={styles.ratedMasterImageWrap}>
+                            <Image
+                              src={
+                                getImageUrl(item.master.image) ||
+                                "https://ui-avatars.com/api/?name=" +
+                                  encodeURIComponent(item.master.name) +
+                                  "&size=200"
+                              }
+                              alt={item.master.name}
+                              width={160}
+                              height={160}
+                              className={styles.ratedMasterImage}
+                            />
+                            <div className={styles.ratedMasterStars}>
+                              <Star size={16} fill="currentColor" />
+                              <span>{item.stars}</span>
+                            </div>
+                          </div>
+                          <h3 className={styles.ratedMasterName}>
+                            {item.master.name}
+                          </h3>
+                          {item.master.specialty && (
+                            <p className={styles.ratedMasterSpecialty}>
+                              {item.master.specialty}
+                            </p>
+                          )}
+                          {item.master.location && (
+                            <div className={styles.ratedMasterLocation}>
+                              <MapPin size={14} />
+                              <span>{item.master.location}</span>
+                            </div>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div
+                    className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
+                  >
+                    <h2 className={styles.portfolioTitle}>Portfolio</h2>
+                    <p className={styles.portfolioSubtitle}>
+                      Explore my collection of works
+                    </p>
+                  </div>
+
+                  <div className={styles.masonry}>
+                    {profile.works.map((work, index) => (
+                      <div
+                        key={work.id}
+                        className={`${styles.workCard} ${styles.scrollReveal} ${
+                          [
+                            styles.scrollRevealDelay2,
+                            styles.scrollRevealDelay3,
+                            styles.scrollRevealDelay4,
+                            styles.scrollRevealDelay5,
+                            styles.scrollRevealDelay6,
+                            styles.scrollRevealDelay7,
+                            styles.scrollRevealDelay8,
+                            styles.scrollRevealDelay9,
+                            styles.scrollRevealDelay10,
+                            styles.scrollRevealDelay11,
+                            styles.scrollRevealDelay12,
+                            styles.scrollRevealDelay13,
+                          ][index]
+                        }`}
+                        onClick={() => setSelectedWork(work)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedWork(work);
+                          }
+                        }}
+                      >
+                        <div className={styles.workImageWrapper}>
+                          <Image
+                            src={work.image}
+                            alt={work.title}
+                            width={400}
+                            height={500}
+                            className={styles.workImage}
+                          />
+                          <div className={styles.workOverlay} />
+                        </div>
+                        <div className={styles.workCaption}>
+                          <h3 className={styles.workTitle}>{work.title}</h3>
+                          <p className={styles.workDescription}>
+                            {work.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

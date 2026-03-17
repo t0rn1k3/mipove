@@ -11,6 +11,7 @@
   max-width: 42rem;
   background: var(--white-70);
   backdrop-filter: blur(1rem);
+  -webkit-backdrop-filter: blur(1rem);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-3xl);
   padding: 3rem 2rem;

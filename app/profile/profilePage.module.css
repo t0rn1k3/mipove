@@ -106,6 +106,86 @@
   font-size: 1rem;
 }
 
+/* Rated Masters (user profile) */
+.emptyRated {
+  color: #6b7280;
+  font-size: 1.125rem;
+  padding: 2rem 0;
+}
+
+.ratedMastersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.ratedMasterCard {
+  display: block;
+  background: white;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ratedMasterCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+}
+
+.ratedMasterImageWrap {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.ratedMasterImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ratedMasterStars {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fbbf24;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ratedMasterName {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin: 1rem 1rem 0.25rem;
+}
+
+.ratedMasterSpecialty {
+  font-size: 0.875rem;
+  color: var(--teal);
+  font-weight: 600;
+  margin: 0 1rem;
+}
+
+.ratedMasterLocation {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0.25rem 1rem 1rem;
+}
+
 /* Masonry grid (CSS columns) */
 .masonry {
   column-count: 2;

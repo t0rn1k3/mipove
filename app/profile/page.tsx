@@ -8,8 +8,7 @@ export default function ProfileIndex() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = getStoredToken();
-    if (!token) {
+    if (!getStoredToken()) {
       router.replace("/join");
       return;
     }

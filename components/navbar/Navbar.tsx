@@ -19,25 +19,33 @@ export default function Navbar() {
   const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
-    const token = getStoredToken();
-    if (!token) {
+    if (!getStoredToken()) {
       setIsAdmin(false);
       setUser(null);
       return;
     }
-    getMe()
-      .then(({ data }) => {
-        setIsAdmin(data.role === "admin");
-        if (data.role !== "admin") {
-          setUser({ name: data.name, image: data.image });
-        } else {
+    let cancelled = false;
+    const timeoutId = setTimeout(() => {
+      getMe()
+        .then(({ data }) => {
+          if (cancelled) return;
+          setIsAdmin(data.role === "admin");
+          if (data.role !== "admin") {
+            setUser({ name: data.name, image: data.image });
+          } else {
+            setUser(null);
+          }
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setIsAdmin(false);
           setUser(null);
-        }
-      })
-      .catch(() => {
-        setIsAdmin(false);
-        setUser(null);
-      });
+        });
+    }, 100);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [pathname]);
 
   useEffect(() => {

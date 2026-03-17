@@ -3,7 +3,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
-import Navbar from "@/components/navbar/Navbar";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 
 const sharpe = localFont({
   src: "../public/fonts/SharpePERSONAL-Bold.woff2",
@@ -39,7 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <head></head>
       <body className={`${sharpe.variable} ${playfair.variable} ${inter.variable}`}>
-        <Navbar />
+        <ConditionalNavbar />
         {children}
       </body>
     </html>

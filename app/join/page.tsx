@@ -46,6 +46,7 @@ const initialRegisterForm = {
   phone: "",
   password: "",
   confirmPassword: "",
+  adminSecret: "",
 };
 
 const initialLoginForm = {
@@ -112,10 +113,16 @@ export default function JoinPage() {
       };
       let json: Awaited<ReturnType<typeof registerUser>>;
       if (isAdminMode) {
+        if (!registerForm.adminSecret) {
+          setError("Admin secret is required");
+          setLoading(false);
+          return;
+        }
         json = await registerAdmin({
           name: registerForm.fullName,
           email: registerForm.email,
           password: registerForm.password,
+          adminSecret: registerForm.adminSecret,
         });
       } else {
         json =
@@ -305,6 +312,27 @@ export default function JoinPage() {
                   />
                 </div>
               </div>
+
+              {isAdminMode && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="adminSecret" className={styles.formLabel}>
+                    Admin Secret *
+                  </label>
+                  <div className={styles.inputWrapper}>
+                    <Lock className={styles.inputIcon} />
+                    <input
+                      id="adminSecret"
+                      name="adminSecret"
+                      type="password"
+                      value={registerForm.adminSecret}
+                      onChange={handleRegisterChange}
+                      className={styles.formInput}
+                      placeholder="Enter admin secret"
+                      required={isAdminMode}
+                    />
+                  </div>
+                </div>
+              )}
 
               {!isAdminMode && (
                 <div className={styles.formGroup}>
