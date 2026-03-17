@@ -7,10 +7,11 @@ import {
   getAdminUsers,
   getAdminMasters,
 } from "@/lib/api";
+import type { AdminStats } from "@/lib/types";
 import styles from "./admin.module.css";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<{ users?: number; masters?: number }>({});
+  const [stats, setStats] = useState<AdminStats>({});
   const [recentUsers, setRecentUsers] = useState<Array<{ _id: string; name: string; email: string; role: string }>>([]);
   const [recentMasters, setRecentMasters] = useState<Array<{ _id: string; name: string; email: string; specialty?: string }>>([]);
   const [loading, setLoading] = useState(true);

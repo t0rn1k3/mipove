@@ -12,7 +12,7 @@ import type {
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-const API_BASE = API_URL.replace(/\/api\/?$/, "") || "http://localhost:5000";
+const IMAGE_BASE = API_URL.replace(/\/api\/?$/, "") || "http://localhost:5000";
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -32,12 +32,15 @@ export function clearToken(): void {
 export function getImageUrl(path: string | undefined): string {
   if (!path) return "";
   if (path.startsWith("http")) return path;
-  if (path.startsWith("/")) return `${API_BASE}${path}`;
+  if (path.startsWith("/")) return `${IMAGE_BASE}${path}`;
   return path;
 }
 
+const api = (path: string) =>
+  `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+
 export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/users/register`, {
+  const res = await fetch(`${api("/auth/users/register")}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...data, phone: data.phone || "" }),
@@ -50,7 +53,7 @@ export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
 export async function registerMaster(
   data: RegisterInput,
 ): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/masters/register`, {
+  const res = await fetch(`${api("/auth/masters/register")}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...data, phone: data.phone || "" }),
@@ -61,7 +64,7 @@ export async function registerMaster(
 }
 
 export async function login(data: LoginInput): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/login`, {
+  const res = await fetch(`${api("/auth/login")}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -102,13 +105,18 @@ export async function getMe(): Promise<{
     image?: string;
     instagram?: string;
     website?: string;
-    works?: Array<{ id: string; title: string; description?: string; image: string }>;
+    works?: Array<{
+      id: string;
+      title: string;
+      description?: string;
+      image: string;
+    }>;
     ratedMasters?: RatedMasterItem[];
   };
 }> {
   const token = getStoredToken();
   if (!token) throw new Error("Not logged in");
-  const res = await fetch(`${API_URL}/auth/me`, {
+  const res = await fetch(`${api("/auth/me")}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const json = await res.json();
@@ -119,7 +127,7 @@ export async function getMe(): Promise<{
 export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
   const token = getStoredToken();
   if (!token) throw new Error("Not logged in");
-  const res = await fetch(`${API_URL}/auth/profile`, {
+  const res = await fetch(`${api("/auth/profile")}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const json = await res.json();
@@ -135,7 +143,7 @@ export async function getMasters(params?: {
   if (params?.specialty) searchParams.set("specialty", params.specialty);
   if (params?.search) searchParams.set("search", params.search);
   const q = searchParams.toString() ? `?${searchParams}` : "";
-  const res = await fetch(`${API_URL}/masters${q}`);
+  const res = await fetch(api(`/masters${q}`));
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to fetch masters");
   const data = json.data ?? json;
@@ -152,9 +160,14 @@ export async function getProfileBySlug(slug: string): Promise<{
   instagram?: string;
   website?: string;
   image: string;
-  works: Array<{ id: string; title: string; description?: string; image: string }>;
+  works: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    image: string;
+  }>;
 }> {
-  const res = await fetch(`${API_URL}/masters/${slug}`);
+  const res = await fetch(`${api(`/masters/${slug}`)}`);
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Profile not found");
   const data = json.data ?? json;
@@ -168,11 +181,11 @@ export async function getProfileBySlug(slug: string): Promise<{
 }
 
 export async function updateProfile(
-  data: UpdateProfileInput
+  data: UpdateProfileInput,
 ): Promise<{ data: Awaited<ReturnType<typeof getMe>>["data"] }> {
   const token = getStoredToken();
   if (!token) throw new Error("Not logged in");
-  const res = await fetch(`${API_URL}/auth/me`, {
+  const res = await fetch(`${api("/auth/me")}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -190,7 +203,7 @@ export async function updateProfile(
 function adminFetch(path: string, init?: RequestInit) {
   const token = getStoredToken();
   if (!token) throw new Error("Not logged in");
-  return fetch(`${API_URL}${path}`, {
+  return fetch(api(path), {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -283,8 +296,10 @@ export async function unblockAdminMaster(id: string): Promise<void> {
   if (!res.ok) throw new Error(json.message || "Failed to unblock master");
 }
 
-export async function registerAdmin(data: AdminRegisterInput): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/admin/register`, {
+export async function registerAdmin(
+  data: AdminRegisterInput,
+): Promise<AuthResponse> {
+  const res = await fetch(`${api("/auth/admin/register")}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
