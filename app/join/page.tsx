@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Logo from "@/components/logo/Logo";
 import styles from "./join.module.css";
 import {
   registerUser,
   registerMaster,
   login,
+  registerAdmin,
   storeToken,
   getAuthRedirectPath,
 } from "@/lib/api";
@@ -54,7 +55,11 @@ const initialLoginForm = {
 
 export default function JoinPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"register" | "login">("register");
+  const searchParams = useSearchParams();
+  const isAdminMode = searchParams.get("admin") === "1";
+  const [activeTab, setActiveTab] = useState<"register" | "login">(
+    isAdminMode ? "login" : "register"
+  );
   const [role, setRole] = useState<"user" | "master">("user");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,6 +68,10 @@ export default function JoinPage() {
 
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
   const [loginForm, setLoginForm] = useState(initialLoginForm);
+
+  useEffect(() => {
+    if (isAdminMode) setActiveTab("login");
+  }, [isAdminMode]);
 
   const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -101,10 +110,19 @@ export default function JoinPage() {
         phone: registerForm.phone || undefined,
         password: registerForm.password,
       };
-      const json =
-        role === "master"
-          ? await registerMaster(data)
-          : await registerUser(data);
+      let json: Awaited<ReturnType<typeof registerUser>>;
+      if (isAdminMode) {
+        json = await registerAdmin({
+          name: registerForm.fullName,
+          email: registerForm.email,
+          password: registerForm.password,
+        });
+      } else {
+        json =
+          role === "master"
+            ? await registerMaster(data)
+            : await registerUser(data);
+      }
       storeToken(json.token);
       router.push(getAuthRedirectPath(json));
     } catch (err) {
@@ -157,58 +175,74 @@ export default function JoinPage() {
 
       {/* Main Content */}
       <div className={styles.content}>
-        {/* Left Card - Role & Benefits */}
+        {/* Left Card - Role & Benefits (hidden in admin mode) */}
         <div
           className={`${styles.leftCard} ${styles.reveal} ${styles.revealDelay4}`}
         >
-          <div>
-            <h2 className={styles.sectionHeading}>Choose Your Role</h2>
-            <div className={styles.roleOptions}>
-              <button
-                type="button"
-                className={`${styles.roleOption} ${role === "user" ? styles.selected : ""}`}
-                onClick={() => setRole("user")}
-              >
-                <User className={styles.roleIcon} />
-                <span className={styles.roleName}>User</span>
-                <span className={styles.roleDesc}>
-                  Find masters for your projects
-                </span>
-              </button>
-              <button
-                type="button"
-                className={`${styles.roleOption} ${role === "master" ? styles.selected : ""}`}
-                onClick={() => setRole("master")}
-              >
-                <Briefcase className={styles.roleIcon} />
-                <span className={styles.roleName}>Professional</span>
-                <span className={styles.roleDesc}>
-                  Showcase your work and connect with clients
-                </span>
-              </button>
+          {isAdminMode ? (
+            <div>
+              <h2 className={styles.sectionHeading}>Admin Access</h2>
+              <p className={styles.subtitle}>
+                {activeTab === "login"
+                  ? "Log in to access the admin dashboard."
+                  : "Create an admin account. Requires ADMIN_SECRET to be configured."}
+              </p>
+              <p className={styles.legalText}>
+                Visit <strong>/join?admin=1</strong> to access this flow.
+              </p>
             </div>
-          </div>
+          ) : (
+            <>
+              <div>
+                <h2 className={styles.sectionHeading}>Choose Your Role</h2>
+                <div className={styles.roleOptions}>
+                  <button
+                    type="button"
+                    className={`${styles.roleOption} ${role === "user" ? styles.selected : ""}`}
+                    onClick={() => setRole("user")}
+                  >
+                    <User className={styles.roleIcon} />
+                    <span className={styles.roleName}>User</span>
+                    <span className={styles.roleDesc}>
+                      Find masters for your projects
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.roleOption} ${role === "master" ? styles.selected : ""}`}
+                    onClick={() => setRole("master")}
+                  >
+                    <Briefcase className={styles.roleIcon} />
+                    <span className={styles.roleName}>Professional</span>
+                    <span className={styles.roleDesc}>
+                      Showcase your work and connect with clients
+                    </span>
+                  </button>
+                </div>
+              </div>
 
-          <div>
-            <h2 className={styles.sectionHeading}>
-              {role === "user" ? "User" : "Master"} Benefits
-            </h2>
-            <ul className={styles.benefitsList}>
-              {benefits.map((benefit) => (
-                <li key={benefit} className={styles.benefitItem}>
-                  <Check className={styles.benefitIcon} />
-                  <span>{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+              <div>
+                <h2 className={styles.sectionHeading}>
+                  {role === "user" ? "User" : "Master"} Benefits
+                </h2>
+                <ul className={styles.benefitsList}>
+                  {benefits.map((benefit) => (
+                    <li key={benefit} className={styles.benefitItem}>
+                      <Check className={styles.benefitIcon} />
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <div className={styles.trustedCallout}>
-            <p className={styles.trustedText}>Trusted by 500+ masters</p>
-            <p className={styles.communityText}>
-              Join our growing community today
-            </p>
-          </div>
+              <div className={styles.trustedCallout}>
+                <p className={styles.trustedText}>Trusted by 500+ masters</p>
+                <p className={styles.communityText}>
+                  Join our growing community today
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right Card - Form */}
@@ -221,7 +255,7 @@ export default function JoinPage() {
               className={`${styles.tab} ${activeTab === "register" ? styles.active : ""}`}
               onClick={() => handleTabSwitch("register")}
             >
-              Register
+              {isAdminMode ? "Register Admin" : "Register"}
             </button>
             <button
               type="button"
@@ -272,24 +306,26 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label htmlFor="phone" className={styles.formLabel}>
-                  Phone Number *
-                </label>
-                <div className={styles.inputWrapper}>
-                  <Phone className={styles.inputIcon} />
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={registerForm.phone}
-                    onChange={handleRegisterChange}
-                    className={styles.formInput}
-                    placeholder="+995 XXX XXX XXX"
-                    required
-                  />
+              {!isAdminMode && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="phone" className={styles.formLabel}>
+                    Phone Number *
+                  </label>
+                  <div className={styles.inputWrapper}>
+                    <Phone className={styles.inputIcon} />
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={registerForm.phone}
+                      onChange={handleRegisterChange}
+                      className={styles.formInput}
+                      placeholder="+995 XXX XXX XXX"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label htmlFor="password" className={styles.formLabel}>
@@ -369,17 +405,19 @@ export default function JoinPage() {
                 </span>
               </button>
 
-              <p className={styles.legalText}>
-                By creating an account, you agree to our{" "}
-                <Link href="/terms" className={styles.legalLink}>
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className={styles.legalLink}>
-                  Privacy Policy
-                </Link>
-                .
-              </p>
+              {!isAdminMode && (
+                <p className={styles.legalText}>
+                  By creating an account, you agree to our{" "}
+                  <Link href="/terms" className={styles.legalLink}>
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className={styles.legalLink}>
+                    Privacy Policy
+                  </Link>
+                  .
+                </p>
+              )}
             </form>
           ) : (
             <form className={styles.form} onSubmit={handleLoginSubmit}>

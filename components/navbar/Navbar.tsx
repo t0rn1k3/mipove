@@ -16,6 +16,7 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<UserInfo>(null);
   const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
     const token = getStoredToken();
@@ -50,6 +51,8 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (isAdminRoute) return null;
 
   const navLinks = [
     { name: "Home", href: "/" },

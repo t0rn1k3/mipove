@@ -3,7 +3,7 @@ import type { AuthResponse, LoginInput, RegisterInput } from "./types";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/register/user`, {
+  const res = await fetch(`${API_URL}/auth/users/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...data, phone: data.phone || "" }),
@@ -16,7 +16,7 @@ export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
 export async function registerMaster(
   data: RegisterInput,
 ): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/register/master`, {
+  const res = await fetch(`${API_URL}/auth/masters/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...data, phone: data.phone || "" }),
@@ -55,11 +55,13 @@ export function clearToken(): void {
 export function getAuthRedirectPath(json: {
   data?: { role?: string; slug?: string };
   user?: { role?: string; slug?: string };
+  admin?: { role?: string; slug?: string };
 }): string {
-  const data = json.data ?? json.user;
+  const data = json.data ?? json.user ?? json.admin;
   const role = data?.role;
   if (role === "admin") return "/admin";
   if (role === "master" && data?.slug) return `/profile/${data.slug}`;
+  if (role === "user") return "/";
   return "/profile/me";
 }
 
@@ -102,10 +104,17 @@ export async function getProfileBySlug(slug: string): Promise<{
   image: string;
   works: Array<{ id: string; title: string; description?: string; image: string }>;
 }> {
-  const res = await fetch(`${API_URL}/profile/${slug}`);
+  const res = await fetch(`${API_URL}/masters/${slug}`);
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Profile not found");
-  return json;
+  const data = json.data ?? json;
+  return {
+    ...data,
+    works: (data.works ?? []).map((w: { _id?: string; id?: string }) => ({
+      ...w,
+      id: w._id ?? w.id ?? "",
+    })),
+  };
 }
 
 export type UpdateProfileInput = {
@@ -135,5 +144,150 @@ export async function updateProfile(
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Update failed");
+  return json;
+}
+
+/* ========== Admin ========== */
+
+function getAdminToken(): string | null {
+  const token = getStoredToken();
+  return token;
+}
+
+function adminFetch(path: string, init?: RequestInit) {
+  const token = getAdminToken();
+  if (!token) throw new Error("Not logged in");
+  return fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...init?.headers,
+    },
+  });
+}
+
+export type AdminStats = {
+  users?: number;
+  masters?: number;
+  totalUsers?: number;
+  totalMasters?: number;
+};
+
+export async function getAdminStats(): Promise<AdminStats> {
+  const res = await adminFetch("/admin/stats");
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to fetch stats");
+  return json.data ?? json;
+}
+
+export type AdminUser = {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  blocked?: boolean;
+  createdAt?: string;
+};
+
+export async function getAdminUsers(params?: {
+  status?: "active" | "blocked" | "new";
+}): Promise<AdminUser[]> {
+  const q = params?.status ? `?status=${params.status}` : "";
+  const res = await adminFetch(`/admin/users${q}`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to fetch users");
+  const data = json.data ?? json;
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getAdminUser(id: string): Promise<AdminUser> {
+  const res = await adminFetch(`/admin/users/${id}`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "User not found");
+  return json.data ?? json;
+}
+
+export async function blockAdminUser(id: string): Promise<void> {
+  const res = await adminFetch(`/admin/users/${id}/block`, { method: "PUT" });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to block user");
+}
+
+export async function unblockAdminUser(id: string): Promise<void> {
+  const res = await adminFetch(`/admin/users/${id}/unblock`, { method: "PUT" });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to unblock user");
+}
+
+export type AdminMaster = AdminUser & {
+  slug?: string;
+  specialty?: string;
+  location?: string;
+  bio?: string;
+  image?: string;
+};
+
+export async function getAdminMasters(): Promise<AdminMaster[]> {
+  const res = await adminFetch("/admin/masters");
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to fetch masters");
+  const data = json.data ?? json;
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getAdminMaster(id: string): Promise<AdminMaster> {
+  const res = await adminFetch(`/admin/masters/${id}`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Master not found");
+  return json.data ?? json;
+}
+
+export async function createAdminMaster(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  specialty?: string;
+  location?: string;
+}): Promise<AdminMaster> {
+  const res = await adminFetch("/admin/masters", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to create master");
+  return json.data ?? json;
+}
+
+export async function blockAdminMaster(id: string): Promise<void> {
+  const res = await adminFetch(`/admin/masters/${id}/block`, { method: "PUT" });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to block master");
+}
+
+export async function unblockAdminMaster(id: string): Promise<void> {
+  const res = await adminFetch(`/admin/masters/${id}/unblock`, {
+    method: "PUT",
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to unblock master");
+}
+
+export type AdminRegisterInput = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+export async function registerAdmin(data: AdminRegisterInput): Promise<AuthResponse> {
+  const res = await fetch("/api/admin-register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Admin registration failed");
   return json;
 }
