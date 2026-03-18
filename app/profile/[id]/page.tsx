@@ -7,6 +7,7 @@ import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
+import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import {
   getMe,
   getProfileBySlug,
@@ -582,10 +583,11 @@ export default function ProfilePage() {
                 </div>
                 <div className={styles.formField}>
                   <label htmlFor="edit-location">Location</label>
-                  <input
+                  <CityAutocomplete
                     id="edit-location"
                     name="location"
                     defaultValue={profile.location === "—" ? "" : profile.location}
+                    placeholder="Start typing a city..."
                   />
                 </div>
               </div>

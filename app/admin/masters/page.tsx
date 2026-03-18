@@ -9,6 +9,7 @@ import {
   createAdminMaster,
 } from "@/lib/api";
 import type { AdminMaster } from "@/lib/types";
+import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import styles from "../admin.module.css";
 
 export default function AdminMastersPage() {
@@ -197,12 +198,10 @@ export default function AdminMastersPage() {
             </div>
             <div>
               <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>Location</label>
-              <input
-                type="text"
+              <CityAutocomplete
                 value={createForm.location}
-                onChange={(e) => setCreateForm((p) => ({ ...p, location: e.target.value }))}
-                className={styles.searchInput}
-                style={{ width: "100%" }}
+                onChange={(v) => setCreateForm((p) => ({ ...p, location: v }))}
+                placeholder="Start typing a city..."
               />
             </div>
             <div style={{ gridColumn: "1 / -1", display: "flex", gap: "0.5rem" }}>

@@ -9,6 +9,7 @@ import type {
   AdminUser,
   AdminMaster,
   AdminRegisterInput,
+  GeocodeCity,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -149,6 +150,16 @@ export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to get profile");
   return json;
+}
+
+export async function searchCities(query: string, count = 10): Promise<GeocodeCity[]> {
+  if (!query || query.trim().length < 2) return [];
+  const q = encodeURIComponent(query.trim());
+  const res = await fetch(`${api("/geocode/search")}?q=${q}&count=${count}`);
+  const json = await res.json();
+  if (!res.ok) return [];
+  const data = json?.data;
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getMasters(params?: {

@@ -141,6 +141,19 @@ export type AdminRegisterInput = {
   adminSecret: string;
 };
 
+/* ========== Geocode ========== */
+
+export type GeocodeCity = {
+  id: number;
+  name: string;
+  country: string;
+  countryCode: string;
+  admin1?: string;
+  latitude: number;
+  longitude: number;
+  displayName: string;
+};
+
 /* ========== API Error ========== */
 
 export type ApiErrorResponse = {
