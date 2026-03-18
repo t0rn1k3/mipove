@@ -155,10 +155,16 @@ export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
 export async function searchCities(query: string, count = 10): Promise<GeocodeCity[]> {
   if (!query || query.trim().length < 2) return [];
   const q = encodeURIComponent(query.trim());
-  const res = await fetch(`${api("/geocode/search")}?q=${q}&count=${count}`);
+  const url = `${api("/geocode/search")}?q=${q}&count=${count}`;
+  const res = await fetch(url);
   const json = await res.json();
-  if (!res.ok) return [];
-  const data = json?.data;
+  if (!res.ok) {
+    if (typeof window !== "undefined") {
+      console.warn("[searchCities] API error:", res.status, json?.message ?? json);
+    }
+    return [];
+  }
+  const data = json?.data ?? json?.results ?? json;
   return Array.isArray(data) ? data : [];
 }
 
