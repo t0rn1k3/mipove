@@ -64,7 +64,11 @@ export default function MastersPage() {
       </p>
       <div className={styles.grid}>
         {masters.map((master) => (
-          <div key={master._id} className={styles.card}>
+          <Link
+            key={master._id}
+            href={`/profile/${master.slug}`}
+            className={styles.card}
+          >
             <div className={styles.imageContainer}>
               <Image
                 src={
@@ -87,19 +91,8 @@ export default function MastersPage() {
                 <MapPin size={18} className={styles.pin} />
                 <span>{master.location || "—"}</span>
               </div>
-
-              <hr className={styles.divider} />
-
-              <div className={styles.footer}>
-                <Link
-                  href={`/profile/${master.slug}`}
-                  className={styles.viewBtn}
-                >
-                  View Portfolio
-                </Link>
-              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
