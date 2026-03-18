@@ -109,6 +109,7 @@ export default function ProfilePage() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoError, setPhotoError] = useState("");
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
+  const [selectedPortfolioIndex, setSelectedPortfolioIndex] = useState<number | null>(null);
   const [selectedPortfolioFiles, setSelectedPortfolioFiles] = useState<File[]>([]);
   const [selectedPortfolioPreviews, setSelectedPortfolioPreviews] = useState<string[]>([]);
   const [portfolioUploading, setPortfolioUploading] = useState(false);
@@ -507,6 +508,15 @@ export default function ProfilePage() {
                               styles.scrollRevealDelay13,
                             ][index]
                           }`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setSelectedPortfolioIndex(index)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedPortfolioIndex(index);
+                            }
+                          }}
                         >
                           <div className={styles.workImageWrapper}>
                             <Image
@@ -732,6 +742,16 @@ export default function ProfilePage() {
           title={selectedWork.title}
           description={selectedWork.description}
           onClose={() => setSelectedWork(null)}
+        />
+      )}
+
+      {selectedPortfolioIndex !== null && profile.portfolioImages.length > 0 && (
+        <LightboxModal
+          images={profile.portfolioImages}
+          index={selectedPortfolioIndex}
+          onIndexChange={setSelectedPortfolioIndex}
+          title="Portfolio"
+          onClose={() => setSelectedPortfolioIndex(null)}
         />
       )}
     </div>
