@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { getMe, getStoredToken, logout } from "@/lib/api";
+import { getMe, logout } from "@/lib/api";
 import styles from "./admin.module.css";
 
 export default function AdminLayout({
@@ -17,10 +17,6 @@ export default function AdminLayout({
   const [adminName, setAdminName] = useState<string>("");
 
   useEffect(() => {
-    if (!getStoredToken()) {
-      router.replace("/join");
-      return;
-    }
     getMe()
       .then(({ data }) => {
         if (data.role !== "admin") {

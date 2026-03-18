@@ -6,7 +6,7 @@ import styles from "./navbar.module.css";
 import Logo from "@/components/logo/Logo";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { getMe, getStoredToken } from "@/lib/api";
+import { getMe } from "@/lib/api";
 
 type UserInfo = { name: string; image?: string } | null;
 
@@ -19,11 +19,6 @@ export default function Navbar() {
   const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
-    if (!getStoredToken()) {
-      setIsAdmin(false);
-      setUser(null);
-      return;
-    }
     let cancelled = false;
     const timeoutId = setTimeout(() => {
       getMe()

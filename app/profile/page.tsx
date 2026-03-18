@@ -2,16 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getMe, getStoredToken } from "@/lib/api";
+import { getMe } from "@/lib/api";
 
 export default function ProfileIndex() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!getStoredToken()) {
-      router.replace("/join");
-      return;
-    }
     getMe()
       .then(({ data }) => {
         if (data.role === "admin") {

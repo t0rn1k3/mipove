@@ -9,7 +9,6 @@ import {
   registerMaster,
   login,
   registerAdmin,
-  storeToken,
   getAuthRedirectPath,
 } from "@/lib/api";
 import {
@@ -130,7 +129,6 @@ export default function JoinPage() {
             ? await registerMaster(data)
             : await registerUser(data);
       }
-      storeToken(json.token);
       router.push(getAuthRedirectPath(json));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
@@ -148,7 +146,6 @@ export default function JoinPage() {
         email: loginForm.email,
         password: loginForm.password,
       });
-      storeToken(json.token);
       router.push(getAuthRedirectPath(json));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");

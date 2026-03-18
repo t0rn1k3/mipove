@@ -14,19 +14,9 @@ import type {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 const IMAGE_BASE = API_URL.replace(/\/api\/?$/, "") || "http://localhost:5000";
 
+/** @deprecated Use cookie auth; kept for migration. Returns null when using HTTP-only cookies. */
 export function getStoredToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("mipove_token");
-}
-
-export function storeToken(token: string): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem("mipove_token", token);
-}
-
-export function clearToken(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem("mipove_token");
+  return null;
 }
 
 export function getImageUrl(path: string | undefined): string {
@@ -44,6 +34,7 @@ export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...data, phone: data.phone || "" }),
+    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Registration failed");
@@ -57,6 +48,7 @@ export async function registerMaster(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...data, phone: data.phone || "" }),
+    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Registration failed");
@@ -68,6 +60,7 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Login failed");
@@ -75,7 +68,14 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
 }
 
 export async function logout(): Promise<void> {
-  clearToken();
+  try {
+    await fetch(`${api("/auth/logout")}`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } finally {
+    if (typeof window !== "undefined") localStorage.removeItem("mipove_token");
+  }
 }
 
 export function getAuthRedirectPath(json: {
@@ -115,10 +115,8 @@ export async function getMe(): Promise<{
     ratedMasters?: RatedMasterItem[];
   };
 }> {
-  const token = getStoredToken();
-  if (!token) throw new Error("Not logged in");
   const res = await fetch(`${api("/auth/me")}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to get user");
@@ -126,10 +124,8 @@ export async function getMe(): Promise<{
 }
 
 export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
-  const token = getStoredToken();
-  if (!token) throw new Error("Not logged in");
   const res = await fetch(`${api("/auth/profile")}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to get profile");
@@ -187,15 +183,11 @@ export async function getProfileBySlug(slug: string): Promise<{
 export async function updateProfile(
   data: UpdateProfileInput,
 ): Promise<{ data: Awaited<ReturnType<typeof getMe>>["data"] }> {
-  const token = getStoredToken();
-  if (!token) throw new Error("Not logged in");
   const res = await fetch(`${api("/auth/me")}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Update failed");
@@ -207,13 +199,10 @@ export async function uploadProfileImage(
 ): Promise<{ data: Awaited<ReturnType<typeof getMe>>["data"] }> {
   const form = new FormData();
   form.append("image", file);
-
-  const token = getStoredToken();
   const res = await fetch(`${api("/auth/me")}`, {
     method: "PATCH",
     body: form,
     credentials: "include",
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "Upload failed");
@@ -221,11 +210,9 @@ export async function uploadProfileImage(
 }
 
 export async function fetchMyPortfolio(): Promise<string[]> {
-  const token = getStoredToken();
   const res = await fetch(`${api("/masters/me/portfolio")}`, {
     method: "GET",
     credentials: "include",
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "Failed to load portfolio");
@@ -237,13 +224,10 @@ export async function uploadPortfolioImages(files: File[] | FileList): Promise<s
   const arr = Array.isArray(files) ? files : Array.from(files);
   const form = new FormData();
   for (const f of arr) form.append("images", f);
-
-  const token = getStoredToken();
   const res = await fetch(`${api("/masters/me/portfolio")}`, {
     method: "POST",
     body: form,
     credentials: "include",
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "Upload failed");
@@ -254,13 +238,11 @@ export async function uploadPortfolioImages(files: File[] | FileList): Promise<s
 /* ========== Admin ========== */
 
 function adminFetch(path: string, init?: RequestInit) {
-  const token = getStoredToken();
-  if (!token) throw new Error("Not logged in");
   return fetch(api(path), {
     ...init,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
       ...init?.headers,
     },
   });
@@ -361,6 +343,7 @@ export async function registerAdmin(
       password: data.password,
       adminSecret: data.adminSecret,
     }),
+    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Admin registration failed");

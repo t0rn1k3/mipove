@@ -10,7 +10,6 @@ import LightboxModal from "@/components/LightboxModal/LightboxModal";
 import {
   getMe,
   getProfileBySlug,
-  getStoredToken,
   updateProfile,
   logout,
   getImageUrl,
@@ -139,11 +138,6 @@ export default function ProfilePage() {
     }
 
     if (slug === "me") {
-      if (!getStoredToken()) {
-        router.replace("/join");
-        setLoading(false);
-        return;
-      }
       getMe()
         .then(({ data }) => {
           setUserRole(data.role);
@@ -164,45 +158,34 @@ export default function ProfilePage() {
       return;
     }
 
-    const token = getStoredToken();
-    if (token) {
-      getMe()
-        .then(({ data }) => {
-          setUserRole(data.role);
-          if (data.slug === slug) {
-            setProfile(mapMeToProfile(data, data.role));
-            setIsOwnProfile(true);
-            if (data.role === "master") {
-              fetchMyPortfolio()
-                .then((list) => setProfile((p) => ({ ...p, portfolioImages: list })))
-                .catch(() => {});
-            }
-            setLoading(false);
-            return;
+    getMe()
+      .then(({ data }) => {
+        setUserRole(data.role);
+        if (data.slug === slug) {
+          setProfile(mapMeToProfile(data, data.role));
+          setIsOwnProfile(true);
+          if (data.role === "master") {
+            fetchMyPortfolio()
+              .then((list) => setProfile((p) => ({ ...p, portfolioImages: list })))
+              .catch(() => {});
           }
-          return getProfileBySlug(slug).then((p) => {
-            setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
-            setIsOwnProfile(false);
-          });
-        })
-        .catch(() =>
-          getProfileBySlug(slug)
-            .then((p) => {
-              setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
-              setIsOwnProfile(false);
-            })
-            .catch(() => {})
-        )
-        .finally(() => setLoading(false));
-    } else {
-      getProfileBySlug(slug)
-        .then((p) => {
+          setLoading(false);
+          return;
+        }
+        return getProfileBySlug(slug).then((p) => {
           setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
           setIsOwnProfile(false);
-        })
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    }
+        });
+      })
+      .catch(() =>
+        getProfileBySlug(slug)
+          .then((p) => {
+            setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
+            setIsOwnProfile(false);
+          })
+          .catch(() => {})
+      )
+      .finally(() => setLoading(false));
   }, [slug, router]);
 
   const handleLogout = async () => {

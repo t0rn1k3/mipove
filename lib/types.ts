@@ -13,7 +13,7 @@ export type LoginInput = {
 };
 
 export type AuthResponse = {
-  token: string;
+  token?: string; // Optional when using HTTP-only cookie auth
   message?: string;
   user?: User;
   data?: { role?: string; slug?: string; id?: string };
