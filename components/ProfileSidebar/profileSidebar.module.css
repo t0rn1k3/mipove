@@ -13,16 +13,51 @@
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  overflow: hidden;
   margin: 0 auto 1.5rem;
   border: 2px solid #4dd0e1;
   box-sizing: border-box;
+  position: relative;
 }
 
 .avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
+}
+
+.addPhotoBtn {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(77, 208, 225, 1);
+  color: #000000;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(250, 254, 255, 0.3);
+  border: 2px solid #000000;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.addPhotoBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+  box-shadow: 0 10px 24px rgba(77, 208, 225, 0.45);
+}
+
+.addPhotoBtn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+.addPhotoBtnIcon {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  transform: translateY(-1px);
 }
 
 .name {

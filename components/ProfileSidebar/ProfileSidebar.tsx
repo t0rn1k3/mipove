@@ -56,11 +56,13 @@ export default function ProfileSidebar({
             height={200}
             className={styles.avatar}
           />
-        </div>
-        {isOwnProfile && onChangePhoto && (
-          <div className={styles.actions}>
-            <label className={styles.actionBtn}>
-              {isUploadingPhoto ? "Uploading..." : "Change photo"}
+          {isOwnProfile && onChangePhoto && (
+            <label
+              className={styles.addPhotoBtn}
+              aria-label={isUploadingPhoto ? "Uploading photo" : "Change photo"}
+              title={isUploadingPhoto ? "Uploading..." : "Change photo"}
+            >
+              <span className={styles.addPhotoBtnIcon}>+</span>
               <input
                 type="file"
                 accept="image/*"
@@ -73,8 +75,8 @@ export default function ProfileSidebar({
                 }}
               />
             </label>
-          </div>
-        )}
+          )}
+        </div>
         <h1 className={styles.name}>{name}</h1>
         <p className={styles.specialty}>{specialty}</p>
         <div className={styles.location}>

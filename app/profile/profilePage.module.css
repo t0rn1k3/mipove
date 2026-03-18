@@ -381,7 +381,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 50;
+  z-index: 150;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -470,6 +470,93 @@
   margin: 0;
 }
 
+.portfolioEditSection {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-xl);
+  background: #ffffff;
+}
+
+.portfolioEditHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.portfolioEditTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin: 0;
+}
+
+.portfolioAddBtn {
+  padding: 0.6rem 0.9rem;
+  background: var(--teal);
+  color: #fff;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(91, 154, 158, 0.2);
+  transition: transform 0.2s, background 0.2s;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.portfolioAddBtn:hover {
+  background: rgba(91, 154, 158, 0.9);
+  transform: translateY(-1px);
+}
+
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.portfolioThumb {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f3f4f6;
+  aspect-ratio: 1;
+}
+
+.portfolioThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portfolioPending {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.portfolioPendingLabel {
+  margin: 0;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.portfolioActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.portfolioActions .cancelBtn,
+.portfolioActions .submitBtn {
+  width: auto;
+}
+
 .modalActions {
   display: flex;
   gap: 1rem;
@@ -541,6 +628,10 @@
 
   .submitBtn {
     width: 100%;
+  }
+
+  .portfolioGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

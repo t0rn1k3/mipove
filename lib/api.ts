@@ -111,6 +111,7 @@ export async function getMe(): Promise<{
       description?: string;
       image: string;
     }>;
+    portfolioImages?: string[];
     ratedMasters?: RatedMasterItem[];
   };
 }> {
@@ -160,6 +161,7 @@ export async function getProfileBySlug(slug: string): Promise<{
   instagram?: string;
   website?: string;
   image: string;
+  portfolioImages?: string[];
   works: Array<{
     id: string;
     title: string;
@@ -173,6 +175,8 @@ export async function getProfileBySlug(slug: string): Promise<{
   const data = json.data ?? json;
   return {
     ...data,
+    image: getImageUrl(data.image),
+    portfolioImages: (data.portfolioImages ?? []).map((p: string) => getImageUrl(p)),
     works: (data.works ?? []).map((w: { _id?: string; id?: string }) => ({
       ...w,
       id: w._id ?? w.id ?? "",
@@ -214,6 +218,37 @@ export async function uploadProfileImage(
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "Upload failed");
   return json;
+}
+
+export async function fetchMyPortfolio(): Promise<string[]> {
+  const token = getStoredToken();
+  const res = await fetch(`${api("/masters/me/portfolio")}`, {
+    method: "GET",
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "Failed to load portfolio");
+  const list = json?.data?.portfolioImages;
+  return Array.isArray(list) ? list.map((p: string) => getImageUrl(p)) : [];
+}
+
+export async function uploadPortfolioImages(files: File[] | FileList): Promise<string[]> {
+  const arr = Array.isArray(files) ? files : Array.from(files);
+  const form = new FormData();
+  for (const f of arr) form.append("images", f);
+
+  const token = getStoredToken();
+  const res = await fetch(`${api("/masters/me/portfolio")}`, {
+    method: "POST",
+    body: form,
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "Upload failed");
+  const list = json?.data?.portfolioImages;
+  return Array.isArray(list) ? list.map((p: string) => getImageUrl(p)) : [];
 }
 
 /* ========== Admin ========== */

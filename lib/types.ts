@@ -38,6 +38,7 @@ export type Master = User & {
   image?: string;
   slug?: string;
   works?: Work[];
+  portfolioImages?: string[];
 };
 
 /* ========== Artisan / Portfolio ========== */

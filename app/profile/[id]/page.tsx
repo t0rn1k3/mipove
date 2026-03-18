@@ -15,6 +15,8 @@ import {
   logout,
   getImageUrl,
   uploadProfileImage,
+  fetchMyPortfolio,
+  uploadPortfolioImages,
 } from "@/lib/api";
 import type { RatedMasterItem } from "@/lib/types";
 import styles from "../profilePage.module.css";
@@ -29,6 +31,7 @@ type ProfileData = {
   instagram?: string;
   website?: string;
   image: string;
+  portfolioImages: string[];
   works: Array<{
     id: string;
     title: string;
@@ -48,50 +51,8 @@ const DEFAULT_PROFILE: ProfileData = {
   website: "www.elenamartinez.art",
   image:
     "https://images.unsplash.com/photo-1651889512068-f1c588fe6649?w=400&q=80",
-  works: [
-    {
-      id: "1",
-      title: "Abstract Horizon",
-      description: "Mixed media on canvas, 2024",
-      image:
-        "https://images.unsplash.com/photo-1748285279107-13e8799eab76?w=800&q=80",
-    },
-    {
-      id: "2",
-      title: "Modern Forms",
-      description: "Acrylic on wood, 2024",
-      image:
-        "https://images.unsplash.com/photo-1767134426275-059972692c23?w=800&q=80",
-    },
-    {
-      id: "3",
-      title: "Ceramic Dreams",
-      description: "Hand-painted ceramic, 2023",
-      image:
-        "https://images.unsplash.com/photo-1656626277991-0fd06ae52d5c?w=800&q=80",
-    },
-    {
-      id: "4",
-      title: "Wooden Elegance",
-      description: "Mixed media installation, 2024",
-      image:
-        "https://images.unsplash.com/photo-1732575886697-0ddcbce961dd?w=800&q=80",
-    },
-    {
-      id: "5",
-      title: "Portrait in Motion",
-      description: "Oil on canvas, 2023",
-      image:
-        "https://images.unsplash.com/photo-1763070606104-fc2ae79182db?w=800&q=80",
-    },
-    {
-      id: "6",
-      title: "Decorative Symphony",
-      description: "Mixed media, 2024",
-      image:
-        "https://images.unsplash.com/photo-1699005005263-c4e05a77d86b?w=800&q=80",
-    },
-  ],
+  portfolioImages: [],
+  works: [],
 };
 
 type Work = ProfileData["works"][0];
@@ -113,6 +74,7 @@ function mapMeToProfile(
       description?: string;
       image: string;
     }>;
+    portfolioImages?: string[];
   },
   role?: string
 ): ProfileData {
@@ -129,7 +91,8 @@ function mapMeToProfile(
       `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&size=400`,
     instagram: data.instagram,
     website: data.website,
-    works: data.works ?? (role === "user" ? [] : DEFAULT_PROFILE.works),
+    portfolioImages: (data.portfolioImages ?? []).map((p) => getImageUrl(p)),
+    works: data.works ?? [],
   };
 }
 
@@ -146,6 +109,10 @@ export default function ProfilePage() {
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoError, setPhotoError] = useState("");
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
+  const [selectedPortfolioFiles, setSelectedPortfolioFiles] = useState<File[]>([]);
+  const [selectedPortfolioPreviews, setSelectedPortfolioPreviews] = useState<string[]>([]);
+  const [portfolioUploading, setPortfolioUploading] = useState(false);
+  const [portfolioError, setPortfolioError] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(true);
   useEffect(() => {
@@ -200,21 +167,27 @@ export default function ProfilePage() {
     if (token) {
       getMe()
         .then(({ data }) => {
+          setUserRole(data.role);
           if (data.slug === slug) {
             setProfile(mapMeToProfile(data, data.role));
             setIsOwnProfile(true);
+            if (data.role === "master") {
+              fetchMyPortfolio()
+                .then((list) => setProfile((p) => ({ ...p, portfolioImages: list })))
+                .catch(() => {});
+            }
             setLoading(false);
             return;
           }
           return getProfileBySlug(slug).then((p) => {
-            setProfile(p);
+            setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
             setIsOwnProfile(false);
           });
         })
         .catch(() =>
           getProfileBySlug(slug)
             .then((p) => {
-              setProfile(p);
+              setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
               setIsOwnProfile(false);
             })
             .catch(() => {})
@@ -223,7 +196,7 @@ export default function ProfilePage() {
     } else {
       getProfileBySlug(slug)
         .then((p) => {
-          setProfile(p);
+          setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
           setIsOwnProfile(false);
         })
         .catch(() => {})
@@ -291,6 +264,63 @@ export default function ProfilePage() {
       setEditError(err instanceof Error ? err.message : "Update failed");
     } finally {
       setEditLoading(false);
+    }
+  };
+
+  const handleSelectPortfolioFiles = (files: FileList | null) => {
+    setPortfolioError("");
+    if (!files || files.length === 0) return;
+
+    const currentCount = profile.portfolioImages?.length ?? 0;
+    const nextCount = currentCount + files.length;
+    if (nextCount > 30) {
+      setPortfolioError(`You can have up to 30 portfolio images (currently ${currentCount}).`);
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const arr = Array.from(files);
+    for (const f of arr) {
+      if (!allowedTypes.includes(f.type)) {
+        setPortfolioError("Only JPG, PNG, or WebP images are allowed.");
+        return;
+      }
+      if (f.size > 4 * 1024 * 1024) {
+        setPortfolioError("Each image must be 4MB or smaller.");
+        return;
+      }
+    }
+
+    const previews = arr.map((f) => URL.createObjectURL(f));
+    setSelectedPortfolioFiles(arr);
+    setSelectedPortfolioPreviews(previews);
+  };
+
+  const clearSelectedPortfolio = () => {
+    for (const url of selectedPortfolioPreviews) URL.revokeObjectURL(url);
+    setSelectedPortfolioFiles([]);
+    setSelectedPortfolioPreviews([]);
+  };
+
+  const handleUploadPortfolio = async () => {
+    setPortfolioError("");
+    if (selectedPortfolioFiles.length === 0) return;
+
+    setPortfolioUploading(true);
+    try {
+      const list = await uploadPortfolioImages(selectedPortfolioFiles);
+      setProfile((p) => ({ ...p, portfolioImages: list }));
+      clearSelectedPortfolio();
+    } catch (err) {
+      setPortfolioError(err instanceof Error ? err.message : "Upload failed");
+      if (userRole === "master" && isOwnProfile) {
+        try {
+          const list = await fetchMyPortfolio();
+          setProfile((p) => ({ ...p, portfolioImages: list }));
+        } catch {}
+      }
+    } finally {
+      setPortfolioUploading(false);
     }
   };
 
@@ -397,60 +427,101 @@ export default function ProfilePage() {
                     className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
                   >
                     <h2 className={styles.portfolioTitle}>Portfolio</h2>
-                    <p className={styles.portfolioSubtitle}>
-                      Explore my collection of works
-                    </p>
+                    {userRole === "master" && isOwnProfile && (
+                      <label className={styles.portfolioAddBtn}>
+                        {portfolioUploading ? "Uploading..." : "Add photos"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          style={{ display: "none" }}
+                          disabled={portfolioUploading}
+                          onChange={(e) => {
+                            handleSelectPortfolioFiles(e.currentTarget.files);
+                            e.currentTarget.value = "";
+                          }}
+                        />
+                      </label>
+                    )}
                   </div>
 
-                  <div className={styles.masonry}>
-                    {profile.works.map((work, index) => (
-                      <div
-                        key={work.id}
-                        className={`${styles.workCard} ${styles.scrollReveal} ${
-                          [
-                            styles.scrollRevealDelay2,
-                            styles.scrollRevealDelay3,
-                            styles.scrollRevealDelay4,
-                            styles.scrollRevealDelay5,
-                            styles.scrollRevealDelay6,
-                            styles.scrollRevealDelay7,
-                            styles.scrollRevealDelay8,
-                            styles.scrollRevealDelay9,
-                            styles.scrollRevealDelay10,
-                            styles.scrollRevealDelay11,
-                            styles.scrollRevealDelay12,
-                            styles.scrollRevealDelay13,
-                          ][index]
-                        }`}
-                        onClick={() => setSelectedWork(work)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setSelectedWork(work);
-                          }
-                        }}
-                      >
-                        <div className={styles.workImageWrapper}>
-                          <Image
-                            src={work.image}
-                            alt={work.title}
-                            width={400}
-                            height={500}
-                            className={styles.workImage}
-                          />
-                          <div className={styles.workOverlay} />
-                        </div>
-                        <div className={styles.workCaption}>
-                          <h3 className={styles.workTitle}>{work.title}</h3>
-                          <p className={styles.workDescription}>
-                            {work.description}
-                          </p>
-                        </div>
+                  {selectedPortfolioPreviews.length > 0 && (
+                    <div className={styles.portfolioPending}>
+                      {portfolioError && <p className={styles.editError}>{portfolioError}</p>}
+                      <p className={styles.portfolioPendingLabel}>
+                        Ready to upload ({selectedPortfolioPreviews.length})
+                      </p>
+                      <div className={styles.portfolioGrid}>
+                        {selectedPortfolioPreviews.map((src) => (
+                          <div key={src} className={styles.portfolioThumb}>
+                            <Image
+                              src={src}
+                              alt="Selected portfolio"
+                              width={160}
+                              height={160}
+                              className={styles.portfolioThumbImg}
+                              unoptimized
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                      <div className={styles.portfolioActions}>
+                        <button
+                          type="button"
+                          className={styles.cancelBtn}
+                          onClick={clearSelectedPortfolio}
+                          disabled={portfolioUploading}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.submitBtn}
+                          onClick={handleUploadPortfolio}
+                          disabled={portfolioUploading}
+                        >
+                          {portfolioUploading ? "Uploading..." : "Upload photos"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.portfolioImages.length > 0 && (
+                    <div className={styles.masonry}>
+                      {profile.portfolioImages.map((src, index) => (
+                        <div
+                          key={src}
+                          className={`${styles.workCard} ${styles.scrollReveal} ${
+                            [
+                              styles.scrollRevealDelay2,
+                              styles.scrollRevealDelay3,
+                              styles.scrollRevealDelay4,
+                              styles.scrollRevealDelay5,
+                              styles.scrollRevealDelay6,
+                              styles.scrollRevealDelay7,
+                              styles.scrollRevealDelay8,
+                              styles.scrollRevealDelay9,
+                              styles.scrollRevealDelay10,
+                              styles.scrollRevealDelay11,
+                              styles.scrollRevealDelay12,
+                              styles.scrollRevealDelay13,
+                            ][index]
+                          }`}
+                        >
+                          <div className={styles.workImageWrapper}>
+                            <Image
+                              src={src}
+                              alt="Portfolio image"
+                              width={400}
+                              height={500}
+                              className={styles.workImage}
+                            />
+                            <div className={styles.workOverlay} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -477,6 +548,85 @@ export default function ProfilePage() {
             </div>
             <form onSubmit={handleEditSubmit} className={styles.editForm}>
               {editError && <p className={styles.editError}>{editError}</p>}
+              {userRole === "master" && (
+                <div className={styles.portfolioEditSection}>
+                  <div className={styles.portfolioEditHeader}>
+                    <h3 className={styles.portfolioEditTitle}>Portfolio</h3>
+                    <label className={styles.portfolioAddBtn}>
+                      Add photos
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style={{ display: "none" }}
+                        disabled={portfolioUploading}
+                        onChange={(e) => {
+                          handleSelectPortfolioFiles(e.currentTarget.files);
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {portfolioError && <p className={styles.editError}>{portfolioError}</p>}
+
+                  {profile.portfolioImages.length > 0 && (
+                    <div className={styles.portfolioGrid}>
+                      {profile.portfolioImages.map((src) => (
+                        <div key={src} className={styles.portfolioThumb}>
+                          <Image
+                            src={src}
+                            alt="Portfolio image"
+                            width={160}
+                            height={160}
+                            className={styles.portfolioThumbImg}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedPortfolioPreviews.length > 0 && (
+                    <div className={styles.portfolioPending}>
+                      <p className={styles.portfolioPendingLabel}>
+                        Ready to upload ({selectedPortfolioPreviews.length})
+                      </p>
+                      <div className={styles.portfolioGrid}>
+                        {selectedPortfolioPreviews.map((src) => (
+                          <div key={src} className={styles.portfolioThumb}>
+                            <Image
+                              src={src}
+                              alt="Selected portfolio"
+                              width={160}
+                              height={160}
+                              className={styles.portfolioThumbImg}
+                              unoptimized
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <div className={styles.portfolioActions}>
+                        <button
+                          type="button"
+                          className={styles.cancelBtn}
+                          onClick={clearSelectedPortfolio}
+                          disabled={portfolioUploading}
+                        >
+                          Cancel selection
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.submitBtn}
+                          onClick={handleUploadPortfolio}
+                          disabled={portfolioUploading}
+                        >
+                          {portfolioUploading ? "Uploading..." : "Upload photos"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className={styles.formRow}>
                 <div className={styles.formField}>
                   <label htmlFor="edit-name">Name</label>
