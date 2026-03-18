@@ -14,6 +14,7 @@ import {
   updateProfile,
   logout,
   getImageUrl,
+  uploadProfileImage,
 } from "@/lib/api";
 import type { RatedMasterItem } from "@/lib/types";
 import styles from "../profilePage.module.css";
@@ -124,10 +125,8 @@ function mapMeToProfile(
     location: data.location || "—",
     bio: data.bio || "",
     image:
-      data.image ||
-      "https://ui-avatars.com/api/?name=" +
-        encodeURIComponent(data.name) +
-        "&size=400",
+      getImageUrl(data.image) ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&size=400`,
     instagram: data.instagram,
     website: data.website,
     works: data.works ?? (role === "user" ? [] : DEFAULT_PROFILE.works),
@@ -144,6 +143,8 @@ export default function ProfilePage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editError, setEditError] = useState("");
   const [editLoading, setEditLoading] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoError, setPhotoError] = useState("");
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -235,6 +236,39 @@ export default function ProfilePage() {
     router.replace("/");
   };
 
+  const handleChangePhoto = async (file: File) => {
+    setPhotoError("");
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setPhotoError("Please select a JPG, PNG, or WebP image.");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      setPhotoError("Image must be 4MB or smaller.");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setProfile((p) => ({ ...p, image: previewUrl }));
+    setPhotoUploading(true);
+
+    try {
+      const res = await uploadProfileImage(file);
+      setProfile(mapMeToProfile(res.data, userRole ?? undefined));
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : "Upload failed");
+      // Best-effort revert: refetch current user if we can
+      try {
+        const me = await getMe();
+        setProfile(mapMeToProfile(me.data, me.data.role));
+      } catch {}
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setPhotoUploading(false);
+    }
+  };
+
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -250,7 +284,6 @@ export default function ProfilePage() {
         bio: (form.elements.namedItem("bio") as HTMLTextAreaElement)?.value,
         instagram: (form.elements.namedItem("instagram") as HTMLInputElement)?.value || undefined,
         website: (form.elements.namedItem("website") as HTMLInputElement)?.value || undefined,
-        image: (form.elements.namedItem("image") as HTMLInputElement)?.value || undefined,
       });
       setProfile(mapMeToProfile(data.data, userRole ?? undefined));
       setShowEditModal(false);
@@ -282,7 +315,10 @@ export default function ProfilePage() {
                 isOwnProfile={isOwnProfile}
                 onEdit={() => setShowEditModal(true)}
                 onLogout={handleLogout}
+                onChangePhoto={handleChangePhoto}
+                isUploadingPhoto={photoUploading}
               />
+              {photoError && <p className={styles.emptyRated}>{photoError}</p>}
             </div>
 
             <div className={styles.main}>
@@ -518,15 +554,6 @@ export default function ProfilePage() {
                     placeholder="https://"
                   />
                 </div>
-              </div>
-              <div className={styles.formField}>
-                <label htmlFor="edit-image">Profile Image URL</label>
-                <input
-                  id="edit-image"
-                  name="image"
-                  type="url"
-                  defaultValue={profile.image}
-                />
               </div>
               <div className={styles.modalActions}>
                 <button

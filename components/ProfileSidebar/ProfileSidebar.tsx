@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Phone, Mail, Globe, Instagram } from "lucide-react";
+import { getImageUrl } from "@/lib/api";
 import styles from "./profileSidebar.module.css";
 
 export type ProfileSidebarProps = {
@@ -18,6 +19,8 @@ export type ProfileSidebarProps = {
   isOwnProfile?: boolean;
   onEdit?: () => void;
   onLogout?: () => void;
+  onChangePhoto?: (file: File) => void;
+  isUploadingPhoto?: boolean;
 };
 
 export default function ProfileSidebar({
@@ -33,19 +36,45 @@ export default function ProfileSidebar({
   isOwnProfile,
   onEdit,
   onLogout,
+  onChangePhoto,
+  isUploadingPhoto,
 }: ProfileSidebarProps) {
+  const resolvedImage = typeof image === "string" ? getImageUrl(image.trim()) : "";
+  const avatarSrc =
+    resolvedImage.length > 0
+      ? resolvedImage
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=400`;
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.card}>
         <div className={styles.avatarWrapper}>
           <Image
-            src={image}
+            src={avatarSrc}
             alt={name}
             width={200}
             height={200}
             className={styles.avatar}
           />
         </div>
+        {isOwnProfile && onChangePhoto && (
+          <div className={styles.actions}>
+            <label className={styles.actionBtn}>
+              {isUploadingPhoto ? "Uploading..." : "Change photo"}
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                disabled={isUploadingPhoto}
+                onChange={(e) => {
+                  const file = e.currentTarget.files?.[0];
+                  e.currentTarget.value = "";
+                  if (file) onChangePhoto(file);
+                }}
+              />
+            </label>
+          </div>
+        )}
         <h1 className={styles.name}>{name}</h1>
         <p className={styles.specialty}>{specialty}</p>
         <div className={styles.location}>
@@ -105,23 +134,15 @@ export default function ProfileSidebar({
           Get In Touch
         </Link>
 
-        {isOwnProfile && (
+        {isOwnProfile && (onEdit || onLogout) && (
           <div className={styles.actions}>
             {onEdit && (
-              <button
-                type="button"
-                onClick={onEdit}
-                className={styles.actionBtn}
-              >
+              <button type="button" onClick={onEdit} className={styles.actionBtn}>
                 Edit Profile
               </button>
             )}
             {onLogout && (
-              <button
-                type="button"
-                onClick={onLogout}
-                className={styles.logoutBtn}
-              >
+              <button type="button" onClick={onLogout} className={styles.logoutBtn}>
                 Log out
               </button>
             )}

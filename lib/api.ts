@@ -198,6 +198,24 @@ export async function updateProfile(
   return json;
 }
 
+export async function uploadProfileImage(
+  file: File,
+): Promise<{ data: Awaited<ReturnType<typeof getMe>>["data"] }> {
+  const form = new FormData();
+  form.append("image", file);
+
+  const token = getStoredToken();
+  const res = await fetch(`${api("/auth/me")}`, {
+    method: "PATCH",
+    body: form,
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "Upload failed");
+  return json;
+}
+
 /* ========== Admin ========== */
 
 function adminFetch(path: string, init?: RequestInit) {
