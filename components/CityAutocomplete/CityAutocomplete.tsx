@@ -11,6 +11,7 @@ type CityAutocompleteProps = {
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
+  onSelect?: (value: string, city: GeocodeCity) => void;
   onBlur?: () => void;
   placeholder?: string;
   className?: string;
@@ -23,6 +24,7 @@ export default function CityAutocomplete({
   value: controlledValue,
   defaultValue,
   onChange,
+  onSelect,
   onBlur,
   placeholder = "Start typing a city...",
   className = "",
@@ -32,6 +34,7 @@ export default function CityAutocomplete({
   const [suggestions, setSuggestions] = useState<GeocodeCity[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isControlled = controlledValue !== undefined;
@@ -43,6 +46,7 @@ export default function CityAutocomplete({
   const fetchSuggestions = useCallback(async (q: string) => {
     if (q.length < 2) {
       setSuggestions([]);
+      setHasSearched(false);
       return;
     }
     setLoading(true);
@@ -50,6 +54,7 @@ export default function CityAutocomplete({
       const data = await searchCities(q, 10);
       setSuggestions(data);
       setIsOpen(true);
+      setHasSearched(true);
     } finally {
       setLoading(false);
     }
@@ -61,19 +66,24 @@ export default function CityAutocomplete({
   }, [inputValue, fetchSuggestions]);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    function handlePointerOutside(e: MouseEvent | TouchEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handlePointerOutside);
+    document.addEventListener("touchstart", handlePointerOutside);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerOutside);
+      document.removeEventListener("touchstart", handlePointerOutside);
+    };
   }, []);
 
   const handleSelect = (city: GeocodeCity) => {
-    const val = city.displayName;
+    const val = `${city.name}, ${city.country}`;
     setInputValue(val);
     onChange?.(val);
+    onSelect?.(val, city);
     setIsOpen(false);
     setSuggestions([]);
   };
@@ -82,6 +92,11 @@ export default function CityAutocomplete({
     const v = e.target.value;
     setInputValue(v);
     onChange?.(v);
+    if (v.trim().length < 2) {
+      setHasSearched(false);
+      setSuggestions([]);
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -104,23 +119,30 @@ export default function CityAutocomplete({
         aria-controls="city-suggestions"
       />
       {loading && <span className={styles.spinner} aria-hidden />}
-      {isOpen && suggestions.length > 0 && (
+      {isOpen && (
         <ul
           id="city-suggestions"
           className={styles.list}
           role="listbox"
         >
-          {suggestions.map((city) => (
-            <li
-              key={city.id}
-              role="option"
-              className={styles.item}
-              onClick={() => handleSelect(city)}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              {city.displayName}
-            </li>
-          ))}
+          {loading ? (
+            <li className={styles.itemMuted}>Loading...</li>
+          ) : suggestions.length > 0 ? (
+            suggestions.map((city) => (
+              <li
+                key={city.id}
+                role="option"
+                aria-selected={inputValue === `${city.name}, ${city.country}`}
+                className={styles.item}
+                onClick={() => handleSelect(city)}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {city.displayName}
+              </li>
+            ))
+          ) : hasSearched ? (
+            <li className={styles.itemMuted}>No cities found</li>
+          ) : null}
         </ul>
       )}
     </div>

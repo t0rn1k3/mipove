@@ -163,10 +163,12 @@ export async function searchCities(query: string, count = 10): Promise<GeocodeCi
 }
 
 export async function getMasters(params?: {
+  location?: string;
   specialty?: string;
   search?: string;
 }): Promise<MasterListItem[]> {
   const searchParams = new URLSearchParams();
+  if (params?.location) searchParams.set("location", params.location);
   if (params?.specialty) searchParams.set("specialty", params.specialty);
   if (params?.search) searchParams.set("search", params.search);
   const q = searchParams.toString() ? `?${searchParams}` : "";

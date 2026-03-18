@@ -1,30 +1,145 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import styles from "./mastersPage.module.css";
 import Image from "next/image";
 import { getMasters, getImageUrl } from "@/lib/api";
 import type { MasterListItem } from "@/lib/types";
+import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 
 export default function MastersPage() {
   const [masters, setMasters] = useState<MasterListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [search, setSearch] = useState("");
+  const [allSpecialties, setAllSpecialties] = useState<string[]>([]);
+
+  const applyFilters = useCallback(
+    async (params?: { location?: string; specialty?: string; search?: string }) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getMasters(params);
+        setMasters(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load masters");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    getMasters()
-      .then((data) => setMasters(data))
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load masters"))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    const init = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getMasters();
+        if (cancelled) return;
+        setMasters(data);
+        const specialties = Array.from(
+          new Set(
+            data
+              .map((m) => (m.specialty ?? "").trim())
+              .filter((s) => s.length > 0),
+          ),
+        ).sort((a, b) => a.localeCompare(b));
+        setAllSpecialties(specialties);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Failed to load masters");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    void init();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const handleSearch = useCallback(() => {
+    void applyFilters({
+      location: location || undefined,
+      specialty: specialty || undefined,
+      search: search || undefined,
+    });
+  }, [applyFilters, location, specialty, search]);
+
+  const specialtyOptions = useMemo(() => allSpecialties, [allSpecialties]);
+
+  const filtersEl = (
+    <form
+      className={styles.filters}
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSearch();
+      }}
+    >
+      <div className={styles.filterField}>
+        <label htmlFor="filter-specialty" className={styles.filterLabel}>Specialty</label>
+        <select
+          id="filter-specialty"
+          value={specialty}
+          onChange={(e) => setSpecialty(e.target.value)}
+          className={styles.filterInput}
+        >
+          <option value="">All specialties</option>
+          {specialtyOptions.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className={styles.filterField}>
+        <label htmlFor="filter-location" className={styles.filterLabel}>Location</label>
+        <CityAutocomplete
+          id="filter-location"
+          value={location}
+          onChange={setLocation}
+          onSelect={(selectedValue) => {
+            setLocation(selectedValue);
+            void applyFilters({
+              location: selectedValue || undefined,
+              specialty: specialty || undefined,
+              search: search || undefined,
+            });
+          }}
+          placeholder="Filter by city..."
+        />
+      </div>
+      <div className={styles.filterField}>
+        <label htmlFor="filter-search" className={styles.filterLabel}>Search by name</label>
+        <input
+          id="filter-search"
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search masters..."
+          className={styles.filterInput}
+        />
+      </div>
+      <div className={styles.filterActions}>
+        <button type="submit" className={styles.searchBtn} disabled={loading}>
+          {loading ? "Searching..." : "Search"}
+        </button>
+      </div>
+    </form>
+  );
 
   if (loading) {
     return (
       <div className={styles.container}>
         <h1 className={styles.title}>Masters Directory</h1>
         <p className={styles.description}>Find the best masters in your area</p>
+        {filtersEl}
         <div className={styles.loading}>
           <p>Loading masters...</p>
         </div>
@@ -37,6 +152,7 @@ export default function MastersPage() {
       <div className={styles.container}>
         <h1 className={styles.title}>Masters Directory</h1>
         <p className={styles.description}>Find the best masters in your area</p>
+        {filtersEl}
         <div className={styles.error}>
           <p>{error}</p>
         </div>
@@ -49,8 +165,9 @@ export default function MastersPage() {
       <div className={styles.container}>
         <h1 className={styles.title}>Masters Directory</h1>
         <p className={styles.description}>Find the best masters in your area</p>
+        {filtersEl}
         <div className={styles.empty}>
-          <p>No masters found yet.</p>
+          <p>No masters found.</p>
         </div>
       </div>
     );
@@ -62,6 +179,9 @@ export default function MastersPage() {
       <p className={styles.description}>
         Find the best masters in your area
       </p>
+
+      {filtersEl}
+
       <div className={styles.grid}>
         {masters.map((master) => (
           <Link
