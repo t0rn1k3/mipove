@@ -29,6 +29,29 @@ export function getImageUrl(path: string | undefined): string {
 const api = (path: string) =>
   `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
+async function refreshAccessToken(): Promise<boolean> {
+  const res = await fetch(`${api("/auth/refresh")}`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return res.ok;
+}
+
+type AuthFetchInit = RequestInit | (() => RequestInit);
+
+async function authFetch(url: string, initOrFactory: AuthFetchInit): Promise<Response> {
+  const getInit = typeof initOrFactory === "function" ? initOrFactory : () => initOrFactory;
+  let init = getInit();
+  let res = await fetch(url, { ...init, credentials: "include" as RequestCredentials });
+  if (res.status === 401) {
+    const refreshed = await refreshAccessToken();
+    if (!refreshed) throw new Error("Session expired. Please log in again.");
+    init = getInit();
+    res = await fetch(url, { ...init, credentials: "include" as RequestCredentials });
+  }
+  return res;
+}
+
 export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
   const res = await fetch(`${api("/auth/users/register")}`, {
     method: "POST",
@@ -115,18 +138,14 @@ export async function getMe(): Promise<{
     ratedMasters?: RatedMasterItem[];
   };
 }> {
-  const res = await fetch(`${api("/auth/me")}`, {
-    credentials: "include",
-  });
+  const res = await authFetch(`${api("/auth/me")}`, {});
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to get user");
   return json;
 }
 
 export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
-  const res = await fetch(`${api("/auth/profile")}`, {
-    credentials: "include",
-  });
+  const res = await authFetch(`${api("/auth/profile")}`, {});
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to get profile");
   return json;
@@ -183,11 +202,10 @@ export async function getProfileBySlug(slug: string): Promise<{
 export async function updateProfile(
   data: UpdateProfileInput,
 ): Promise<{ data: Awaited<ReturnType<typeof getMe>>["data"] }> {
-  const res = await fetch(`${api("/auth/me")}`, {
+  const res = await authFetch(`${api("/auth/me")}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-    credentials: "include",
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Update failed");
@@ -197,12 +215,10 @@ export async function updateProfile(
 export async function uploadProfileImage(
   file: File,
 ): Promise<{ data: Awaited<ReturnType<typeof getMe>>["data"] }> {
-  const form = new FormData();
-  form.append("image", file);
-  const res = await fetch(`${api("/auth/me")}`, {
-    method: "PATCH",
-    body: form,
-    credentials: "include",
+  const res = await authFetch(`${api("/auth/me")}`, () => {
+    const form = new FormData();
+    form.append("image", file);
+    return { method: "PATCH", body: form };
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "Upload failed");
@@ -210,10 +226,7 @@ export async function uploadProfileImage(
 }
 
 export async function fetchMyPortfolio(): Promise<string[]> {
-  const res = await fetch(`${api("/masters/me/portfolio")}`, {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await authFetch(`${api("/masters/me/portfolio")}`, { method: "GET" });
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "Failed to load portfolio");
   const list = json?.data?.portfolioImages;
@@ -222,12 +235,10 @@ export async function fetchMyPortfolio(): Promise<string[]> {
 
 export async function uploadPortfolioImages(files: File[] | FileList): Promise<string[]> {
   const arr = Array.isArray(files) ? files : Array.from(files);
-  const form = new FormData();
-  for (const f of arr) form.append("images", f);
-  const res = await fetch(`${api("/masters/me/portfolio")}`, {
-    method: "POST",
-    body: form,
-    credentials: "include",
+  const res = await authFetch(`${api("/masters/me/portfolio")}`, () => {
+    const form = new FormData();
+    for (const f of arr) form.append("images", f);
+    return { method: "POST", body: form };
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "Upload failed");
@@ -238,9 +249,8 @@ export async function uploadPortfolioImages(files: File[] | FileList): Promise<s
 /* ========== Admin ========== */
 
 function adminFetch(path: string, init?: RequestInit) {
-  return fetch(api(path), {
+  return authFetch(api(path), {
     ...init,
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...init?.headers,
