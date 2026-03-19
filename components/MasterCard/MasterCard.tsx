@@ -98,11 +98,9 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
                   );
                 })}
               </div>
-              {master.reviewCount != null && master.reviewCount > 0 && (
-                <span className={styles.reviewCount}>
-                  ({master.reviewCount} {t("reviews")})
-                </span>
-              )}
+              <span className={styles.reviewCount}>
+                ({master.reviewCount ?? 0} {t("reviews")})
+              </span>
             </div>
 
             <p className={styles.locationRow}>
