@@ -93,9 +93,10 @@ export type MasterListItem = {
   location?: string;
   rating?: number;
   reviewCount?: number;
-  phone?: string;
-  email?: string;
-  instagram?: string;
+  projectsCount?: number;
+  skills?: string[];
+  bio?: string;
+  description?: string;
 };
 
 /* ========== Profile Update ========== */

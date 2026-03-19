@@ -85,7 +85,10 @@
     "loadingMasters": "Loading masters...",
     "noMastersFound": "No masters found.",
     "failedToLoad": "Failed to load masters",
-    "viewPortfolio": "View Portfolio"
+    "viewPortfolio": "View Portfolio",
+    "viewProfile": "View Profile",
+    "projects": "Projects",
+    "reviews": "reviews"
   },
   "profile": {
     "loading": "Loading...",

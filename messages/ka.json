@@ -85,7 +85,10 @@
     "loadingMasters": "იტვირთება ოსტატები...",
     "noMastersFound": "ოსტატები ვერ მოიძებნა.",
     "failedToLoad": "ოსტატების ჩატვირთვა ვერ მოხერხდა",
-    "viewPortfolio": "პორტფოლიოს ნახვა"
+    "viewPortfolio": "პორტფოლიოს ნახვა",
+    "viewProfile": "პროფილის ნახვა",
+    "projects": "პროექტი",
+    "reviews": "შეფასება"
   },
   "profile": {
     "loading": "იტვირთება...",

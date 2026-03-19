@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Phone, Mail, Star, Instagram } from "lucide-react";
+import { Star } from "lucide-react";
 import { motion } from "motion/react";
 import { Link as I18nLink } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -33,6 +33,13 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
     `https://ui-avatars.com/api/?name=${encodeURIComponent(master.name)}&size=200`;
 
   const hasRating = master.rating != null && master.rating > 0;
+  const skills = master.skills ?? [];
+  const descriptionText = master.bio || master.description || "";
+  const truncatedBio = descriptionText
+    ? descriptionText.length > 80
+      ? descriptionText.slice(0, 80) + "..."
+      : descriptionText
+    : "—";
 
   return (
     <motion.div
@@ -56,10 +63,6 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
             </div>
             <div className={styles.gradientOverlay} aria-hidden />
 
-            {master.specialty && (
-              <div className={styles.specialtyBadge}>{master.specialty}</div>
-            )}
-
             {hasRating && (
               <div className={styles.ratingBadge}>
                 <Star size={14} className={styles.starFilled} />
@@ -68,84 +71,62 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
                 </span>
               </div>
             )}
+
+            {master.projectsCount != null && master.projectsCount > 0 && (
+              <div className={styles.projectsBadge}>
+                {master.projectsCount} {t("projects")}
+              </div>
+            )}
           </div>
 
           <div className={styles.content}>
-            <div className={styles.contentInner}>
-              <div>
-                <h2 className={styles.name}>{master.name}</h2>
-                <p className={styles.locationRow}>
-                  <LocationIcon />
-                  {master.location || "—"}
-                </p>
+            <h2 className={styles.name}>{master.name}</h2>
+            <p className={styles.specialty}>{master.specialty || "—"}</p>
 
-                {hasRating && (
-                  <div className={styles.ratingSection}>
-                    <div className={styles.ratingStars}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={14}
-                          className={
-                            i < Math.floor(master.rating!)
-                              ? styles.starFilled
-                              : styles.starEmpty
-                          }
-                        />
-                      ))}
-                    </div>
-                    {master.reviewCount != null && master.reviewCount > 0 && (
-                      <span className={styles.reviewCount}>
-                        ({master.reviewCount} reviews)
-                      </span>
-                    )}
-                  </div>
-                )}
+            <div className={styles.ratingSection}>
+              <div className={styles.ratingStars}>
+                {[...Array(5)].map((_, i) => {
+                  const filledCount = hasRating ? Math.floor(master.rating!) : 0;
+                  return (
+                    <Star
+                      key={i}
+                      size={14}
+                      className={
+                        i < filledCount ? styles.starFilled : styles.starEmpty
+                      }
+                    />
+                  );
+                })}
               </div>
+              {master.reviewCount != null && master.reviewCount > 0 && (
+                <span className={styles.reviewCount}>
+                  ({master.reviewCount} {t("reviews")})
+                </span>
+              )}
             </div>
+
+            <p className={styles.locationRow}>
+              <LocationIcon />
+              {master.location || "—"}
+            </p>
+
+            {skills.length > 0 && (
+              <div className={styles.skillTags}>
+                {skills.slice(0, 3).map((skill) => (
+                  <span key={skill} className={styles.skillTag}>
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <p className={styles.bio}>{truncatedBio}</p>
           </div>
         </I18nLink>
 
-        <div className={styles.contactRow}>
-          {master.phone && (
-            <motion.a
-              href={`tel:${master.phone}`}
-              className={styles.contactLink}
-              title="Call"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Phone size={16} />
-            </motion.a>
-          )}
-          {master.email && (
-            <motion.a
-              href={`mailto:${master.email}`}
-              className={styles.contactLink}
-              title="Email"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Mail size={16} />
-            </motion.a>
-          )}
-          {master.instagram && (
-            <motion.a
-              href={`https://instagram.com/${master.instagram.replace(/^@/, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.contactLink}
-              title="Instagram"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Instagram size={16} />
-            </motion.a>
-          )}
-          <I18nLink href={`/profile/${master.slug}`} className={styles.viewBtn}>
-            {t("viewPortfolio")}
-          </I18nLink>
-        </div>
+        <I18nLink href={`/profile/${master.slug}`} className={styles.viewBtn}>
+          {t("viewProfile")}
+        </I18nLink>
       </div>
     </motion.div>
   );
