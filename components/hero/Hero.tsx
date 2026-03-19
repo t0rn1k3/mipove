@@ -1,9 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import styles from "./hero.module.css";
 
+const POPULAR_SKILLS = ["Painting", "Sculpture", "Pottery", "Woodwork"];
+
 export default function Hero() {
+  const router = useRouter();
+  const [skill, setSkill] = useState("");
+  const [location, setLocation] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (skill.trim()) params.set("specialty", skill.trim());
+    if (location.trim()) params.set("location", location.trim());
+    router.push(`/masters${params.toString() ? `?${params}` : ""}`);
+  };
+
+  const handlePopularClick = (item: string) => {
+    setSkill(item);
+  };
+
   return (
     <section className={styles.section}>
       <div className={styles.backgroundImage}></div>
@@ -21,7 +42,10 @@ export default function Hero() {
           </p>
 
           {/* Search Bar */}
-          <div className={`${styles.searchBar} ${styles.reveal} ${styles.revealDelay3}`}>
+          <form
+            className={`${styles.searchBar} ${styles.reveal} ${styles.revealDelay3}`}
+            onSubmit={handleSearch}
+          >
             <div className={styles.searchBarSeparator}>
               <div className={styles.searchInput}>
                 <Image
@@ -34,6 +58,8 @@ export default function Hero() {
                   type="text"
                   placeholder="Search by skill..."
                   className={styles.searchBarInput}
+                  value={skill}
+                  onChange={(e) => setSkill(e.target.value)}
                 />
               </div>
               <div className={styles.searchInput}>
@@ -43,23 +69,31 @@ export default function Hero() {
                   width={20}
                   height={20}
                 />
-                <input
-                  type="text"
-                  placeholder="Location..."
-                  className={styles.searchBarInput}
-                />
+                <div className={styles.heroLocationWrap}>
+                  <CityAutocomplete
+                    value={location}
+                    onChange={setLocation}
+                    placeholder="Location..."
+                    className={styles.heroCityAutocomplete}
+                  />
+                </div>
               </div>
             </div>
 
-            <button className={styles.searchBarButton}>Search</button>
-          </div>
+            <button type="submit" className={styles.searchBarButton}>Search</button>
+          </form>
 
           {/* Popular Tags */}
           <div className={`${styles.popularTags} ${styles.reveal} ${styles.revealDelay4}`}>
             <span className={styles.popularTagsTitle}>Popular:</span>
 
-            {["Painting", "Sculpture", "Pottery", "Woodwork"].map((item) => (
-              <button key={item} className={styles.popularTagsButton}>
+            {POPULAR_SKILLS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={styles.popularTagsButton}
+                onClick={() => handlePopularClick(item)}
+              >
                 {item}
               </button>
             ))}

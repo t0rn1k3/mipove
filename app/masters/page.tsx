@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { MapPin } from "lucide-react";
 import styles from "./mastersPage.module.css";
 import Image from "next/image";
@@ -10,6 +11,7 @@ import type { MasterListItem } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 
 export default function MastersPage() {
+  const searchParams = useSearchParams();
   const [masters, setMasters] = useState<MasterListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,12 +37,27 @@ export default function MastersPage() {
   );
 
   useEffect(() => {
+    const specialtyFromUrl = searchParams.get("specialty") ?? "";
+    const locationFromUrl = searchParams.get("location") ?? "";
+    const searchFromUrl = searchParams.get("search") ?? "";
+    setSpecialty(specialtyFromUrl);
+    setLocation(locationFromUrl);
+    setSearch(searchFromUrl);
+
     let cancelled = false;
     const init = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getMasters();
+        const params =
+          specialtyFromUrl || locationFromUrl || searchFromUrl
+            ? {
+                specialty: specialtyFromUrl || undefined,
+                location: locationFromUrl || undefined,
+                search: searchFromUrl || undefined,
+              }
+            : undefined;
+        const data = await getMasters(params);
         if (cancelled) return;
         setMasters(data);
         const specialties = Array.from(
@@ -62,7 +79,7 @@ export default function MastersPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [searchParams]);
 
   const handleSearch = useCallback(() => {
     void applyFilters({
