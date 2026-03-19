@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { MapPin, Phone, Mail, Globe, Instagram } from "lucide-react";
 import { getImageUrl } from "@/lib/api";
+import { useTranslations } from "next-intl";
 import styles from "./profileSidebar.module.css";
 
 export type ProfileSidebarProps = {
@@ -39,6 +39,8 @@ export default function ProfileSidebar({
   onChangePhoto,
   isUploadingPhoto,
 }: ProfileSidebarProps) {
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
   const resolvedImage = typeof image === "string" ? getImageUrl(image.trim()) : "";
   const avatarSrc =
     resolvedImage.length > 0
@@ -59,8 +61,8 @@ export default function ProfileSidebar({
           {isOwnProfile && onChangePhoto && (
             <label
               className={styles.addPhotoBtn}
-              aria-label={isUploadingPhoto ? "Uploading photo" : "Change photo"}
-              title={isUploadingPhoto ? "Uploading..." : "Change photo"}
+            aria-label={isUploadingPhoto ? t("uploadingPhoto") : t("changePhoto")}
+            title={isUploadingPhoto ? t("uploading") : t("changePhoto")}
             >
               <span className={styles.addPhotoBtnIcon}>+</span>
               <input
@@ -91,14 +93,14 @@ export default function ProfileSidebar({
           <a href={`tel:${phone.replace(/\s/g, "")}`} className={styles.contactBlock}>
             <Phone size={20} className={styles.contactIcon} />
             <div className={styles.contactContent}>
-              <span className={styles.contactLabel}>Phone</span>
+              <span className={styles.contactLabel}>{tCommon("phone")}</span>
               <span className={styles.contactDetail}>{phone}</span>
             </div>
           </a>
           <a href={`mailto:${email}`} className={styles.contactBlock}>
             <Mail size={20} className={styles.contactIcon} />
             <div className={styles.contactContent}>
-              <span className={styles.contactLabel}>Email</span>
+              <span className={styles.contactLabel}>{tCommon("email")}</span>
               <span className={styles.contactDetail}>{email}</span>
             </div>
           </a>
@@ -132,20 +134,20 @@ export default function ProfileSidebar({
           )}
         </div>
 
-        <Link href={`mailto:${email}`} className={styles.ctaButton}>
-          Get In Touch
-        </Link>
+        <a href={`mailto:${email}`} className={styles.ctaButton}>
+          {t("getInTouch")}
+        </a>
 
         {isOwnProfile && (onEdit || onLogout) && (
           <div className={styles.actions}>
             {onEdit && (
               <button type="button" onClick={onEdit} className={styles.actionBtn}>
-                Edit Profile
+                {t("editProfile")}
               </button>
             )}
             {onLogout && (
               <button type="button" onClick={onLogout} className={styles.logoutBtn}>
-                Log out
+                {t("logOut")}
               </button>
             )}
           </div>

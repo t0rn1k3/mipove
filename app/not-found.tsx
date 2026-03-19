@@ -1,12 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import Logo from "@/components/logo/Logo";
 import { Home, ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import styles from "./not-found.module.css";
 
 export default function NotFound() {
+  const t = useTranslations("notFound");
+  const tCommon = useTranslations("common");
   const router = useRouter();
 
   return (
@@ -15,15 +18,15 @@ export default function NotFound() {
         <div className={styles.logoWrap}>
           <Logo showText size={64} />
         </div>
-        <p className={styles.status}>404</p>
-        <h1 className={styles.title}>Oops! Something went wrong</h1>
+        <p className={styles.status}>{t("status")}</p>
+        <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.message}>
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+          {t("message")}
         </p>
         <div className={styles.actions}>
           <Link href="/" className={styles.btnPrimary}>
             <Home size={20} />
-            Go Home
+            {t("goHome")}
           </Link>
           <button
             type="button"
@@ -31,13 +34,13 @@ export default function NotFound() {
             className={styles.btnSecondary}
           >
             <ArrowLeft size={20} />
-            Go Back
+            {t("goBack")}
           </button>
         </div>
         <p className={styles.help}>
-          Need help?{" "}
+          {t("needHelp")}{" "}
           <a href="mailto:hello@mipove.ge" className={styles.helpLink}>
-            Contact us
+            {tCommon("contactUs")}
           </a>
         </p>
       </div>

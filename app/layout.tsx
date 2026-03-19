@@ -1,9 +1,9 @@
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-
-import ConditionalNavbar from "@/components/ConditionalNavbar";
 
 const sharpe = localFont({
   src: "../public/fonts/SharpePERSONAL-Bold.woff2",
@@ -30,17 +30,20 @@ export const metadata: Metadata = {
   description: "Mipove is a platform for masters in different fields",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
-      <head></head>
+    <html lang={locale}>
       <body className={`${sharpe.variable} ${playfair.variable} ${inter.variable}`}>
-        <ConditionalNavbar />
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

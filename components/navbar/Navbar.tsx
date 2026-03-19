@@ -1,16 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import { Link, usePathname } from "@/i18n/navigation";
 import Image from "next/image";
 import styles from "./navbar.module.css";
 import Logo from "@/components/logo/Logo";
+import LocaleSwitcher from "@/components/LocaleSwitcher/LocaleSwitcher";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
 import { getMe } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 type UserInfo = { name: string; image?: string } | null;
 
 export default function Navbar() {
+  const t = useTranslations("nav");
+  const tCommon = useTranslations("common");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -58,10 +61,10 @@ export default function Navbar() {
   if (isAdminRoute) return null;
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Gallery", href: "/gallery" },
-    { name: "Masters", href: "/masters" },
-    { name: "About", href: "/about" },
+    { name: t("home"), href: "/" },
+    { name: t("gallery"), href: "/gallery" },
+    { name: t("masters"), href: "/masters" },
+    { name: t("about"), href: "/about" },
   ];
   return (
     <header
@@ -83,7 +86,7 @@ export default function Navbar() {
           type="button"
           className={`${styles.hamburger} ${isMenuOpen ? styles.open : ""}`}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          aria-label={isMenuOpen ? tCommon("closeMenu") : tCommon("openMenu")}
           aria-expanded={isMenuOpen}
         >
           <span className={styles.hamburgerLine} />
@@ -106,17 +109,18 @@ export default function Navbar() {
             ))}
           </nav>
 
+          <LocaleSwitcher />
           {isAdmin ? (
             <Link
               href="/admin"
               className={styles.ctaButton}
               onClick={() => setIsMenuOpen(false)}
             >
-              Admin
+              {t("admin")}
             </Link>
           ) : user ? (
             <Link
-              href="/profile"
+                href="/profile"
               className={styles.profileLink}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -140,12 +144,12 @@ export default function Navbar() {
             </Link>
           ) : (
             <Link
-              href="/join"
-              className={styles.ctaButton}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Join Us
-            </Link>
+                href="/join"
+                className={styles.ctaButton}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t("joinUs")}
+              </Link>
           )}
         </div>
       </div>

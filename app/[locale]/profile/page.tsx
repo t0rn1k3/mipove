@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { getMe } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 export default function ProfileIndex() {
+  const t = useTranslations("profileRedirect");
   const router = useRouter();
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export default function ProfileIndex() {
 
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
-      <p>Redirecting to your profile...</p>
+      <p>{t("message")}</p>
     </div>
   );
 }

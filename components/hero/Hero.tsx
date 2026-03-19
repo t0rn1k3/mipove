@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import { useTranslations } from "next-intl";
 import styles from "./hero.module.css";
 
-const POPULAR_SKILLS = ["Painting", "Sculpture", "Pottery", "Woodwork"];
-
 export default function Hero() {
+  const t = useTranslations("hero");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [skill, setSkill] = useState("");
   const [location, setLocation] = useState("");
@@ -20,6 +21,8 @@ export default function Hero() {
     if (location.trim()) params.set("location", location.trim());
     router.push(`/masters${params.toString() ? `?${params}` : ""}`);
   };
+
+  const popularSkills = [t("painting"), t("sculpture"), t("pottery"), t("woodwork")];
 
   const handlePopularClick = (item: string) => {
     setSkill(item);
@@ -33,12 +36,11 @@ export default function Hero() {
         {/* LEFT SIDE */}
         <div className={styles.leftSide}>
           <h1 className={`${styles.title} ${styles.reveal} ${styles.revealDelay1}`}>
-            Find Your Perfect Craftsperson
+            {t("title")}
           </h1>
 
           <p className={`${styles.description} ${styles.reveal} ${styles.revealDelay2}`}>
-            Connect with exceptional artisans, sculptors, painters, and
-            craftspeople who bring vision to life.
+            {t("description")}
           </p>
 
           {/* Search Bar */}
@@ -50,13 +52,13 @@ export default function Hero() {
               <div className={styles.searchInput}>
                 <Image
                   src="/icons/search.svg"
-                  alt="Search"
+                  alt={tCommon("search")}
                   width={20}
                   height={20}
                 />
                 <input
                   type="text"
-                  placeholder="Search by skill..."
+                  placeholder={t("searchBySkill")}
                   className={styles.searchBarInput}
                   value={skill}
                   onChange={(e) => setSkill(e.target.value)}
@@ -65,7 +67,7 @@ export default function Hero() {
               <div className={styles.searchInput}>
                 <Image
                   src="/icons/location.svg"
-                  alt="Location"
+                  alt={tCommon("location")}
                   width={20}
                   height={20}
                 />
@@ -73,21 +75,21 @@ export default function Hero() {
                   <CityAutocomplete
                     value={location}
                     onChange={setLocation}
-                    placeholder="Location..."
+                    placeholder={t("locationPlaceholder")}
                     className={styles.heroCityAutocomplete}
                   />
                 </div>
               </div>
             </div>
 
-            <button type="submit" className={styles.searchBarButton}>Search</button>
+            <button type="submit" className={styles.searchBarButton}>{t("searchButton")}</button>
           </form>
 
           {/* Popular Tags */}
           <div className={`${styles.popularTags} ${styles.reveal} ${styles.revealDelay4}`}>
-            <span className={styles.popularTagsTitle}>Popular:</span>
+            <span className={styles.popularTagsTitle}>{t("popular")}</span>
 
-            {POPULAR_SKILLS.map((item) => (
+            {popularSkills.map((item) => (
               <button
                 key={item}
                 type="button"
@@ -105,7 +107,7 @@ export default function Hero() {
           <div className={`${styles.mainImage} ${styles.reveal} ${styles.revealDelay5}`}>
             <Image
               src="/images/artisan-2.jpg"
-              alt="Hero Main"
+              alt={t("heroMainAlt")}
               width={280}
               height={280}
             />
@@ -114,7 +116,7 @@ export default function Hero() {
           <div className={`${styles.secondaryImage} ${styles.reveal} ${styles.revealDelay6}`}>
             <Image
               src="/images/artisan-2.jpg"
-              alt="Hero Secondary"
+              alt={t("heroSecondaryAlt")}
               width={280}
               height={280}
             />

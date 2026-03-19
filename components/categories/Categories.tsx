@@ -12,21 +12,23 @@ import {
   Palette,
   Mountain,
 } from "lucide-react";
-
-const CATEGORIES = [
-  { title: "Woodworking", count: 124, icon: Hammer },
-  { title: "Metalwork", count: 89, icon: Wrench },
-  { title: "Pottery & Ceramics", count: 156, icon: Flower2 },
-  { title: "Textile & Fashion", count: 98, icon: Shirt },
-  { title: "Jewelry Making", count: 72, icon: Gem },
-  { title: "Photography", count: 145, icon: Camera },
-  { title: "Painting & Murals", count: 112, icon: Palette },
-  { title: "Sculpture", count: 67, icon: Mountain },
-];
+import { useTranslations } from "next-intl";
 
 export default function Categories() {
+  const t = useTranslations("categories");
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  const CATEGORIES = [
+    { title: t("woodworking"), count: 124, icon: Hammer },
+    { title: t("metalwork"), count: 89, icon: Wrench },
+    { title: t("potteryCeramics"), count: 156, icon: Flower2 },
+    { title: t("textileFashion"), count: 98, icon: Shirt },
+    { title: t("jewelryMaking"), count: 72, icon: Gem },
+    { title: t("photography"), count: 145, icon: Camera },
+    { title: t("paintingMurals"), count: 112, icon: Palette },
+    { title: t("sculpture"), count: 67, icon: Mountain },
+  ];
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -47,7 +49,7 @@ export default function Categories() {
     <section ref={sectionRef} className={styles.section}>
       <div className={`${styles.content} ${isVisible ? styles.visible : ""}`}>
         <h2 className={`${styles.title} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}>
-          Browse by Category
+          {t("title")}
         </h2>
         <div className={styles.grid}>
           {CATEGORIES.map((cat, index) => (
@@ -66,7 +68,7 @@ export default function Categories() {
                 <cat.icon className={styles.icon} />
               </div>
               <h3 className={styles.cardTitle}>{cat.title}</h3>
-              <p className={styles.cardCount}>{cat.count} professionals</p>
+              <p className={styles.cardCount}>{cat.count} {t("professionals")}</p>
             </div>
           ))}
         </div>

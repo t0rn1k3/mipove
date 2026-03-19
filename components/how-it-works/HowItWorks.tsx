@@ -3,28 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./howItWorks.module.css";
 import { Search, ImageIcon, MessageCircle } from "lucide-react";
-
-const STEPS = [
-  {
-    icon: Search,
-    title: "Search & Discover",
-    description: "Browse categories or search directly for the perfect craftsperson for your project.",
-  },
-  {
-    icon: ImageIcon,
-    title: "Review Portfolios",
-    description: "Explore work samples, read reviews, and find masters who match your vision.",
-  },
-  {
-    icon: MessageCircle,
-    title: "Connect Directly",
-    description: "Message masters and start your project with confidence.",
-  },
-];
+import { useTranslations } from "next-intl";
 
 export default function HowItWorks() {
+  const t = useTranslations("howItWorks");
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  const STEPS = [
+    { icon: Search, title: t("step1Title"), description: t("step1Desc") },
+    { icon: ImageIcon, title: t("step2Title"), description: t("step2Desc") },
+    { icon: MessageCircle, title: t("step3Title"), description: t("step3Desc") },
+  ];
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -41,7 +31,7 @@ export default function HowItWorks() {
     <section ref={sectionRef} className={styles.section}>
       <div className={`${styles.container} ${isVisible ? styles.visible : ""}`}>
         <h2 className={`${styles.title} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}>
-          How It Works
+          {t("title")}
         </h2>
         <div className={styles.stepsGrid}>
           {STEPS.map((step, i) => (

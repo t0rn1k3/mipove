@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import styles from "./mastersPage.module.css";
 import Image from "next/image";
 import { getMasters, getImageUrl } from "@/lib/api";
@@ -11,6 +12,8 @@ import type { MasterListItem } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 
 export default function MastersPage() {
+  const t = useTranslations("masters");
+  const tCommon = useTranslations("common");
   const searchParams = useSearchParams();
   const [masters, setMasters] = useState<MasterListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +31,7 @@ export default function MastersPage() {
         const data = await getMasters(params);
         setMasters(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load masters");
+        setError(err instanceof Error ? err.message : t("failedToLoad"));
       } finally {
         setLoading(false);
       }
@@ -70,7 +73,7 @@ export default function MastersPage() {
         setAllSpecialties(specialties);
       } catch (err) {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Failed to load masters");
+        setError(err instanceof Error ? err.message : t("failedToLoad"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -100,14 +103,14 @@ export default function MastersPage() {
       }}
     >
       <div className={styles.filterField}>
-        <label htmlFor="filter-specialty" className={styles.filterLabel}>Specialty</label>
+        <label htmlFor="filter-specialty" className={styles.filterLabel}>{tCommon("specialty")}</label>
         <select
           id="filter-specialty"
           value={specialty}
           onChange={(e) => setSpecialty(e.target.value)}
           className={styles.filterInput}
         >
-          <option value="">All specialties</option>
+          <option value="">{t("allSpecialties")}</option>
           {specialtyOptions.map((s) => (
             <option key={s} value={s}>
               {s}
@@ -116,7 +119,7 @@ export default function MastersPage() {
         </select>
       </div>
       <div className={styles.filterField}>
-        <label htmlFor="filter-location" className={styles.filterLabel}>Location</label>
+        <label htmlFor="filter-location" className={styles.filterLabel}>{tCommon("location")}</label>
         <CityAutocomplete
           id="filter-location"
           value={location}
@@ -129,23 +132,23 @@ export default function MastersPage() {
               search: search || undefined,
             });
           }}
-          placeholder="Filter by city..."
+          placeholder={t("filterByCity")}
         />
       </div>
       <div className={styles.filterField}>
-        <label htmlFor="filter-search" className={styles.filterLabel}>Search by name</label>
+        <label htmlFor="filter-search" className={styles.filterLabel}>{t("searchByName")}</label>
         <input
           id="filter-search"
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search masters..."
+          placeholder={t("searchMastersPlaceholder")}
           className={styles.filterInput}
         />
       </div>
       <div className={styles.filterActions}>
         <button type="submit" className={styles.searchBtn} disabled={loading}>
-          {loading ? "Searching..." : "Search"}
+          {loading ? t("searching") : t("searchButton")}
         </button>
       </div>
     </form>
@@ -154,11 +157,11 @@ export default function MastersPage() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>Masters Directory</h1>
-        <p className={styles.description}>Find the best masters in your area</p>
+        <h1 className={styles.title}>{t("title")}</h1>
+        <p className={styles.description}>{t("description")}</p>
         {filtersEl}
         <div className={styles.loading}>
-          <p>Loading masters...</p>
+          <p>{t("loadingMasters")}</p>
         </div>
       </div>
     );
@@ -167,8 +170,8 @@ export default function MastersPage() {
   if (error) {
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>Masters Directory</h1>
-        <p className={styles.description}>Find the best masters in your area</p>
+        <h1 className={styles.title}>{t("title")}</h1>
+        <p className={styles.description}>{t("description")}</p>
         {filtersEl}
         <div className={styles.error}>
           <p>{error}</p>
@@ -180,11 +183,11 @@ export default function MastersPage() {
   if (masters.length === 0) {
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>Masters Directory</h1>
-        <p className={styles.description}>Find the best masters in your area</p>
+        <h1 className={styles.title}>{t("title")}</h1>
+        <p className={styles.description}>{t("description")}</p>
         {filtersEl}
         <div className={styles.empty}>
-          <p>No masters found.</p>
+          <p>{t("noMastersFound")}</p>
         </div>
       </div>
     );
@@ -192,9 +195,9 @@ export default function MastersPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Masters Directory</h1>
+      <h1 className={styles.title}>{t("title")}</h1>
       <p className={styles.description}>
-        Find the best masters in your area
+        {t("description")}
       </p>
 
       {filtersEl}

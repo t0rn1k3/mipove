@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { searchCities } from "@/lib/api";
 import type { GeocodeCity } from "@/lib/types";
+import { useTranslations } from "next-intl";
 import styles from "./cityAutocomplete.module.css";
 
 type CityAutocompleteProps = {
@@ -30,6 +31,7 @@ export default function CityAutocomplete({
   className = "",
   disabled = false,
 }: CityAutocompleteProps) {
+  const t = useTranslations("common");
   const [inputValue, setInputValue] = useState(controlledValue ?? defaultValue ?? "");
   const [suggestions, setSuggestions] = useState<GeocodeCity[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -126,7 +128,7 @@ export default function CityAutocomplete({
           role="listbox"
         >
           {loading ? (
-            <li className={styles.itemMuted}>Loading...</li>
+            <li className={styles.itemMuted}>{t("loading")}</li>
           ) : suggestions.length > 0 ? (
             suggestions.map((city) => (
               <li
@@ -141,7 +143,7 @@ export default function CityAutocomplete({
               </li>
             ))
           ) : hasSearched ? (
-            <li className={styles.itemMuted}>No cities found</li>
+            <li className={styles.itemMuted}>{t("noCitiesFound")}</li>
           ) : null}
         </ul>
       )}

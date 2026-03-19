@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import Logo from "@/components/logo/Logo";
 import styles from "./join.module.css";
+import { useTranslations } from "next-intl";
 import {
   registerUser,
   registerMaster,
@@ -21,22 +23,14 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
-const USER_BENEFITS = [
-  "Access to verified masters",
-  "Browse portfolios and reviews",
-  "Direct messaging with artisans",
-  "Save your favorite masters",
-  "Track your project inquiries",
+const USER_BENEFITS_KEYS = [
+  "benefit1User", "benefit2User", "benefit3User", "benefit4User", "benefit5User",
 ];
 
-const MASTER_BENEFITS = [
-  "Showcase your portfolio to clients",
-  "Receive direct project inquiries",
-  "Build your reputation as a master",
-  "Connect with clients seeking your craft",
-  "Manage projects and communications",
+const MASTER_BENEFITS_KEYS = [
+  "benefit1Master", "benefit2Master", "benefit3Master", "benefit4Master", "benefit5Master",
 ];
 
 const initialRegisterForm = {
@@ -54,6 +48,7 @@ const initialLoginForm = {
 };
 
 export default function JoinPage() {
+  const t = useTranslations("join");
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAdminMode = searchParams.get("admin") === "1";
@@ -99,7 +94,7 @@ export default function JoinPage() {
     e.preventDefault();
     setError("");
     if (registerForm.password !== registerForm.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("passwordsNoMatch"));
       return;
     }
     setLoading(true);
@@ -131,7 +126,7 @@ export default function JoinPage() {
       }
       router.push(getAuthRedirectPath(json));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(err instanceof Error ? err.message : t("registrationFailed"));
     } finally {
       setLoading(false);
     }
@@ -154,7 +149,7 @@ export default function JoinPage() {
     }
   };
 
-  const benefits = role === "user" ? USER_BENEFITS : MASTER_BENEFITS;
+  const benefitKeys = role === "user" ? USER_BENEFITS_KEYS : MASTER_BENEFITS_KEYS;
 
   return (
     <main className={styles.page}>
@@ -168,12 +163,12 @@ export default function JoinPage() {
         <h1
           className={`${styles.title} ${styles.reveal} ${styles.revealDelay2}`}
         >
-          Join Mipove
+          {t("title")}
         </h1>
         <p
           className={`${styles.subtitle} ${styles.reveal} ${styles.revealDelay3}`}
         >
-          Create your account and start connecting
+          {t("subtitle")}
         </p>
       </section>
 
@@ -185,20 +180,20 @@ export default function JoinPage() {
         >
           {isAdminMode ? (
             <div>
-              <h2 className={styles.sectionHeading}>Admin Access</h2>
+              <h2 className={styles.sectionHeading}>{t("adminAccess")}</h2>
               <p className={styles.subtitle}>
                 {activeTab === "login"
-                  ? "Log in to access the admin dashboard."
-                  : "Create an admin account. Requires ADMIN_SECRET to be configured."}
+                  ? t("adminLoginDesc")
+                  : t("adminRegisterDesc")}
               </p>
               <p className={styles.legalText}>
-                Visit <strong>/join?admin=1</strong> to access this flow.
+                {t("adminVisitUrl")}
               </p>
             </div>
           ) : (
             <>
               <div>
-                <h2 className={styles.sectionHeading}>Choose Your Role</h2>
+                <h2 className={styles.sectionHeading}>{t("chooseRole")}</h2>
                 <div className={styles.roleOptions}>
                   <button
                     type="button"
@@ -206,9 +201,9 @@ export default function JoinPage() {
                     onClick={() => setRole("user")}
                   >
                     <User className={styles.roleIcon} />
-                    <span className={styles.roleName}>User</span>
+                    <span className={styles.roleName}>{t("user")}</span>
                     <span className={styles.roleDesc}>
-                      Find masters for your projects
+                      {t("userDesc")}
                     </span>
                   </button>
                   <button
@@ -227,22 +222,22 @@ export default function JoinPage() {
 
               <div>
                 <h2 className={styles.sectionHeading}>
-                  {role === "user" ? "User" : "Master"} Benefits
+                  {role === "user" ? t("userBenefits") : t("masterBenefits")}
                 </h2>
                 <ul className={styles.benefitsList}>
-                  {benefits.map((benefit) => (
-                    <li key={benefit} className={styles.benefitItem}>
+                  {benefitKeys.map((key) => (
+                    <li key={key} className={styles.benefitItem}>
                       <Check className={styles.benefitIcon} />
-                      <span>{benefit}</span>
+                      <span>{t(key)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               <div className={styles.trustedCallout}>
-                <p className={styles.trustedText}>Trusted by 500+ masters</p>
+                <p className={styles.trustedText}>{t("trustedBy")}</p>
                 <p className={styles.communityText}>
-                  Join our growing community today
+                  {t("joinCommunity")}
                 </p>
               </div>
             </>
@@ -259,14 +254,14 @@ export default function JoinPage() {
               className={`${styles.tab} ${activeTab === "register" ? styles.active : ""}`}
               onClick={() => handleTabSwitch("register")}
             >
-              {isAdminMode ? "Register Admin" : "Register"}
+              {isAdminMode ? t("registerAdmin") : t("register")}
             </button>
             <button
               type="button"
               className={`${styles.tab} ${activeTab === "login" ? styles.active : ""}`}
               onClick={() => handleTabSwitch("login")}
             >
-              Login
+              {t("login")}
             </button>
           </div>
 
@@ -274,7 +269,7 @@ export default function JoinPage() {
             <form className={styles.form} onSubmit={handleRegisterSubmit}>
               <div className={styles.formGroup}>
                 <label htmlFor="fullName" className={styles.formLabel}>
-                  Full Name *
+                  {t("fullName")}
                 </label>
                 <div className={styles.inputWrapper}>
                   <User className={styles.inputIcon} />
@@ -285,7 +280,7 @@ export default function JoinPage() {
                     value={registerForm.fullName}
                     onChange={handleRegisterChange}
                     className={styles.formInput}
-                    placeholder="Enter your full name"
+                    placeholder={t("fullNamePlaceholder")}
                     required
                   />
                 </div>
@@ -293,7 +288,7 @@ export default function JoinPage() {
 
               <div className={styles.formGroup}>
                 <label htmlFor="email" className={styles.formLabel}>
-                  Email Address *
+                  {t("emailAddress")}
                 </label>
                 <div className={styles.inputWrapper}>
                   <Mail className={styles.inputIcon} />
@@ -304,7 +299,7 @@ export default function JoinPage() {
                     value={registerForm.email}
                     onChange={handleRegisterChange}
                     className={styles.formInput}
-                    placeholder="your@email.com"
+                    placeholder={t("emailPlaceholder")}
                     required
                   />
                 </div>
@@ -313,7 +308,7 @@ export default function JoinPage() {
               {isAdminMode && (
                 <div className={styles.formGroup}>
                   <label htmlFor="adminSecret" className={styles.formLabel}>
-                    Admin Secret *
+                    {t("adminSecret")}
                   </label>
                   <div className={styles.inputWrapper}>
                     <Lock className={styles.inputIcon} />
@@ -324,7 +319,7 @@ export default function JoinPage() {
                       value={registerForm.adminSecret}
                       onChange={handleRegisterChange}
                       className={styles.formInput}
-                      placeholder="Enter admin secret"
+                      placeholder={t("adminSecretPlaceholder")}
                       required={isAdminMode}
                     />
                   </div>
@@ -333,9 +328,9 @@ export default function JoinPage() {
 
               {!isAdminMode && (
                 <div className={styles.formGroup}>
-                  <label htmlFor="phone" className={styles.formLabel}>
-                    Phone Number *
-                  </label>
+                <label htmlFor="phone" className={styles.formLabel}>
+                  {t("phoneNumber")}
+                </label>
                   <div className={styles.inputWrapper}>
                     <Phone className={styles.inputIcon} />
                     <input
@@ -345,7 +340,7 @@ export default function JoinPage() {
                       value={registerForm.phone}
                       onChange={handleRegisterChange}
                       className={styles.formInput}
-                      placeholder="+995 XXX XXX XXX"
+                      placeholder={t("phonePlaceholder")}
                       required
                     />
                   </div>
@@ -354,7 +349,7 @@ export default function JoinPage() {
 
               <div className={styles.formGroup}>
                 <label htmlFor="password" className={styles.formLabel}>
-                  Password *
+                  {t("password")}
                 </label>
                 <div className={styles.inputWrapper}>
                   <Lock className={styles.inputIcon} />
@@ -365,7 +360,7 @@ export default function JoinPage() {
                     value={registerForm.password}
                     onChange={handleRegisterChange}
                     className={styles.formInput}
-                    placeholder="Minimum 8 characters"
+                    placeholder={t("passwordPlaceholder")}
                     required
                   />
                   <button
@@ -373,7 +368,7 @@ export default function JoinPage() {
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={
-                      showPassword ? "Hide password" : "Show password"
+                      showPassword ? t("hidePassword") : t("showPassword")
                     }
                   >
                     {showPassword ? (
@@ -387,7 +382,7 @@ export default function JoinPage() {
 
               <div className={styles.formGroup}>
                 <label htmlFor="confirmPassword" className={styles.formLabel}>
-                  Confirm Password *
+                  {t("confirmPassword")}
                 </label>
                 <div className={styles.inputWrapper}>
                   <Lock className={styles.inputIcon} />
@@ -398,7 +393,7 @@ export default function JoinPage() {
                     value={registerForm.confirmPassword}
                     onChange={handleRegisterChange}
                     className={styles.formInput}
-                    placeholder="Re-enter your password"
+                    placeholder={t("confirmPasswordPlaceholder")}
                     required
                   />
                   <button
@@ -406,7 +401,7 @@ export default function JoinPage() {
                     className={styles.passwordToggle}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     aria-label={
-                      showConfirmPassword ? "Hide password" : "Show password"
+                      showConfirmPassword ? t("hidePassword") : t("showPassword")
                     }
                   >
                     {showConfirmPassword ? (
@@ -426,19 +421,19 @@ export default function JoinPage() {
               >
                 <span className={styles.submitBtnContent}>
                   {loading && <span className={styles.spinner} aria-hidden />}
-                  {loading ? "Creating account..." : "Create Account"}
+                  {loading ? t("creatingAccount") : t("createAccount")}
                 </span>
               </button>
 
               {!isAdminMode && (
                 <p className={styles.legalText}>
-                  By creating an account, you agree to our{" "}
+                  {t("termsPrefix")}{" "}
                   <Link href="/terms" className={styles.legalLink}>
-                    Terms of Service
+                    {t("termsOfService")}
                   </Link>{" "}
                   and{" "}
                   <Link href="/privacy" className={styles.legalLink}>
-                    Privacy Policy
+                    {t("privacyPolicy")}
                   </Link>
                   .
                 </p>
@@ -459,7 +454,7 @@ export default function JoinPage() {
                     value={loginForm.email}
                     onChange={handleLoginChange}
                     className={styles.formInput}
-                    placeholder="your@email.com"
+                    placeholder={t("emailPlaceholder")}
                     required
                   />
                 </div>
@@ -467,7 +462,7 @@ export default function JoinPage() {
 
               <div className={styles.formGroup}>
                 <label htmlFor="loginPassword" className={styles.formLabel}>
-                  Password *
+                  {t("password")}
                 </label>
                 <div className={styles.inputWrapper}>
                   <Lock className={styles.inputIcon} />
@@ -478,7 +473,7 @@ export default function JoinPage() {
                     value={loginForm.password}
                     onChange={handleLoginChange}
                     className={styles.formInput}
-                    placeholder="Enter your password"
+                    placeholder={t("loginPasswordPlaceholder")}
                     required
                   />
                   <button
@@ -486,7 +481,7 @@ export default function JoinPage() {
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={
-                      showPassword ? "Hide password" : "Show password"
+                      showPassword ? t("hidePassword") : t("showPassword")
                     }
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -502,7 +497,7 @@ export default function JoinPage() {
               >
                 <span className={styles.submitBtnContent}>
                   {loading && <span className={styles.spinner} aria-hidden />}
-                  {loading ? "Logging in..." : "Login"}
+                  {loading ? t("loggingIn") : t("login")}
                 </span>
               </button>
             </form>
