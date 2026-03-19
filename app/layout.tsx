@@ -1,5 +1,5 @@
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { LocaleProvider } from "@/components/LocaleProvider/LocaleProvider";
+import { getLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import localFont from "next/font/local";
@@ -35,15 +35,22 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  const locale = (await getLocale()) as "en" | "ka";
+  const [enMessages, kaMessages] = await Promise.all([
+    import("../messages/en.json").then((m) => m.default),
+    import("../messages/ka.json").then((m) => m.default),
+  ]);
 
   return (
     <html lang={locale}>
       <body className={`${sharpe.variable} ${playfair.variable} ${inter.variable}`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <LocaleProvider
+          initialLocale={locale}
+          enMessages={enMessages}
+          kaMessages={kaMessages}
+        >
           {children}
-        </NextIntlClientProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

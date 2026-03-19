@@ -1,8 +1,7 @@
 "use client";
 
 import { Globe } from "lucide-react";
-import { useLocale } from "next-intl";
-import { usePathname, getPathname } from "@/i18n/navigation";
+import { useLocaleSwitch } from "@/components/LocaleProvider/LocaleProvider";
 import styles from "./localeSwitcher.module.css";
 
 const LANGUAGES = [
@@ -11,20 +10,7 @@ const LANGUAGES = [
 ] as const;
 
 export default function LocaleSwitcher() {
-  const locale = useLocale();
-  const pathname = usePathname();
-
-  const switchLocale = (newLocale: "en" | "ka") => {
-    if (newLocale === locale) return;
-
-    const pathWithoutLocale = pathname.replace(/^\/(en|ka)(\/|$)/, "$2") || "/";
-    const targetPath = getPathname({
-      href: pathWithoutLocale,
-      locale: newLocale,
-      forcePrefix: true,
-    });
-    window.location.assign(targetPath);
-  };
+  const { locale, setLocale } = useLocaleSwitch();
 
   return (
     <div className={styles.wrapper}>
@@ -33,7 +19,7 @@ export default function LocaleSwitcher() {
         <button
           key={lang.code}
           type="button"
-          onClick={() => switchLocale(lang.code)}
+          onClick={() => setLocale(lang.code)}
           aria-pressed={locale === lang.code}
           className={`${styles.button} ${locale === lang.code ? styles.buttonActive : ""}`}
         >
