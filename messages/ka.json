@@ -84,7 +84,8 @@
     "searching": "იძებნება...",
     "loadingMasters": "იტვირთება ოსტატები...",
     "noMastersFound": "ოსტატები ვერ მოიძებნა.",
-    "failedToLoad": "ოსტატების ჩატვირთვა ვერ მოხერხდა"
+    "failedToLoad": "ოსტატების ჩატვირთვა ვერ მოხერხდა",
+    "viewPortfolio": "პორტფოლიოს ნახვა"
   },
   "profile": {
     "loading": "იტვირთება...",

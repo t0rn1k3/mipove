@@ -464,6 +464,10 @@
   min-height: 100px;
 }
 
+.hiddenInput {
+  display: none;
+}
+
 .editError {
   color: #dc2626;
   font-size: 0.875rem;

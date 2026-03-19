@@ -68,7 +68,7 @@ export default function ProfileSidebar({
               <input
                 type="file"
                 accept="image/*"
-                style={{ display: "none" }}
+                className={styles.hiddenInput}
                 disabled={isUploadingPhoto}
                 onChange={(e) => {
                   const file = e.currentTarget.files?.[0];

@@ -113,7 +113,7 @@ export default function AdminMastersPage() {
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
           <h2 className={styles.tableTitle}>Master List</h2>
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <div className={styles.tableHeaderActions}>
             <input
               type="search"
               placeholder="Search masters..."
@@ -134,77 +134,65 @@ export default function AdminMastersPage() {
         {showCreate && (
           <form
             onSubmit={handleCreateSubmit}
-            style={{
-              padding: "1.5rem",
-              borderBottom: "1px solid #eee",
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "1rem",
-              alignItems: "end",
-            }}
+            className={styles.createForm}
           >
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>Name *</label>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Name *</label>
               <input
                 type="text"
                 required
                 value={createForm.name}
                 onChange={(e) => setCreateForm((p) => ({ ...p, name: e.target.value }))}
-                className={styles.searchInput}
-                style={{ width: "100%" }}
+                className={`${styles.searchInput} ${styles.createFormInput}`}
               />
             </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>Email *</label>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Email *</label>
               <input
                 type="email"
                 required
                 value={createForm.email}
                 onChange={(e) => setCreateForm((p) => ({ ...p, email: e.target.value }))}
-                className={styles.searchInput}
-                style={{ width: "100%" }}
+                className={`${styles.searchInput} ${styles.createFormInput}`}
               />
             </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>Password *</label>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Password *</label>
               <input
                 type="password"
                 required
                 value={createForm.password}
                 onChange={(e) => setCreateForm((p) => ({ ...p, password: e.target.value }))}
-                className={styles.searchInput}
-                style={{ width: "100%" }}
+                className={`${styles.searchInput} ${styles.createFormInput}`}
               />
             </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>Phone</label>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Phone</label>
               <input
                 type="tel"
                 value={createForm.phone}
                 onChange={(e) => setCreateForm((p) => ({ ...p, phone: e.target.value }))}
-                className={styles.searchInput}
-                style={{ width: "100%" }}
+                className={`${styles.searchInput} ${styles.createFormInput}`}
               />
             </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>Specialty</label>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Specialty</label>
               <input
                 type="text"
                 value={createForm.specialty}
                 onChange={(e) => setCreateForm((p) => ({ ...p, specialty: e.target.value }))}
-                className={styles.searchInput}
-                style={{ width: "100%" }}
+                className={`${styles.searchInput} ${styles.createFormInput}`}
               />
             </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>Location</label>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Location</label>
               <CityAutocomplete
                 value={createForm.location}
                 onChange={(v) => setCreateForm((p) => ({ ...p, location: v }))}
                 placeholder="Start typing a city..."
               />
             </div>
-            <div style={{ gridColumn: "1 / -1", display: "flex", gap: "0.5rem" }}>
+            <div className={styles.createFormActions}>
               <button type="submit" className={styles.createBtn} disabled={createLoading}>
                 {createLoading ? "Creating..." : "Create"}
               </button>
@@ -250,8 +238,7 @@ export default function AdminMastersPage() {
                   <td>
                     <Link
                       href={m.slug ? `/profile/${m.slug}` : "#"}
-                      className={styles.createBtn}
-                      style={{ marginRight: "0.5rem", padding: "0.25rem 0.5rem" }}
+                      className={`${styles.createBtn} ${styles.viewLink}`}
                     >
                       View
                     </Link>

@@ -1,3 +1,7 @@
+.logoIcon {
+  color: var(--teal);
+}
+
 /* Logo icon wrapper - contains SVG and has ::before/::after dots + hover */
 .logo {
   font-size: 1.2rem;

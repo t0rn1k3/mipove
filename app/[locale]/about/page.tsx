@@ -124,8 +124,7 @@ export default function AboutPage() {
       {/* Metrics */}
       <section
         ref={metricsSection.ref}
-        className={styles.section}
-        style={{ background: "#fdfbf7" }}
+        className={`${styles.section} ${styles.sectionAltBg}`}
       >
         <div
           className={`${styles.sectionInner} ${metricsSection.isVisible ? styles.visible : ""}`}
@@ -221,8 +220,7 @@ export default function AboutPage() {
       {/* Meet the Creators */}
       <section
         ref={creatorsSection.ref}
-        className={styles.section}
-        style={{ background: "#fdfbf7" }}
+        className={`${styles.section} ${styles.sectionAltBg}`}
       >
         <div
           className={`${styles.sectionInner} ${creatorsSection.isVisible ? styles.visible : ""}`}

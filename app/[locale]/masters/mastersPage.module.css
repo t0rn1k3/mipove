@@ -103,72 +103,60 @@
   font-weight: 600;
   margin-bottom: 6px;
 }
+
+/* Masters section - Figma layout */
+.section {
+  padding: 4rem 0;
+  background: var(--cream);
+}
+
+.sectionInner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .sectionInner {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sectionInner {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
-  margin: 0 auto;
-  max-width: 1400px;
+  grid-template-columns: 1fr;
+  gap: 2rem;
 }
 
-/* Card Styling */
-.card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  background: white;
-  border-radius: 32px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
-  width: 300px;
-  padding-bottom: 10px;
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.card:hover {
-  transform: translateY(-5px);
-}
-.card:hover .name {
-  color: #008080;
-}
-
-/* Image section */
-.imageContainer {
-  width: 100%;
-  height: 190px;
-  overflow: hidden;
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.artisanImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
 }
 
-/* Content section */
-.content {
-  padding: 10px 20px;
-}
-
-.name {
-  font-family: var(--font-sharpe);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 10px;
-  transition: all 0.2s;
-}
-
-.location {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #5c5c68;
-  font-size: 0.8rem;
-}
-
-.pin {
-  color: #4a4a55;
+.emptyStateText {
+  font-size: 1.25rem;
+  color: #4b5563;
 }
 
 .divider {
@@ -236,9 +224,6 @@
     padding: 60px 1.5rem;
     margin-top: 60px;
   }
-  .grid {
-    gap: 24px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -251,20 +236,11 @@
   .description {
     font-size: 1rem;
   }
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
-    justify-items: center;
-  }
   .filterActions {
     width: 100%;
   }
   .searchBtn {
     width: 100%;
-  }
-  .card {
-    width: 100%;
-    max-width: 340px;
   }
 }
 
@@ -274,12 +250,6 @@
   }
   .title {
     font-size: 1.5rem;
-  }
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  .card {
-    max-width: 100%;
   }
   .footer {
     flex-direction: column;

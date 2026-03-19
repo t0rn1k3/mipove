@@ -1,15 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { motion } from "motion/react";
 import styles from "./mastersPage.module.css";
-import Image from "next/image";
-import { getMasters, getImageUrl } from "@/lib/api";
+import { getMasters } from "@/lib/api";
 import type { MasterListItem } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import MasterCard from "@/components/MasterCard/MasterCard";
 
 export default function MastersPage() {
   const t = useTranslations("masters");
@@ -180,19 +179,6 @@ export default function MastersPage() {
     );
   }
 
-  if (masters.length === 0) {
-    return (
-      <div className={styles.container}>
-        <h1 className={styles.title}>{t("title")}</h1>
-        <p className={styles.description}>{t("description")}</p>
-        {filtersEl}
-        <div className={styles.empty}>
-          <p>{t("noMastersFound")}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>{t("title")}</h1>
@@ -202,39 +188,29 @@ export default function MastersPage() {
 
       {filtersEl}
 
-      <div className={styles.grid}>
-        {masters.map((master) => (
-          <Link
-            key={master._id}
-            href={`/profile/${master.slug}`}
-            className={styles.card}
-          >
-            <div className={styles.imageContainer}>
-              <Image
-                src={
-                  getImageUrl(master.image) ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(master.name)}&size=200`
-                }
-                width={300}
-                height={190}
-                alt={master.name}
-                className={styles.artisanImage}
+      <section className={styles.section}>
+        <div className={styles.sectionInner}>
+          <div className={styles.grid}>
+            {masters.map((master, index) => (
+              <MasterCard
+                key={master._id}
+                master={master}
+                delay={index * 0.1}
               />
-            </div>
+            ))}
+          </div>
 
-            <div className={styles.content}>
-              <h2 className={styles.name}>{master.name}</h2>
-              {master.specialty && (
-                <p className={styles.specialty}>{master.specialty}</p>
-              )}
-              <div className={styles.location}>
-                <MapPin size={18} className={styles.pin} />
-                <span>{master.location || "—"}</span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+          {masters.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={styles.emptyState}
+            >
+              <p className={styles.emptyStateText}>{t("noMastersFound")}</p>
+            </motion.div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

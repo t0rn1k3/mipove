@@ -53,6 +53,10 @@
   transform: translateY(0px) scale(0.98);
 }
 
+.hiddenInput {
+  display: none;
+}
+
 .addPhotoBtnIcon {
   font-size: 22px;
   font-weight: 800;

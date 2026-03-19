@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { getMe } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import styles from "./profileRedirect.module.css";
 
 export default function ProfileIndex() {
   const t = useTranslations("profileRedirect");
@@ -26,7 +27,7 @@ export default function ProfileIndex() {
   }, [router]);
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
+    <div className={styles.redirectWrapper}>
       <p>{t("message")}</p>
     </div>
   );

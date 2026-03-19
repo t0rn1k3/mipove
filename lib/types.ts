@@ -91,6 +91,11 @@ export type MasterListItem = {
   image?: string;
   specialty?: string;
   location?: string;
+  rating?: number;
+  reviewCount?: number;
+  phone?: string;
+  email?: string;
+  instagram?: string;
 };
 
 /* ========== Profile Update ========== */

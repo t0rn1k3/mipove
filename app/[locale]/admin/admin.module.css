@@ -253,6 +253,10 @@
   width: 240px;
 }
 
+.searchInputFull {
+  width: 100%;
+}
+
 .searchInput:focus {
   outline: none;
   border-color: var(--teal);
@@ -326,4 +330,46 @@
   color: #dc2626;
   font-size: 0.875rem;
   margin-top: 0.5rem;
+}
+
+/* Admin Masters create form */
+.tableHeaderActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.createForm {
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+
+.createFormField {
+  display: flex;
+  flex-direction: column;
+}
+
+.createFormLabel {
+  display: block;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.createFormInput {
+  width: 100%;
+}
+
+.createFormActions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewLink {
+  margin-right: 0.5rem;
+  padding: 0.25rem 0.5rem;
 }

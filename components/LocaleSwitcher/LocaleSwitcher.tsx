@@ -2,6 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import styles from "./localeSwitcher.module.css";
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
@@ -13,29 +14,21 @@ export default function LocaleSwitcher() {
   };
 
   return (
-    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+    <div className={styles.wrapper}>
       <button
         type="button"
         onClick={() => switchLocale("en")}
         aria-pressed={locale === "en"}
-        style={{
-          padding: "0.25rem 0.5rem",
-          fontWeight: locale === "en" ? 600 : 400,
-          opacity: locale === "en" ? 1 : 0.7,
-        }}
+        className={`${styles.button} ${locale === "en" ? styles.buttonActive : ""}`}
       >
         EN
       </button>
-      <span aria-hidden>|</span>
+      <span className={styles.separator} aria-hidden>|</span>
       <button
         type="button"
         onClick={() => switchLocale("ka")}
         aria-pressed={locale === "ka"}
-        style={{
-          padding: "0.25rem 0.5rem",
-          fontWeight: locale === "ka" ? 600 : 400,
-          opacity: locale === "ka" ? 1 : 0.7,
-        }}
+        className={`${styles.button} ${locale === "ka" ? styles.buttonActive : ""}`}
       >
         KA
       </button>

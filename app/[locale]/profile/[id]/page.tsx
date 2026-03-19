@@ -419,7 +419,7 @@ export default function ProfilePage() {
                           type="file"
                           accept="image/*"
                           multiple
-                          style={{ display: "none" }}
+                          className={styles.hiddenInput}
                           disabled={portfolioUploading}
                           onChange={(e) => {
                             handleSelectPortfolioFiles(e.currentTarget.files);
