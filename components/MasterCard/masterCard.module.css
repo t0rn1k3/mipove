@@ -9,6 +9,7 @@
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  padding-bottom: 1.5rem;
 }
 
 .card:hover {
@@ -182,8 +183,9 @@
 /* View Profile - full width teal button */
 .viewBtn {
   display: block;
-  width: 100%;
-  padding: 0.875rem 1.5rem;
+  width: 80%;
+  margin: 0 auto;
+  padding: 0.57rem 1.5rem;
   background: var(--teal);
   color: white;
   border-radius: 9999px;

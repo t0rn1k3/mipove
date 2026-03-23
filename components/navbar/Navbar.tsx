@@ -11,6 +11,13 @@ import { useTranslations } from "next-intl";
 
 type UserInfo = { name: string; image?: string } | null;
 
+/** Stable across locale-only URL changes (avoids header remount + entrance animation). */
+function routeKeyFromPathname(pathname: string | undefined): string {
+  const raw = pathname ?? "/";
+  const stripped = raw.replace(/^\/(en|ka)(\/|$)/, "$2") || "/";
+  return stripped === "" ? "/" : stripped;
+}
+
 export default function Navbar() {
   const t = useTranslations("nav");
   const tCommon = useTranslations("common");
@@ -19,6 +26,7 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<UserInfo>(null);
   const pathname = usePathname();
+  const routeKey = routeKeyFromPathname(pathname);
   const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
@@ -44,7 +52,7 @@ export default function Navbar() {
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [pathname]);
+  }, [routeKey]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,7 +76,7 @@ export default function Navbar() {
   ];
   return (
     <header
-      key={pathname}
+      key={routeKey}
       className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}
     >
       <div
@@ -101,7 +109,7 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`${styles.navLink} ${pathname === link.href ? styles.navLinkActive : ""}`}
+                className={`${styles.navLink} ${routeKey === link.href ? styles.navLinkActive : ""}`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.name}
