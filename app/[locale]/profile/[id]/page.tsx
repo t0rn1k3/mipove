@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link as I18nLink } from "@/i18n/navigation";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
@@ -17,6 +19,7 @@ import {
   uploadProfileImage,
   fetchMyPortfolio,
   uploadPortfolioImages,
+  rateMaster,
 } from "@/lib/api";
 import type { RatedMasterItem } from "@/lib/types";
 import styles from "../profilePage.module.css";
@@ -26,6 +29,8 @@ type ProfileData = {
   specialty: string;
   location: string;
   bio: string;
+  rating?: number;
+  reviewCount?: number;
   phone: string;
   email: string;
   instagram?: string;
@@ -45,6 +50,8 @@ const DEFAULT_PROFILE: ProfileData = {
   specialty: "Contemporary Painting",
   location: "Barcelona, Spain",
   bio: "Award-winning contemporary artist with 15+ years of experience. Specializing in abstract expressionism and mixed media works that explore the intersection of color, emotion, and form.",
+  rating: 0,
+  reviewCount: 0,
   phone: "+34 612 345 678",
   email: "elena@example.com",
   instagram: "elenamartinezart",
@@ -65,6 +72,8 @@ function mapMeToProfile(
     specialty?: string;
     location?: string;
     bio?: string;
+    rating?: number;
+    reviewCount?: number;
     image?: string;
     instagram?: string;
     website?: string;
@@ -86,6 +95,8 @@ function mapMeToProfile(
       role === "user" ? "Client" : data.specialty || "—",
     location: data.location || "—",
     bio: data.bio || "",
+    rating: data.rating ?? 0,
+    reviewCount: data.reviewCount ?? 0,
     image:
       getImageUrl(data.image) ||
       `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&size=400`,
@@ -97,6 +108,7 @@ function mapMeToProfile(
 }
 
 export default function ProfilePage() {
+  const tProfile = useTranslations("profile");
   const params = useParams();
   const router = useRouter();
   const slug = params?.id as string | undefined;
@@ -130,7 +142,28 @@ export default function ProfilePage() {
   }, []);
 
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isMasterProfile, setIsMasterProfile] = useState(false);
   const [ratedMasters, setRatedMasters] = useState<RatedMasterItem[]>([]);
+  const [rateHover, setRateHover] = useState(0);
+  const [rateSelected, setRateSelected] = useState(0);
+  const [rateSubmitting, setRateSubmitting] = useState(false);
+  const [rateSuccess, setRateSuccess] = useState(false);
+  const [rateError, setRateError] = useState("");
+
+  const rateInitialStars =
+    slug && slug !== "me"
+      ? (ratedMasters.find((r) => r.master.slug === slug)?.stars ?? null)
+      : null;
+  const canVoteRole = userRole === "user" || userRole === "master";
+
+  useEffect(() => {
+    setRateSuccess(false);
+  }, [slug]);
+
+  useEffect(() => {
+    setRateSelected(rateInitialStars ?? 0);
+    setRateError("");
+  }, [rateInitialStars, slug]);
 
   useEffect(() => {
     if (!slug) {
@@ -152,6 +185,7 @@ export default function ProfilePage() {
           }
           setProfile(mapMeToProfile(data, data.role));
           setIsOwnProfile(true);
+          setIsMasterProfile(data.role === "master");
           setRatedMasters(data.ratedMasters ?? []);
         })
         .catch(() => router.replace("/join"))
@@ -165,6 +199,8 @@ export default function ProfilePage() {
         if (data.slug === slug) {
           setProfile(mapMeToProfile(data, data.role));
           setIsOwnProfile(true);
+          setIsMasterProfile(data.role === "master");
+          setRatedMasters(data.ratedMasters ?? []);
           if (data.role === "master") {
             fetchMyPortfolio()
               .then((list) => setProfile((p) => ({ ...p, portfolioImages: list })))
@@ -176,6 +212,8 @@ export default function ProfilePage() {
         return getProfileBySlug(slug).then((p) => {
           setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
           setIsOwnProfile(false);
+          setIsMasterProfile(true);
+          setRatedMasters(data.ratedMasters ?? []);
         });
       })
       .catch(() =>
@@ -183,6 +221,7 @@ export default function ProfilePage() {
           .then((p) => {
             setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
             setIsOwnProfile(false);
+            setIsMasterProfile(true);
           })
           .catch(() => {})
       )
@@ -287,6 +326,30 @@ export default function ProfilePage() {
     setSelectedPortfolioPreviews([]);
   };
 
+  const handleRateSubmit = async () => {
+    if (!slug || slug === "me" || rateSelected < 1 || rateSubmitting) return;
+    setRateError("");
+    setRateSuccess(false);
+    setRateSubmitting(true);
+    try {
+      const res = await rateMaster(slug, rateSelected);
+      setRateSuccess(true);
+      if (res.data?.rating != null || res.data?.reviewCount != null) {
+        setProfile((prev) => ({
+          ...prev,
+          rating: res.data?.rating ?? prev.rating,
+          reviewCount: res.data?.reviewCount ?? prev.reviewCount,
+        }));
+      }
+      const { data } = await getMe();
+      setRatedMasters(data.ratedMasters ?? []);
+    } catch (e) {
+      setRateError(e instanceof Error ? e.message : tProfile("ratingError"));
+    } finally {
+      setRateSubmitting(false);
+    }
+  };
+
   const handleUploadPortfolio = async () => {
     setPortfolioError("");
     if (selectedPortfolioFiles.length === 0) return;
@@ -337,7 +400,7 @@ export default function ProfilePage() {
             </div>
 
             <div className={styles.main}>
-              {userRole === "user" ? (
+              {userRole === "user" && isOwnProfile ? (
                 <>
                   <div
                     className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
@@ -408,6 +471,99 @@ export default function ProfilePage() {
                 </>
               ) : (
                 <>
+                  {isMasterProfile && (
+                    <div className={styles.masterRatingSummary}>
+                      <div className={styles.masterRatingStars} aria-hidden>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Star
+                            key={n}
+                            size={18}
+                            className={
+                              n <= Math.floor(profile.rating ?? 0)
+                                ? styles.masterRatingStarFilled
+                                : styles.masterRatingStarEmpty
+                            }
+                          />
+                        ))}
+                      </div>
+                      <p className={styles.masterRatingText}>
+                        {(profile.rating ?? 0).toFixed(1)} ({profile.reviewCount ?? 0}{" "}
+                        {tProfile("votes")})
+                      </p>
+                    </div>
+                  )}
+                  {!isOwnProfile && slug && slug !== "me" && (
+                    !canVoteRole ? (
+                      <div className={styles.ratePanel}>
+                        <h2 className={styles.rateTitle}>{tProfile("rateThisMaster")}</h2>
+                        <p className={styles.rateSignIn}>
+                          {userRole === null ? (
+                            <>
+                              {tProfile("signInToRate")}{" "}
+                              <I18nLink href="/join" className={styles.rateSignInLink}>
+                                {tProfile("signInLink")}
+                              </I18nLink>
+                            </>
+                          ) : (
+                            tProfile("ratingNotAllowed")
+                          )}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className={styles.ratePanel}>
+                        <h2 className={styles.rateTitle}>{tProfile("rateThisMaster")}</h2>
+                        <p className={styles.rateSubtitle}>
+                          {rateInitialStars != null
+                            ? tProfile("updateRatingHint")
+                            : tProfile("yourRatingHint")}
+                        </p>
+                        <div
+                          className={styles.rateStarsRow}
+                          role="group"
+                          aria-label={tProfile("yourRating")}
+                          onMouseLeave={() => setRateHover(0)}
+                        >
+                          {[1, 2, 3, 4, 5].map((n) => {
+                            const displayStars = rateHover || rateSelected;
+                            return (
+                              <button
+                                key={n}
+                                type="button"
+                                className={`${styles.rateStarBtn} ${n <= displayStars ? styles.rateStarBtnActive : ""}`}
+                                onMouseEnter={() => setRateHover(n)}
+                                onClick={() => {
+                                  setRateSelected(n);
+                                  setRateSuccess(false);
+                                }}
+                                aria-label={tProfile("starLabel", { n })}
+                              >
+                                <Star
+                                  size={28}
+                                  fill={n <= displayStars ? "currentColor" : "none"}
+                                />
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.rateSubmitBtn}
+                          disabled={rateSelected < 1 || rateSubmitting}
+                          onClick={() => void handleRateSubmit()}
+                        >
+                          {rateSubmitting
+                            ? tProfile("saving")
+                            : rateInitialStars != null
+                              ? tProfile("updateRating")
+                              : tProfile("submitRating")}
+                        </button>
+                        {rateSuccess && (
+                          <p className={styles.rateSuccess}>{tProfile("ratingSaved")}</p>
+                        )}
+                        {rateError && <p className={styles.rateError}>{rateError}</p>}
+                      </div>
+                    )
+                  )}
                   <div
                     className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
                   >

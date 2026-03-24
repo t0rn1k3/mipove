@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import styles from "./mastersPage.module.css";
-import { getMasters } from "@/lib/api";
+import { getMasters, getMe, rateMaster } from "@/lib/api";
 import type { MasterListItem } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import MasterCard from "@/components/MasterCard/MasterCard";
@@ -21,6 +21,9 @@ export default function MastersPage() {
   const [specialty, setSpecialty] = useState("");
   const [search, setSearch] = useState("");
   const [allSpecialties, setAllSpecialties] = useState<string[]>([]);
+  const [viewerRole, setViewerRole] = useState<string | null>(null);
+  const [viewerMasterSlug, setViewerMasterSlug] = useState<string | null>(null);
+  const [myRatingsBySlug, setMyRatingsBySlug] = useState<Record<string, number>>({});
 
   const applyFilters = useCallback(
     async (params?: { location?: string; specialty?: string; search?: string }) => {
@@ -35,8 +38,33 @@ export default function MastersPage() {
         setLoading(false);
       }
     },
-    [],
+    [t],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    getMe()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setViewerRole(data.role ?? null);
+        setViewerMasterSlug(data.slug ?? null);
+        const rated = data.ratedMasters ?? [];
+        const map: Record<string, number> = {};
+        for (const item of rated) {
+          if (item.master?.slug) map[item.master.slug] = item.stars;
+        }
+        setMyRatingsBySlug(map);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setViewerRole(null);
+        setViewerMasterSlug(null);
+        setMyRatingsBySlug({});
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const specialtyFromUrl = searchParams.get("specialty") ?? "";
@@ -81,7 +109,7 @@ export default function MastersPage() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSearch = useCallback(() => {
     void applyFilters({
@@ -90,6 +118,41 @@ export default function MastersPage() {
       search: search || undefined,
     });
   }, [applyFilters, location, specialty, search]);
+
+  const handleRateMaster = useCallback(
+    async (masterSlug: string, stars: number) => {
+      const prevStars = myRatingsBySlug[masterSlug] ?? null;
+      const response = await rateMaster(masterSlug, stars);
+      setMyRatingsBySlug((prev) => ({ ...prev, [masterSlug]: stars }));
+
+      setMasters((prev) =>
+        prev.map((m) => {
+          if (m.slug !== masterSlug) return m;
+          const backendRating = response?.data?.rating;
+          const backendReviewCount = response?.data?.reviewCount;
+          if (backendRating != null || backendReviewCount != null) {
+            return {
+              ...m,
+              rating: backendRating ?? m.rating,
+              reviewCount: backendReviewCount ?? m.reviewCount,
+            };
+          }
+
+          const oldCount = m.reviewCount ?? 0;
+          const oldAverage = m.rating ?? 0;
+          if (prevStars == null) {
+            const newCount = oldCount + 1;
+            const newAverage = ((oldAverage * oldCount) + stars) / newCount;
+            return { ...m, rating: newAverage, reviewCount: newCount };
+          }
+          if (oldCount <= 0) return { ...m, rating: stars, reviewCount: 1 };
+          const newAverage = ((oldAverage * oldCount) - prevStars + stars) / oldCount;
+          return { ...m, rating: newAverage, reviewCount: oldCount };
+        }),
+      );
+    },
+    [myRatingsBySlug],
+  );
 
   const specialtyOptions = useMemo(() => allSpecialties, [allSpecialties]);
 
@@ -196,6 +259,12 @@ export default function MastersPage() {
                 key={master._id}
                 master={master}
                 delay={index * 0.1}
+                canRate={
+                  (viewerRole === "user" || viewerRole === "master") &&
+                  !(viewerRole === "master" && viewerMasterSlug === master.slug)
+                }
+                myRating={myRatingsBySlug[master.slug] ?? null}
+                onRate={handleRateMaster}
               />
             ))}
           </div>

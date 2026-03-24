@@ -126,6 +126,8 @@ export async function getMe(): Promise<{
     specialty?: string;
     location?: string;
     bio?: string;
+    rating?: number;
+    reviewCount?: number;
     image?: string;
     instagram?: string;
     website?: string;
@@ -190,6 +192,8 @@ export async function getProfileBySlug(slug: string): Promise<{
   specialty: string;
   location: string;
   bio: string;
+  rating?: number;
+  reviewCount?: number;
   phone: string;
   email: string;
   instagram?: string;
@@ -216,6 +220,29 @@ export async function getProfileBySlug(slug: string): Promise<{
       id: w._id ?? w.id ?? "",
     })),
   };
+}
+
+/** Rate a master (1–5 stars). Backend: `POST /masters/:slug/rate` body `{ stars }`. */
+export async function rateMaster(
+  slug: string,
+  stars: number,
+): Promise<{
+  data?: {
+    stars?: number;
+    rating?: number;
+    reviewCount?: number;
+    ratedMasters?: RatedMasterItem[];
+  };
+}> {
+  const s = Math.min(5, Math.max(1, Math.round(stars)));
+  const res = await authFetch(`${api(`/masters/${encodeURIComponent(slug)}/rate`)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ stars: s }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to save rating");
+  return json;
 }
 
 export async function updateProfile(

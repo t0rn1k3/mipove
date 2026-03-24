@@ -88,7 +88,11 @@
     "viewPortfolio": "პორტფოლიოს ნახვა",
     "viewProfile": "პროფილის ნახვა",
     "projects": "პროექტი",
-    "reviews": "შეფასება"
+    "reviews": "შეფასება",
+    "rateNow": "შეფასება",
+    "ratingSaved": "შეფასება შენახულია",
+    "ratingError": "შეფასების შენახვა ვერ მოხერხდა",
+    "starLabel": "შეფასება {n} 5-დან"
   },
   "profile": {
     "loading": "იტვირთება...",
@@ -116,7 +120,20 @@
     "portfolioSizeError": "თითოეული სურათის ზომა უნდა იყოს 4MB ან ნაკლები.",
     "startTypingCity": "დაიწყეთ ქალაქის აკრეფა...",
     "portfolioImageAlt": "პორტფოლიოს სურათი",
-    "selectedPortfolioAlt": "არჩეული ფოტო"
+    "selectedPortfolioAlt": "არჩეული ფოტო",
+    "rateThisMaster": "შეაფასეთ ეს ოსტატი",
+    "yourRating": "თქვენი შეფასება",
+    "yourRatingHint": "აირჩიეთ 1–5 ვარსკვლავი და დააჭირეთ გაგზავნას.",
+    "updateRatingHint": "შეგიძლიათ ნებისმიერ დროს შეცვალოთ შეფასება.",
+    "submitRating": "შეფასების გაგზავნა",
+    "updateRating": "შეფასების განახლება",
+    "signInToRate": "შეფასებისთვის შედით სისტემაში —",
+    "signInLink": "რეგისტრაცია ან შესვლა",
+    "ratingSaved": "მადლობა — შეფასება შენახულია.",
+    "ratingError": "შეფასების შენახვა ვერ მოხერხდა. სცადეთ ხელახლა.",
+    "starLabel": "შეფასება {n} 5-დან",
+    "votes": "ხმა",
+    "ratingNotAllowed": "ხმის მიცემა მხოლოდ მომხმარებლებს და ოსტატებს შეუძლიათ."
   },
   "profileRedirect": {
     "message": "მიმართვა თქვენს პროფილზე..."

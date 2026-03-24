@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { motion } from "motion/react";
@@ -12,6 +13,9 @@ import styles from "./masterCard.module.css";
 type MasterCardProps = {
   master: MasterListItem;
   delay?: number;
+  canRate?: boolean;
+  myRating?: number | null;
+  onRate?: (masterSlug: string, stars: number) => Promise<void>;
 };
 
 function LocationIcon() {
@@ -26,7 +30,13 @@ function LocationIcon() {
   );
 }
 
-export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
+export default function MasterCard({
+  master,
+  delay = 0,
+  canRate = false,
+  myRating = null,
+  onRate,
+}: MasterCardProps) {
   const t = useTranslations("masters");
   const imageUrl =
     getImageUrl(master.image) ||
@@ -40,6 +50,33 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
       ? descriptionText.slice(0, 80) + "..."
       : descriptionText
     : "—";
+  const [rateHover, setRateHover] = useState(0);
+  const [rateSelected, setRateSelected] = useState(myRating ?? 0);
+  const [rateSubmitting, setRateSubmitting] = useState(false);
+  const [rateSuccess, setRateSuccess] = useState(false);
+  const [rateError, setRateError] = useState("");
+
+  useEffect(() => {
+    setRateSelected(myRating ?? 0);
+    setRateError("");
+    setRateSuccess(false);
+  }, [myRating, master.slug]);
+
+  const handleRateClick = async (stars: number) => {
+    if (!onRate || rateSubmitting) return;
+    setRateSelected(stars);
+    setRateError("");
+    setRateSuccess(false);
+    setRateSubmitting(true);
+    try {
+      await onRate(master.slug, stars);
+      setRateSuccess(true);
+    } catch (e) {
+      setRateError(e instanceof Error ? e.message : t("ratingError"));
+    } finally {
+      setRateSubmitting(false);
+    }
+  };
 
   return (
     <motion.div
@@ -50,7 +87,7 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
       className={styles.wrapper}
     >
       <div className={styles.card}>
-        <I18nLink href={`/profile/${master.slug}`} className={styles.cardLink}>
+        <div className={styles.cardBody}>
           <div className={styles.imageContainer}>
             <div className={styles.imageWrapper}>
               <Image
@@ -103,6 +140,37 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
               </span>
             </div>
 
+            {canRate && onRate && (
+              <div className={styles.rateRow}>
+                <span className={styles.rateLabel}>{t("rateNow")}</span>
+                <div
+                  className={styles.rateStars}
+                  role="group"
+                  aria-label={t("rateNow")}
+                  onMouseLeave={() => setRateHover(0)}
+                >
+                  {[1, 2, 3, 4, 5].map((n) => {
+                    const display = rateHover || rateSelected;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        className={`${styles.rateStarBtn} ${n <= display ? styles.rateStarBtnActive : ""}`}
+                        onMouseEnter={() => setRateHover(n)}
+                        onClick={() => void handleRateClick(n)}
+                        disabled={rateSubmitting}
+                        aria-label={t("starLabel", { n })}
+                      >
+                        <Star size={16} fill={n <= display ? "currentColor" : "none"} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {rateSuccess && <p className={styles.rateSuccess}>{t("ratingSaved")}</p>}
+            {rateError && <p className={styles.rateError}>{rateError}</p>}
+
             <p className={styles.locationRow}>
               <LocationIcon />
               {master.location || "—"}
@@ -120,7 +188,7 @@ export default function MasterCard({ master, delay = 0 }: MasterCardProps) {
 
             <p className={styles.bio}>{truncatedBio}</p>
           </div>
-        </I18nLink>
+        </div>
 
         <I18nLink href={`/profile/${master.slug}`} className={styles.viewBtn}>
           {t("viewProfile")}

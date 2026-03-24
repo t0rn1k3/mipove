@@ -16,9 +16,8 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
-.cardLink {
+.cardBody {
   display: block;
-  text-decoration: none;
   color: inherit;
 }
 
@@ -34,7 +33,7 @@
   transition: transform 0.4s ease;
 }
 
-.cardLink:hover .imageWrapper {
+.card:hover .imageWrapper {
   transform: scale(1.05);
 }
 
@@ -109,7 +108,7 @@
   transition: color 0.2s;
 }
 
-.cardLink:hover .name {
+.card:hover .name {
   color: var(--teal);
 }
 
@@ -140,6 +139,55 @@
 .reviewCount {
   font-size: 0.8125rem;
   color: #6b7280;
+}
+
+.rateRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.rateLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.rateStars {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.rateStarBtn {
+  border: none;
+  background: none;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+  color: #d1d5db;
+}
+
+.rateStarBtnActive {
+  color: #facc15;
+}
+
+.rateStarBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.rateSuccess {
+  margin: -0.2rem 0 0.5rem;
+  font-size: 0.75rem;
+  color: #059669;
+}
+
+.rateError {
+  margin: -0.2rem 0 0.5rem;
+  font-size: 0.75rem;
+  color: #dc2626;
 }
 
 .locationRow {

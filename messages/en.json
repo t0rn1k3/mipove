@@ -88,7 +88,11 @@
     "viewPortfolio": "View Portfolio",
     "viewProfile": "View Profile",
     "projects": "Projects",
-    "reviews": "reviews"
+    "reviews": "reviews",
+    "rateNow": "Rate",
+    "ratingSaved": "Rating saved",
+    "ratingError": "Could not save rating",
+    "starLabel": "Rate {n} out of 5"
   },
   "profile": {
     "loading": "Loading...",
@@ -116,7 +120,20 @@
     "portfolioSizeError": "Each image must be 4MB or smaller.",
     "startTypingCity": "Start typing a city...",
     "portfolioImageAlt": "Portfolio image",
-    "selectedPortfolioAlt": "Selected portfolio"
+    "selectedPortfolioAlt": "Selected portfolio",
+    "rateThisMaster": "Rate this master",
+    "yourRating": "Your rating",
+    "yourRatingHint": "Tap stars to choose 1–5, then submit.",
+    "updateRatingHint": "Change your rating anytime.",
+    "submitRating": "Submit rating",
+    "updateRating": "Update rating",
+    "signInToRate": "Sign in to rate this master —",
+    "signInLink": "Join or log in",
+    "ratingSaved": "Thanks — your rating was saved.",
+    "ratingError": "Could not save rating. Try again.",
+    "starLabel": "Rate {n} out of 5",
+    "votes": "votes",
+    "ratingNotAllowed": "Only users and masters can rate."
   },
   "profileRedirect": {
     "message": "Redirecting to your profile..."

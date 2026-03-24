@@ -648,3 +648,137 @@
     font-size: 1.5rem;
   }
 }
+
+/* Rate master  */
+.ratePanel {
+  margin-bottom: 1.75rem;
+  padding: 1.25rem 1.5rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+.rateTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin: 0 0 0.5rem;
+}
+
+.rateSubtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 1rem;
+}
+
+.rateStarsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.rateStarBtn {
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #d1d5db;
+  line-height: 0;
+  border-radius: 6px;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.rateStarBtn:hover {
+  color: #facc15;
+  transform: scale(1.08);
+}
+
+.rateStarBtnActive {
+  color: #facc15;
+}
+
+.rateStarBtn:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.rateSubmitBtn {
+  padding: 0.5rem 1.25rem;
+  background: var(--teal);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.rateSubmitBtn:hover:not(:disabled) {
+  background: #4d8589;
+}
+
+.rateSubmitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rateSuccess {
+  font-size: 0.875rem;
+  color: #059669;
+  margin: 0.75rem 0 0;
+}
+
+.rateError {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin: 0.75rem 0 0;
+}
+
+.rateSignIn {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  margin: 0;
+}
+
+.rateSignInLink {
+  color: var(--teal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.rateSignInLink:hover {
+  text-decoration: underline;
+}
+
+.masterRatingSummary {
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+}
+
+.masterRatingStars {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-bottom: 0.35rem;
+}
+
+.masterRatingStarFilled {
+  color: #facc15;
+  fill: currentColor;
+}
+
+.masterRatingStarEmpty {
+  color: #d1d5db;
+}
+
+.masterRatingText {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
