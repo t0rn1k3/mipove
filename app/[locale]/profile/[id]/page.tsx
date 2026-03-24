@@ -487,7 +487,7 @@ export default function ProfilePage() {
                         ))}
                       </div>
                       <p className={styles.masterRatingText}>
-                        {(profile.rating ?? 0).toFixed(1)} ({profile.reviewCount ?? 0}{" "}
+                        {Number((profile.rating ?? 0)).toFixed(1)} ({profile.reviewCount ?? 0}{" "}
                         {tProfile("votes")})
                       </p>
                     </div>
