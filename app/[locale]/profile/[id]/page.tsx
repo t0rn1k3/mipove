@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -152,7 +152,9 @@ export default function ProfilePage() {
 
   const rateInitialStars =
     slug && slug !== "me"
-      ? (ratedMasters.find((r) => r.master.slug === slug)?.stars ?? null)
+      ? (ratedMasters.find(
+          (r) => r.master.slug === slug || r.master._id === slug,
+        )?.stars ?? null)
       : null;
   const canVoteRole = userRole === "user" || userRole === "master";
 
@@ -333,7 +335,6 @@ export default function ProfilePage() {
     setRateSubmitting(true);
     try {
       const res = await rateMaster(slug, rateSelected);
-      setRateSuccess(true);
       if (res.data?.rating != null || res.data?.reviewCount != null) {
         setProfile((prev) => ({
           ...prev,
@@ -341,8 +342,16 @@ export default function ProfilePage() {
           reviewCount: res.data?.reviewCount ?? prev.reviewCount,
         }));
       }
-      const { data } = await getMe();
-      setRatedMasters(data.ratedMasters ?? []);
+      if (res.data?.ratedMasters?.length) {
+        setRatedMasters(res.data.ratedMasters);
+      }
+      try {
+        const { data } = await getMe();
+        setRatedMasters(data.ratedMasters ?? res.data?.ratedMasters ?? []);
+      } catch {
+        /* keep ratedMasters from rate response or prior state */
+      }
+      setRateSuccess(true);
     } catch (e) {
       setRateError(e instanceof Error ? e.message : tProfile("ratingError"));
     } finally {

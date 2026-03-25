@@ -123,7 +123,17 @@ export default function MastersPage() {
     async (masterSlug: string, stars: number) => {
       const prevStars = myRatingsBySlug[masterSlug] ?? null;
       const response = await rateMaster(masterSlug, stars);
-      setMyRatingsBySlug((prev) => ({ ...prev, [masterSlug]: stars }));
+      setMyRatingsBySlug((prev) => {
+        const next = { ...prev };
+        if (response.data?.ratedMasters?.length) {
+          for (const item of response.data.ratedMasters) {
+            if (item.master?.slug) next[item.master.slug] = item.stars;
+          }
+          return next;
+        }
+        next[masterSlug] = stars;
+        return next;
+      });
 
       setMasters((prev) =>
         prev.map((m) => {

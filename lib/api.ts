@@ -240,9 +240,38 @@ export async function rateMaster(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ stars: s }),
   });
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.message || "Failed to save rating");
-  return json;
+  const text = await res.text();
+  let json: Record<string, unknown> = {};
+  if (text) {
+    try {
+      json = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      throw new Error("Invalid response from server");
+    }
+  }
+  if (!res.ok) {
+    throw new Error(
+      typeof json.message === "string" ? json.message : "Failed to save rating",
+    );
+  }
+  // Support both `{ data: { ... } }` and flat `{ ratedMasters, rating, ... }`.
+  const raw = json.data;
+  const inner =
+    raw != null && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : json;
+  const ratedRaw = inner.ratedMasters;
+  const ratedMasters = Array.isArray(ratedRaw)
+    ? (ratedRaw as RatedMasterItem[])
+    : undefined;
+  return {
+    data: {
+      stars: typeof inner.stars === "number" ? inner.stars : undefined,
+      rating: typeof inner.rating === "number" ? inner.rating : undefined,
+      reviewCount: typeof inner.reviewCount === "number" ? inner.reviewCount : undefined,
+      ratedMasters,
+    },
+  };
 }
 
 export async function updateProfile(

@@ -62,6 +62,10 @@ export default function MasterCard({
     setRateSuccess(false);
   }, [myRating, master.slug]);
 
+  const interactive = canRate && !!onRate;
+  const averageStars = hasRating ? Math.floor(master.rating!) : 0;
+  const displayStars = rateHover || rateSelected || averageStars;
+
   const handleRateClick = async (stars: number) => {
     if (!onRate || rateSubmitting) return;
     setRateSelected(stars);
@@ -108,12 +112,6 @@ export default function MasterCard({
                 </span>
               </div>
             )}
-
-            {master.projectsCount != null && master.projectsCount > 0 && (
-              <div className={styles.projectsBadge}>
-                {master.projectsCount} {t("projects")}
-              </div>
-            )}
           </div>
 
           <div className={styles.content}>
@@ -121,16 +119,34 @@ export default function MasterCard({
             <p className={styles.specialty}>{master.specialty || "—"}</p>
 
             <div className={styles.ratingSection}>
-              <div className={styles.ratingStars}>
-                {[...Array(5)].map((_, i) => {
-                  const filledCount = hasRating ? Math.floor(master.rating!) : 0;
+              <div
+                className={`${styles.ratingStars} ${interactive ? styles.ratingStarsInteractive : ""}`}
+                role={interactive ? "group" : undefined}
+                aria-label={interactive ? t("rateNow") : undefined}
+                onMouseLeave={interactive ? () => setRateHover(0) : undefined}
+              >
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const filled = n <= displayStars;
+                  if (interactive) {
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        className={`${styles.rateStarBtn} ${filled ? styles.rateStarBtnActive : ""}`}
+                        onMouseEnter={() => setRateHover(n)}
+                        onClick={() => void handleRateClick(n)}
+                        disabled={rateSubmitting}
+                        aria-label={t("starLabel", { n })}
+                      >
+                        <Star size={16} fill={filled ? "currentColor" : "none"} />
+                      </button>
+                    );
+                  }
                   return (
                     <Star
-                      key={i}
+                      key={n}
                       size={14}
-                      className={
-                        i < filledCount ? styles.starFilled : styles.starEmpty
-                      }
+                      className={filled ? styles.starFilled : styles.starEmpty}
                     />
                   );
                 })}
@@ -138,38 +154,9 @@ export default function MasterCard({
               <span className={styles.reviewCount}>
                 ({master.reviewCount ?? 0} {t("reviews")})
               </span>
+              {rateSuccess && <p className={styles.rateSuccess}>{t("ratingSaved")}</p>}
+              {rateError && <p className={styles.rateError}>{rateError}</p>}
             </div>
-
-            {canRate && onRate && (
-              <div className={styles.rateRow}>
-                <span className={styles.rateLabel}>{t("rateNow")}</span>
-                <div
-                  className={styles.rateStars}
-                  role="group"
-                  aria-label={t("rateNow")}
-                  onMouseLeave={() => setRateHover(0)}
-                >
-                  {[1, 2, 3, 4, 5].map((n) => {
-                    const display = rateHover || rateSelected;
-                    return (
-                      <button
-                        key={n}
-                        type="button"
-                        className={`${styles.rateStarBtn} ${n <= display ? styles.rateStarBtnActive : ""}`}
-                        onMouseEnter={() => setRateHover(n)}
-                        onClick={() => void handleRateClick(n)}
-                        disabled={rateSubmitting}
-                        aria-label={t("starLabel", { n })}
-                      >
-                        <Star size={16} fill={n <= display ? "currentColor" : "none"} />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {rateSuccess && <p className={styles.rateSuccess}>{t("ratingSaved")}</p>}
-            {rateError && <p className={styles.rateError}>{rateError}</p>}
 
             <p className={styles.locationRow}>
               <LocationIcon />
