@@ -33,27 +33,78 @@
   min-width: 180px;
 }
 
-.filterLabel {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1a1a1a;
-  margin-bottom: 0.35rem;
+.filterInputWrap {
+  position: relative;
+  width: 100%;
+}
+
+.filterIcon {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.85;
 }
 
 .filterInput {
   width: 100%;
   padding: 0.75rem 1rem;
+  padding-left: 2.5rem;
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: var(--radius-xl);
   font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filterInput::placeholder {
+  color: #768283;
 }
 
 .filterInput:focus {
   outline: none;
   border-color: #008080;
   box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2);
+}
+
+.filterSelect {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.mastersCityAutocomplete {
+  width: 100%;
+}
+
+.mastersCityAutocomplete input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  padding-left: 2.5rem;
+  padding-right: 2rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #374151;
+  box-shadow: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mastersCityAutocomplete input:focus {
+  outline: none;
+  border-color: #008080;
+  box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2);
+}
+
+.mastersCityAutocomplete input::placeholder {
+  color: #768283;
 }
 
 .loading,

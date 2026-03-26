@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import styles from "./mastersPage.module.css";
@@ -170,41 +171,69 @@ export default function MastersPage() {
   const filtersEl = (
     <div className={styles.filters}>
       <div className={styles.filterField}>
-        <label htmlFor="filter-specialty" className={styles.filterLabel}>{tCommon("specialty")}</label>
-        <select
-          id="filter-specialty"
-          value={specialty}
-          onChange={(e) => setSpecialty(e.target.value)}
-          className={styles.filterInput}
-        >
-          <option value="">{t("allSpecialties")}</option>
-          {specialtyOptions.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <div className={styles.filterInputWrap}>
+          <Image
+            src="/icons/search.svg"
+            alt={tCommon("search")}
+            width={20}
+            height={20}
+            className={styles.filterIcon}
+          />
+          <input
+            id="filter-search"
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("searchMastersPlaceholder")}
+            className={styles.filterInput}
+            aria-label={t("searchByName")}
+          />
+        </div>
       </div>
       <div className={styles.filterField}>
-        <label htmlFor="filter-location" className={styles.filterLabel}>{tCommon("location")}</label>
-        <CityAutocomplete
-          id="filter-location"
-          value={location}
-          onChange={setLocation}
-          onSelect={setLocation}
-          placeholder={t("filterByCity")}
-        />
+        <div className={styles.filterInputWrap}>
+          <Image
+            src="/icons/location.svg"
+            alt={tCommon("location")}
+            width={20}
+            height={20}
+            className={styles.filterIcon}
+          />
+          <CityAutocomplete
+            id="filter-location"
+            value={location}
+            onChange={setLocation}
+            onSelect={(v) => setLocation(v)}
+            placeholder={t("filterByCity")}
+            className={styles.mastersCityAutocomplete}
+          />
+        </div>
       </div>
+
       <div className={styles.filterField}>
-        <label htmlFor="filter-search" className={styles.filterLabel}>{t("searchByName")}</label>
-        <input
-          id="filter-search"
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t("searchMastersPlaceholder")}
-          className={styles.filterInput}
-        />
+        <div className={styles.filterInputWrap}>
+          <Image
+            src="/icons/palette.svg"
+            alt={tCommon("specialty")}
+            width={20}
+            height={20}
+            className={styles.filterIcon}
+          />
+          <select
+            id="filter-specialty"
+            value={specialty}
+            onChange={(e) => setSpecialty(e.target.value)}
+            className={`${styles.filterInput} ${styles.filterSelect}`}
+            aria-label={tCommon("specialty")}
+          >
+            <option value="">{t("allSpecialties")}</option>
+            {specialtyOptions.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );

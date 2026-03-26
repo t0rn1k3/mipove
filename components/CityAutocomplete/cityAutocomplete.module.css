@@ -8,16 +8,12 @@
   padding: 0.75rem 1rem;
   padding-right: 2rem;
   background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: var(--radius-xl);
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--teal-light);
 }
 
 .spinner {
