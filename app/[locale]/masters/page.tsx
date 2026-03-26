@@ -24,22 +24,7 @@ export default function MastersPage() {
   const [viewerRole, setViewerRole] = useState<string | null>(null);
   const [viewerMasterSlug, setViewerMasterSlug] = useState<string | null>(null);
   const [myRatingsBySlug, setMyRatingsBySlug] = useState<Record<string, number>>({});
-
-  const applyFilters = useCallback(
-    async (params?: { location?: string; specialty?: string; search?: string }) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getMasters(params);
-        setMasters(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("failedToLoad"));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [t],
-  );
+  const [isFiltersReady, setIsFiltersReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,6 +83,7 @@ export default function MastersPage() {
           ),
         ).sort((a, b) => a.localeCompare(b));
         setAllSpecialties(specialties);
+        setIsFiltersReady(true);
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : t("failedToLoad"));
@@ -111,13 +97,28 @@ export default function MastersPage() {
     };
   }, [searchParams, t]);
 
-  const handleSearch = useCallback(() => {
-    void applyFilters({
-      location: location || undefined,
-      specialty: specialty || undefined,
-      search: search || undefined,
-    });
-  }, [applyFilters, location, specialty, search]);
+  useEffect(() => {
+    if (!isFiltersReady) return;
+    const timeoutId = window.setTimeout(() => {
+      setLoading(true);
+      setError(null);
+      void getMasters({
+        location: location || undefined,
+        specialty: specialty || undefined,
+        search: search || undefined,
+      })
+        .then((data) => {
+          setMasters(data);
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : t("failedToLoad"));
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, 300);
+    return () => window.clearTimeout(timeoutId);
+  }, [isFiltersReady, location, specialty, search, t]);
 
   const handleRateMaster = useCallback(
     async (masterSlug: string, stars: number) => {
@@ -167,13 +168,7 @@ export default function MastersPage() {
   const specialtyOptions = useMemo(() => allSpecialties, [allSpecialties]);
 
   const filtersEl = (
-    <form
-      className={styles.filters}
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSearch();
-      }}
-    >
+    <div className={styles.filters}>
       <div className={styles.filterField}>
         <label htmlFor="filter-specialty" className={styles.filterLabel}>{tCommon("specialty")}</label>
         <select
@@ -196,14 +191,7 @@ export default function MastersPage() {
           id="filter-location"
           value={location}
           onChange={setLocation}
-          onSelect={(selectedValue) => {
-            setLocation(selectedValue);
-            void applyFilters({
-              location: selectedValue || undefined,
-              specialty: specialty || undefined,
-              search: search || undefined,
-            });
-          }}
+          onSelect={setLocation}
           placeholder={t("filterByCity")}
         />
       </div>
@@ -218,12 +206,7 @@ export default function MastersPage() {
           className={styles.filterInput}
         />
       </div>
-      <div className={styles.filterActions}>
-        <button type="submit" className={styles.searchBtn} disabled={loading}>
-          {loading ? t("searching") : t("searchButton")}
-        </button>
-      </div>
-    </form>
+    </div>
   );
 
   if (loading) {
