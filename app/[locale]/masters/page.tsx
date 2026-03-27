@@ -101,7 +101,7 @@ export default function MastersPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, t]);
-
+  
   useEffect(() => {
     if (!isFiltersReady) return;
     if (skipNextDebounce.current) {

@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
-import { MapPin, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link as I18nLink } from "@/i18n/navigation";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
 import {
   getMe,
   getProfileBySlug,
@@ -410,74 +410,7 @@ export default function ProfilePage() {
 
             <div className={styles.main}>
               {userRole === "user" && isOwnProfile ? (
-                <>
-                  <div
-                    className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
-                  >
-                    <h2 className={styles.portfolioTitle}>Rated Masters</h2>
-                    <p className={styles.portfolioSubtitle}>
-                      Masters you have rated
-                    </p>
-                  </div>
-
-                  {ratedMasters.length === 0 ? (
-                    <p className={styles.emptyRated}>
-                      You haven&apos;t rated any masters yet.
-                    </p>
-                  ) : (
-                    <div className={styles.ratedMastersGrid}>
-                      {ratedMasters.map((item, index) => (
-                        <Link
-                          key={item.master._id + item.ratedAt}
-                          href={`/profile/${item.master.slug}`}
-                          className={`${styles.ratedMasterCard} ${styles.scrollReveal} ${
-                            [
-                              styles.scrollRevealDelay2,
-                              styles.scrollRevealDelay3,
-                              styles.scrollRevealDelay4,
-                              styles.scrollRevealDelay5,
-                              styles.scrollRevealDelay6,
-                              styles.scrollRevealDelay7,
-                            ][index] ?? styles.scrollRevealDelay7
-                          }`}
-                        >
-                          <div className={styles.ratedMasterImageWrap}>
-                            <Image
-                              src={
-                                getImageUrl(item.master.image) ||
-                                "https://ui-avatars.com/api/?name=" +
-                                  encodeURIComponent(item.master.name) +
-                                  "&size=200"
-                              }
-                              alt={item.master.name}
-                              width={160}
-                              height={160}
-                              className={styles.ratedMasterImage}
-                            />
-                            <div className={styles.ratedMasterStars}>
-                              <Star size={16} fill="currentColor" />
-                              <span>{item.stars}</span>
-                            </div>
-                          </div>
-                          <h3 className={styles.ratedMasterName}>
-                            {item.master.name}
-                          </h3>
-                          {item.master.specialty && (
-                            <p className={styles.ratedMasterSpecialty}>
-                              {item.master.specialty}
-                            </p>
-                          )}
-                          {item.master.location && (
-                            <div className={styles.ratedMasterLocation}>
-                              <MapPin size={14} />
-                              <span>{item.master.location}</span>
-                            </div>
-                          )}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </>
+                <RatedMastersList ratedMasters={ratedMasters} />
               ) : (
                 <>
                   {isMasterProfile && (
