@@ -21,7 +21,6 @@
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
   margin-bottom: 2rem;
   max-width: 1000px;
   margin-left: auto;
@@ -31,6 +30,14 @@
 .filterField {
   flex: 1;
   min-width: 180px;
+}
+.filterField:first-child .filterInput,
+.filterField:first-child button[role="combobox"] {
+  border-radius: 9999px 0 0 9999px;
+}
+.filterField:last-child .filterInput,
+.filterField:last-child button[role="combobox"] {
+  border-radius: 0 9999px 9999px 0;
 }
 
 .filterInputWrap {
@@ -50,14 +57,12 @@
 
 .filterInput {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1rem;
   padding-left: 2.5rem;
   background: white;
   font-size: 1rem;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  
   color: #374151;
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .filterInput::placeholder {
@@ -66,47 +71,12 @@
 
 .filterInput:focus {
   outline: none;
-  border-color: #008080;
-  box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2);
 }
 
-.filterSelect {
-  appearance: none;
-  cursor: pointer;
-  padding-right: 2.5rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-}
 
 .mastersCityAutocomplete {
   width: 100%;
 }
-
-.mastersCityAutocomplete input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  padding-left: 2.5rem;
-  padding-right: 2rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 1rem;
-  color: #374151;
-  box-shadow: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.mastersCityAutocomplete input:focus {
-  outline: none;
-  border-color: #008080;
-  box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2);
-}
-
-.mastersCityAutocomplete input::placeholder {
-  color: #768283;
-}
-
 .loading,
 .error,
 .empty {

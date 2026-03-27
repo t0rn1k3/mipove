@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -9,6 +9,7 @@ import styles from "./mastersPage.module.css";
 import { getMasters, getMe, rateMaster } from "@/lib/api";
 import type { MasterListItem } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import CustomSelect from "@/components/CustomSelect/CustomSelect";
 import MasterCard from "@/components/MasterCard/MasterCard";
 
 export default function MastersPage() {
@@ -26,6 +27,7 @@ export default function MastersPage() {
   const [viewerMasterSlug, setViewerMasterSlug] = useState<string | null>(null);
   const [myRatingsBySlug, setMyRatingsBySlug] = useState<Record<string, number>>({});
   const [isFiltersReady, setIsFiltersReady] = useState(false);
+  const skipNextDebounce = useRef(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,9 +58,9 @@ export default function MastersPage() {
     const specialtyFromUrl = searchParams.get("specialty") ?? "";
     const locationFromUrl = searchParams.get("location") ?? "";
     const searchFromUrl = searchParams.get("search") ?? "";
-    setSpecialty(specialtyFromUrl);
-    setLocation(locationFromUrl);
-    setSearch(searchFromUrl);
+    if (specialtyFromUrl !== specialty) setSpecialty(specialtyFromUrl);
+    if (locationFromUrl !== location) setLocation(locationFromUrl);
+    if (searchFromUrl !== search) setSearch(searchFromUrl);
 
     let cancelled = false;
     const init = async () => {
@@ -84,6 +86,7 @@ export default function MastersPage() {
           ),
         ).sort((a, b) => a.localeCompare(b));
         setAllSpecialties(specialties);
+        skipNextDebounce.current = true;
         setIsFiltersReady(true);
       } catch (err) {
         if (cancelled) return;
@@ -96,10 +99,15 @@ export default function MastersPage() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, t]);
 
   useEffect(() => {
     if (!isFiltersReady) return;
+    if (skipNextDebounce.current) {
+      skipNextDebounce.current = false;
+      return;
+    }
     const timeoutId = window.setTimeout(() => {
       setLoading(true);
       setError(null);
@@ -166,7 +174,13 @@ export default function MastersPage() {
     [myRatingsBySlug],
   );
 
-  const specialtyOptions = useMemo(() => allSpecialties, [allSpecialties]);
+  const specialtySelectOptions = useMemo(
+    () => [
+      { value: "", label: t("allSpecialties") },
+      ...allSpecialties.map((s) => ({ value: s, label: s })),
+    ],
+    [allSpecialties, t],
+  );
 
   const filtersEl = (
     <div className={styles.filters}>
@@ -205,7 +219,7 @@ export default function MastersPage() {
             onChange={setLocation}
             onSelect={(v) => setLocation(v)}
             placeholder={t("filterByCity")}
-            className={styles.mastersCityAutocomplete}
+            className={styles.filterInput}
           />
         </div>
       </div>
@@ -219,20 +233,14 @@ export default function MastersPage() {
             height={20}
             className={styles.filterIcon}
           />
-          <select
+          <CustomSelect
             id="filter-specialty"
+            options={specialtySelectOptions}
             value={specialty}
-            onChange={(e) => setSpecialty(e.target.value)}
-            className={`${styles.filterInput} ${styles.filterSelect}`}
+            onChange={setSpecialty}
+            placeholder={t("allSpecialties")}
             aria-label={tCommon("specialty")}
-          >
-            <option value="">{t("allSpecialties")}</option>
-            {specialtyOptions.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </div>
     </div>
@@ -241,8 +249,6 @@ export default function MastersPage() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>{t("title")}</h1>
-        <p className={styles.description}>{t("description")}</p>
         {filtersEl}
         <div className={styles.loading}>
           <p>{t("loadingMasters")}</p>
@@ -254,8 +260,6 @@ export default function MastersPage() {
   if (error) {
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>{t("title")}</h1>
-        <p className={styles.description}>{t("description")}</p>
         {filtersEl}
         <div className={styles.error}>
           <p>{error}</p>
@@ -266,10 +270,6 @@ export default function MastersPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>{t("title")}</h1>
-      <p className={styles.description}>
-        {t("description")}
-      </p>
 
       {filtersEl}
 

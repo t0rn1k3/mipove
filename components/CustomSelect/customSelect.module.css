@@ -1,0 +1,101 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1.2rem 1rem;
+  padding-left: 2.5rem;
+  background: white;
+  border: none;
+  font-size: 1rem;
+  color: #374151;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.trigger:focus-visible {
+  outline: none;
+  border-color: #008080;
+  box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2);
+}
+
+.trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.triggerText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.triggerPlaceholder {
+  color: #768283;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #374151;
+  transition: background 0.15s;
+}
+
+.item:hover {
+  background: #f3f4f6;
+}
+
+.itemSelected {
+  color: #008080;
+  font-weight: 600;
+}
+
+.checkIcon {
+  flex-shrink: 0;
+  color: #008080;
+}
+
+.item:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
+}
