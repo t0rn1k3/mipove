@@ -3,12 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { Star } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link as I18nLink } from "@/i18n/navigation";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import MasterRatingSection from "@/components/MasterRatingSection/MasterRatingSection";
 import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
 import {
   getMe,
@@ -381,6 +380,11 @@ export default function ProfilePage() {
     }
   };
 
+  const handleRateSelect = (stars: number) => {
+    setRateSelected(stars);
+    setRateSuccess(false);
+  };
+
   if (loading) {
     return (
       <div className={styles.page}>
@@ -413,99 +417,24 @@ export default function ProfilePage() {
                 <RatedMastersList ratedMasters={ratedMasters} />
               ) : (
                 <>
-                  {isMasterProfile && (
-                    <div className={styles.masterRatingSummary}>
-                      <div className={styles.masterRatingStars} aria-hidden>
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <Star
-                            key={n}
-                            size={18}
-                            className={
-                              n <= Math.floor(profile.rating ?? 0)
-                                ? styles.masterRatingStarFilled
-                                : styles.masterRatingStarEmpty
-                            }
-                          />
-                        ))}
-                      </div>
-                      <p className={styles.masterRatingText}>
-                        {Number((profile.rating ?? 0)).toFixed(1)} ({profile.reviewCount ?? 0}{" "}
-                        {tProfile("votes")})
-                      </p>
-                    </div>
-                  )}
-                  {!isOwnProfile && slug && slug !== "me" && (
-                    !canVoteRole ? (
-                      <div className={styles.ratePanel}>
-                        <h2 className={styles.rateTitle}>{tProfile("rateThisMaster")}</h2>
-                        <p className={styles.rateSignIn}>
-                          {userRole === null ? (
-                            <>
-                              {tProfile("signInToRate")}{" "}
-                              <I18nLink href="/join" className={styles.rateSignInLink}>
-                                {tProfile("signInLink")}
-                              </I18nLink>
-                            </>
-                          ) : (
-                            tProfile("ratingNotAllowed")
-                          )}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className={styles.ratePanel}>
-                        <h2 className={styles.rateTitle}>{tProfile("rateThisMaster")}</h2>
-                        <p className={styles.rateSubtitle}>
-                          {rateInitialStars != null
-                            ? tProfile("updateRatingHint")
-                            : tProfile("yourRatingHint")}
-                        </p>
-                        <div
-                          className={styles.rateStarsRow}
-                          role="group"
-                          aria-label={tProfile("yourRating")}
-                          onMouseLeave={() => setRateHover(0)}
-                        >
-                          {[1, 2, 3, 4, 5].map((n) => {
-                            const displayStars = rateHover || rateSelected;
-                            return (
-                              <button
-                                key={n}
-                                type="button"
-                                className={`${styles.rateStarBtn} ${n <= displayStars ? styles.rateStarBtnActive : ""}`}
-                                onMouseEnter={() => setRateHover(n)}
-                                onClick={() => {
-                                  setRateSelected(n);
-                                  setRateSuccess(false);
-                                }}
-                                aria-label={tProfile("starLabel", { n })}
-                              >
-                                <Star
-                                  size={28}
-                                  fill={n <= displayStars ? "currentColor" : "none"}
-                                />
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.rateSubmitBtn}
-                          disabled={rateSelected < 1 || rateSubmitting}
-                          onClick={() => void handleRateSubmit()}
-                        >
-                          {rateSubmitting
-                            ? tProfile("saving")
-                            : rateInitialStars != null
-                              ? tProfile("updateRating")
-                              : tProfile("submitRating")}
-                        </button>
-                        {rateSuccess && (
-                          <p className={styles.rateSuccess}>{tProfile("ratingSaved")}</p>
-                        )}
-                        {rateError && <p className={styles.rateError}>{rateError}</p>}
-                      </div>
-                    )
-                  )}
+                  <MasterRatingSection
+                    isMasterProfile={isMasterProfile}
+                    rating={profile.rating}
+                    reviewCount={profile.reviewCount}
+                    isOwnProfile={isOwnProfile}
+                    slug={slug}
+                    canVoteRole={canVoteRole}
+                    userRole={userRole}
+                    rateInitialStars={rateInitialStars}
+                    rateHover={rateHover}
+                    rateSelected={rateSelected}
+                    rateSubmitting={rateSubmitting}
+                    rateSuccess={rateSuccess}
+                    rateError={rateError}
+                    onRateHover={setRateHover}
+                    onRateSelect={handleRateSelect}
+                    onRateSubmit={() => void handleRateSubmit()}
+                  />
                   <div
                     className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
                   >
