@@ -1,63 +1,3 @@
-/* Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.scrollReveal {
-  opacity: 0;
-}
-
-.visible .scrollReveal {
-  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.visible .scrollRevealDelay1 {
-  animation-delay: 0.1s;
-}
-.visible .scrollRevealDelay2 {
-  animation-delay: 0.15s;
-}
-.visible .scrollRevealDelay3 {
-  animation-delay: 0.2s;
-}
-.visible .scrollRevealDelay4 {
-  animation-delay: 0.25s;
-}
-.visible .scrollRevealDelay5 {
-  animation-delay: 0.3s;
-}
-.visible .scrollRevealDelay6 {
-  animation-delay: 0.35s;
-}
-.visible .scrollRevealDelay7 {
-  animation-delay: 0.4s;
-}
-.visible .scrollRevealDelay8 {
-  animation-delay: 0.45s;
-}
-.visible .scrollRevealDelay9 {
-  animation-delay: 0.5s;
-}
-.visible .scrollRevealDelay10 {
-  animation-delay: 0.55s;
-}
-.visible .scrollRevealDelay11 {
-  animation-delay: 0.6s;
-}
-.visible .scrollRevealDelay12 {
-  animation-delay: 0.65s;
-}
-.visible .scrollRevealDelay13 {
-  animation-delay: 0.7s;
-}
-
 /* Page */
 .page {
   min-height: 100vh;
@@ -89,18 +29,6 @@
   padding-left: 0.5rem;
 }
 
-.portfolioHeader {
-  margin-bottom: 2rem;
-}
-
-.portfolioTitle {
-  font-family: var(--font-serif);
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: var(--charcoal);
-  margin-bottom: 0.5rem;
-}
-
 .portfolioSubtitle {
   color: #6b7280;
   font-size: 1rem;
@@ -113,90 +41,6 @@
   padding: 2rem 0;
 }
 
-/* Masonry grid (CSS columns) */
-.masonry {
-  column-count: 2;
-  column-gap: 1.5rem;
-}
-
-.workCard {
-  position: relative;
-  break-inside: avoid;
-  margin-bottom: 1.5rem;
-  cursor: pointer;
-  background: white;
-  border-radius: var(--radius-2xl);
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.workCard:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
-}
-
-.workImageWrapper {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 4 / 5;
-}
-
-.workImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.workCard:hover .workImage {
-  transform: scale(1.05);
-}
-
-.workOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.workCard:hover .workOverlay {
-  opacity: 1;
-}
-
-.workCaption {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  color: white;
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
-}
-
-.workCard:hover .workCaption {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.workTitle {
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.workDescription {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.9);
-}
 
 /* Contact section */
 .contactSection {
@@ -391,10 +235,6 @@
   min-height: 100px;
 }
 
-.hiddenInput {
-  display: none;
-}
-
 .editError {
   color: #dc2626;
   font-size: 0.875rem;
@@ -421,71 +261,6 @@
   font-weight: 700;
   color: var(--charcoal);
   margin: 0;
-}
-
-.portfolioAddBtn {
-  padding: 0.6rem 0.9rem;
-  background: var(--teal);
-  color: #fff;
-  border-radius: 9999px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(91, 154, 158, 0.2);
-  transition: transform 0.2s, background 0.2s;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.portfolioAddBtn:hover {
-  background: rgba(91, 154, 158, 0.9);
-  transform: translateY(-1px);
-}
-
-.portfolioGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.portfolioThumb {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #f3f4f6;
-  aspect-ratio: 1;
-}
-
-.portfolioThumbImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.portfolioPending {
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.portfolioPendingLabel {
-  margin: 0;
-  color: #374151;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.portfolioActions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.portfolioActions .cancelBtn,
-.portfolioActions .submitBtn {
-  width: auto;
 }
 
 .modalActions {
@@ -530,23 +305,11 @@
     padding-left: 0;
   }
 
-  .portfolioTitle {
-    font-size: 2rem;
-  }
 }
 
 @media (max-width: 768px) {
   .container {
     padding: 90px 1rem 2rem;
-  }
-
-  .masonry {
-    column-count: 1;
-    column-gap: 1rem;
-  }
-
-  .workCard {
-    margin-bottom: 1rem;
   }
 
   .formRow {
@@ -561,16 +324,9 @@
     width: 100%;
   }
 
-  .portfolioGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 480px) {
-  .portfolioTitle {
-    font-size: 1.5rem;
-  }
-
   .contactTitle {
     font-size: 1.5rem;
   }

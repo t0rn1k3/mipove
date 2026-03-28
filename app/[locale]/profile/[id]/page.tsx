@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import MasterRatingSection from "@/components/MasterRatingSection/MasterRatingSection";
+import PortfolioSection from "@/components/PortfolioSection/PortfolioSection";
 import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
 import {
   getMe,
@@ -397,7 +397,7 @@ export default function ProfilePage() {
 
   return (
     <div className={styles.page} ref={sectionRef}>
-      <div className={isVisible ? styles.visible : ""}>
+      <div>
         <div className={styles.container}>
           <div className={styles.grid}>
             <div className={styles.sidebar}>
@@ -435,114 +435,19 @@ export default function ProfilePage() {
                     onRateSelect={handleRateSelect}
                     onRateSubmit={() => void handleRateSubmit()}
                   />
-                  <div
-                    className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
-                  >
-                    <h2 className={styles.portfolioTitle}>Portfolio</h2>
-                    {userRole === "master" && isOwnProfile && (
-                      <label className={styles.portfolioAddBtn}>
-                        {portfolioUploading ? "Uploading..." : "Add photos"}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          className={styles.hiddenInput}
-                          disabled={portfolioUploading}
-                          onChange={(e) => {
-                            handleSelectPortfolioFiles(e.currentTarget.files);
-                            e.currentTarget.value = "";
-                          }}
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  {selectedPortfolioPreviews.length > 0 && (
-                    <div className={styles.portfolioPending}>
-                      {portfolioError && <p className={styles.editError}>{portfolioError}</p>}
-                      <p className={styles.portfolioPendingLabel}>
-                        Ready to upload ({selectedPortfolioPreviews.length})
-                      </p>
-                      <div className={styles.portfolioGrid}>
-                        {selectedPortfolioPreviews.map((src) => (
-                          <div key={src} className={styles.portfolioThumb}>
-                            <Image
-                              src={src}
-                              alt="Selected portfolio"
-                              width={160}
-                              height={160}
-                              className={styles.portfolioThumbImg}
-                              unoptimized
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      <div className={styles.portfolioActions}>
-                        <button
-                          type="button"
-                          className={styles.cancelBtn}
-                          onClick={clearSelectedPortfolio}
-                          disabled={portfolioUploading}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.submitBtn}
-                          onClick={handleUploadPortfolio}
-                          disabled={portfolioUploading}
-                        >
-                          {portfolioUploading ? "Uploading..." : "Upload photos"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {profile.portfolioImages.length > 0 && (
-                    <div className={styles.masonry}>
-                      {profile.portfolioImages.map((src, index) => (
-                        <div
-                          key={src}
-                          className={`${styles.workCard} ${styles.scrollReveal} ${
-                            [
-                              styles.scrollRevealDelay2,
-                              styles.scrollRevealDelay3,
-                              styles.scrollRevealDelay4,
-                              styles.scrollRevealDelay5,
-                              styles.scrollRevealDelay6,
-                              styles.scrollRevealDelay7,
-                              styles.scrollRevealDelay8,
-                              styles.scrollRevealDelay9,
-                              styles.scrollRevealDelay10,
-                              styles.scrollRevealDelay11,
-                              styles.scrollRevealDelay12,
-                              styles.scrollRevealDelay13,
-                            ][index]
-                          }`}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => setSelectedPortfolioIndex(index)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              setSelectedPortfolioIndex(index);
-                            }
-                          }}
-                        >
-                          <div className={styles.workImageWrapper}>
-                            <Image
-                              src={src}
-                              alt="Portfolio image"
-                              width={400}
-                              height={500}
-                              className={styles.workImage}
-                            />
-                            <div className={styles.workOverlay} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <PortfolioSection
+                    portfolioImages={profile.portfolioImages}
+                    selectedPortfolioPreviews={selectedPortfolioPreviews}
+                    portfolioUploading={portfolioUploading}
+                    portfolioError={portfolioError}
+                    userRole={userRole}
+                    isOwnProfile={isOwnProfile}
+                    isVisible={isVisible}
+                    onSelectPortfolioFiles={handleSelectPortfolioFiles}
+                    onClearSelectedPortfolio={clearSelectedPortfolio}
+                    onUploadPortfolio={() => void handleUploadPortfolio()}
+                    onOpenPortfolio={setSelectedPortfolioIndex}
+                  />
                 </>
               )}
             </div>
