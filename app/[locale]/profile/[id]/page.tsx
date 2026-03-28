@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
+import EditProfileModal from "@/components/EditProfileModal/EditProfileModal";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
-import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import MasterRatingSection from "@/components/MasterRatingSection/MasterRatingSection";
 import PortfolioSection from "@/components/PortfolioSection/PortfolioSection";
 import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
@@ -455,124 +455,23 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {showEditModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Edit Profile</h2>
-              <button
-                type="button"
-                className={styles.modalClose}
-                onClick={() => setShowEditModal(false)}
-                aria-label="Close"
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleEditSubmit} className={styles.editForm}>
-              {editError && <p className={styles.editError}>{editError}</p>}
-              <div className={styles.formRow}>
-                <div className={styles.formField}>
-                  <label htmlFor="edit-name">Name</label>
-                  <input
-                    id="edit-name"
-                    name="name"
-                    defaultValue={profile.name}
-                    required
-                  />
-                </div>
-                <div className={styles.formField}>
-                  <label htmlFor="edit-email">Email</label>
-                  <input
-                    id="edit-email"
-                    name="email"
-                    type="email"
-                    defaultValue={profile.email}
-                    required
-                  />
-                </div>
-              </div>
-              <div className={styles.formField}>
-                <label htmlFor="edit-phone">Phone</label>
-                <input
-                  id="edit-phone"
-                  name="phone"
-                  type="tel"
-                  defaultValue={profile.phone}
-                />
-              </div>
-              <div className={styles.formRow}>
-                <div className={styles.formField}>
-                  <label htmlFor="edit-specialty">Specialty</label>
-                  <input
-                    id="edit-specialty"
-                    name="specialty"
-                    defaultValue={profile.specialty === "—" ? "" : profile.specialty}
-                  />
-                </div>
-                <div className={styles.formField}>
-                  <label htmlFor="edit-location">Location</label>
-                  <CityAutocomplete
-                    id="edit-location"
-                    name="location"
-                    defaultValue={profile.location === "—" ? "" : profile.location}
-                    placeholder="Start typing a city..."
-                  />
-                </div>
-              </div>
-              <div className={styles.formField}>
-                <label htmlFor="edit-bio">Bio</label>
-                <textarea
-                  id="edit-bio"
-                  name="bio"
-                  rows={4}
-                  defaultValue={profile.bio}
-                />
-              </div>
-              <div className={styles.formRow}>
-                <div className={styles.formField}>
-                  <label htmlFor="edit-instagram">Instagram</label>
-                  <input
-                    id="edit-instagram"
-                    name="instagram"
-                    defaultValue={profile.instagram || ""}
-                    placeholder="@username"
-                  />
-                </div>
-                <div className={styles.formField}>
-                  <label htmlFor="edit-website">Website</label>
-                  <input
-                    id="edit-website"
-                    name="website"
-                    type="url"
-                    defaultValue={profile.website || ""}
-                    placeholder="https://"
-                  />
-                </div>
-              </div>
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  className={styles.cancelBtn}
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={editLoading}
-                >
-                  {editLoading ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <EditProfileModal
+        open={showEditModal}
+        values={{
+          name: profile.name,
+          email: profile.email,
+          phone: profile.phone,
+          specialty: profile.specialty,
+          location: profile.location,
+          bio: profile.bio,
+          instagram: profile.instagram,
+          website: profile.website,
+        }}
+        editError={editError}
+        editLoading={editLoading}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleEditSubmit}
+      />
 
       {selectedWork && (
         <LightboxModal
