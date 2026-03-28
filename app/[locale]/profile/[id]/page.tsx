@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import EditProfileModal from "@/components/EditProfileModal/EditProfileModal";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
+import PortfolioLightbox from "@/components/PortfolioLightbox/PortfolioLightbox";
 import MasterRatingSection from "@/components/MasterRatingSection/MasterRatingSection";
 import PortfolioSection from "@/components/PortfolioSection/PortfolioSection";
 import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
@@ -482,15 +483,13 @@ export default function ProfilePage() {
         />
       )}
 
-      {selectedPortfolioIndex !== null && profile.portfolioImages.length > 0 && (
-        <LightboxModal
-          images={profile.portfolioImages}
-          index={selectedPortfolioIndex}
-          onIndexChange={setSelectedPortfolioIndex}
-          title="Portfolio"
-          onClose={() => setSelectedPortfolioIndex(null)}
-        />
-      )}
+      <PortfolioLightbox
+        images={profile.portfolioImages}
+        index={selectedPortfolioIndex}
+        onIndexChange={setSelectedPortfolioIndex}
+        title="Portfolio"
+        onClose={() => setSelectedPortfolioIndex(null)}
+      />
     </div>
   );
 }
