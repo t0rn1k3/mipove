@@ -1,8 +1,7 @@
-  "use client";
+"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import EditProfileModal from "@/components/EditProfileModal/EditProfileModal";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
@@ -12,13 +11,12 @@ import PortfolioSection from "@/components/PortfolioSection/PortfolioSection";
 import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
 import {
   getMe,
+  fetchMyPortfolio,
   getProfileBySlug,
   updateProfile,
   logout,
   getImageUrl,
   uploadProfileImage,
-  fetchMyPortfolio,
-  uploadPortfolioImages,
   rateMaster,
 } from "@/lib/api";
 import type { RatedMasterItem } from "@/lib/types";
@@ -108,7 +106,6 @@ function mapMeToProfile(
 }
 
 export default function ProfilePage() {
-  const tProfile = useTranslations("profile");
   const params = useParams();
   const router = useRouter();
   const slug = params?.id as string | undefined;
@@ -122,33 +119,10 @@ export default function ProfilePage() {
   const [photoError, setPhotoError] = useState("");
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
   const [selectedPortfolioIndex, setSelectedPortfolioIndex] = useState<number | null>(null);
-  const [selectedPortfolioFiles, setSelectedPortfolioFiles] = useState<File[]>([]);
-  const [selectedPortfolioPreviews, setSelectedPortfolioPreviews] = useState<string[]>([]);
-  const [portfolioUploading, setPortfolioUploading] = useState(false);
-  const [portfolioError, setPortfolioError] = useState("");
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(true);
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true);
-      },
-      { threshold: 0, rootMargin: "0px" },
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
 
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isMasterProfile, setIsMasterProfile] = useState(false);
   const [ratedMasters, setRatedMasters] = useState<RatedMasterItem[]>([]);
-  const [rateHover, setRateHover] = useState(0);
-  const [rateSelected, setRateSelected] = useState(0);
-  const [rateSubmitting, setRateSubmitting] = useState(false);
-  const [rateSuccess, setRateSuccess] = useState(false);
-  const [rateError, setRateError] = useState("");
 
   const rateInitialStars =
     slug && slug !== "me"
@@ -157,15 +131,6 @@ export default function ProfilePage() {
         )?.stars ?? null)
       : null;
   const canVoteRole = userRole === "user" || userRole === "master";
-
-  useEffect(() => {
-    setRateSuccess(false);
-  }, [slug]);
-
-  useEffect(() => {
-    setRateSelected(rateInitialStars ?? 0);
-    setRateError("");
-  }, [rateInitialStars, slug]);
 
   useEffect(() => {
     if (!slug) {
@@ -293,97 +258,25 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSelectPortfolioFiles = (files: FileList | null) => {
-    setPortfolioError("");
-    if (!files || files.length === 0) return;
-
-    const currentCount = profile.portfolioImages?.length ?? 0;
-    const nextCount = currentCount + files.length;
-    if (nextCount > 30) {
-      setPortfolioError(`You can have up to 30 portfolio images (currently ${currentCount}).`);
-      return;
+  const submitRating = async (stars: number) => {
+    if (!slug || slug === "me" || stars < 1) return;
+    const res = await rateMaster(slug, stars);
+    if (res.data?.rating != null || res.data?.reviewCount != null) {
+      setProfile((prev) => ({
+        ...prev,
+        rating: res.data?.rating ?? prev.rating,
+        reviewCount: res.data?.reviewCount ?? prev.reviewCount,
+      }));
     }
-
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    const arr = Array.from(files);
-    for (const f of arr) {
-      if (!allowedTypes.includes(f.type)) {
-        setPortfolioError("Only JPG, PNG, or WebP images are allowed.");
-        return;
-      }
-      if (f.size > 4 * 1024 * 1024) {
-        setPortfolioError("Each image must be 4MB or smaller.");
-        return;
-      }
+    if (res.data?.ratedMasters?.length) {
+      setRatedMasters(res.data.ratedMasters);
     }
-
-    const previews = arr.map((f) => URL.createObjectURL(f));
-    setSelectedPortfolioFiles(arr);
-    setSelectedPortfolioPreviews(previews);
-  };
-
-  const clearSelectedPortfolio = () => {
-    for (const url of selectedPortfolioPreviews) URL.revokeObjectURL(url);
-    setSelectedPortfolioFiles([]);
-    setSelectedPortfolioPreviews([]);
-  };
-
-  const handleRateSubmit = async () => {
-    if (!slug || slug === "me" || rateSelected < 1 || rateSubmitting) return;
-    setRateError("");
-    setRateSuccess(false);
-    setRateSubmitting(true);
     try {
-      const res = await rateMaster(slug, rateSelected);
-      if (res.data?.rating != null || res.data?.reviewCount != null) {
-        setProfile((prev) => ({
-          ...prev,
-          rating: res.data?.rating ?? prev.rating,
-          reviewCount: res.data?.reviewCount ?? prev.reviewCount,
-        }));
-      }
-      if (res.data?.ratedMasters?.length) {
-        setRatedMasters(res.data.ratedMasters);
-      }
-      try {
-        const { data } = await getMe();
-        setRatedMasters(data.ratedMasters ?? res.data?.ratedMasters ?? []);
-      } catch {
-        /* keep ratedMasters from rate response or prior state */
-      }
-      setRateSuccess(true);
-    } catch (e) {
-      setRateError(e instanceof Error ? e.message : tProfile("ratingError"));
-    } finally {
-      setRateSubmitting(false);
+      const { data } = await getMe();
+      setRatedMasters(data.ratedMasters ?? res.data?.ratedMasters ?? []);
+    } catch {
+      /* keep ratedMasters from rate response or prior state */
     }
-  };
-
-  const handleUploadPortfolio = async () => {
-    setPortfolioError("");
-    if (selectedPortfolioFiles.length === 0) return;
-
-    setPortfolioUploading(true);
-    try {
-      const list = await uploadPortfolioImages(selectedPortfolioFiles);
-      setProfile((p) => ({ ...p, portfolioImages: list }));
-      clearSelectedPortfolio();
-    } catch (err) {
-      setPortfolioError(err instanceof Error ? err.message : "Upload failed");
-      if (userRole === "master" && isOwnProfile) {
-        try {
-          const list = await fetchMyPortfolio();
-          setProfile((p) => ({ ...p, portfolioImages: list }));
-        } catch {}
-      }
-    } finally {
-      setPortfolioUploading(false);
-    }
-  };
-
-  const handleRateSelect = (stars: number) => {
-    setRateSelected(stars);
-    setRateSuccess(false);
   };
 
   if (loading) {
@@ -397,7 +290,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className={styles.page} ref={sectionRef}>
+    <div className={styles.page}>
       <div>
         <div className={styles.container}>
           <div className={styles.grid}>
@@ -427,26 +320,15 @@ export default function ProfilePage() {
                     canVoteRole={canVoteRole}
                     userRole={userRole}
                     rateInitialStars={rateInitialStars}
-                    rateHover={rateHover}
-                    rateSelected={rateSelected}
-                    rateSubmitting={rateSubmitting}
-                    rateSuccess={rateSuccess}
-                    rateError={rateError}
-                    onRateHover={setRateHover}
-                    onRateSelect={handleRateSelect}
-                    onRateSubmit={() => void handleRateSubmit()}
+                    onRateSubmit={submitRating}
                   />
                   <PortfolioSection
                     portfolioImages={profile.portfolioImages}
-                    selectedPortfolioPreviews={selectedPortfolioPreviews}
-                    portfolioUploading={portfolioUploading}
-                    portfolioError={portfolioError}
+                    onPortfolioImagesChange={(list) =>
+                      setProfile((p) => ({ ...p, portfolioImages: list }))
+                    }
                     userRole={userRole}
                     isOwnProfile={isOwnProfile}
-                    isVisible={isVisible}
-                    onSelectPortfolioFiles={handleSelectPortfolioFiles}
-                    onClearSelectedPortfolio={clearSelectedPortfolio}
-                    onUploadPortfolio={() => void handleUploadPortfolio()}
                     onOpenPortfolio={setSelectedPortfolioIndex}
                   />
                 </>

@@ -1,35 +1,44 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import {
+  fetchMyPortfolio,
+  uploadPortfolioImages,
+} from "@/lib/api";
 import styles from "./portfolioSection.module.css";
 
 type PortfolioSectionProps = {
   portfolioImages: string[];
-  selectedPortfolioPreviews: string[];
-  portfolioUploading: boolean;
-  portfolioError: string;
+  onPortfolioImagesChange: (images: string[]) => void;
   userRole: string | null;
   isOwnProfile: boolean;
-  isVisible: boolean;
-  onSelectPortfolioFiles: (files: FileList | null) => void;
-  onClearSelectedPortfolio: () => void;
-  onUploadPortfolio: () => void;
   onOpenPortfolio: (index: number) => void;
 };
 
 export default function PortfolioSection({
   portfolioImages,
-  selectedPortfolioPreviews,
-  portfolioUploading,
-  portfolioError,
+  onPortfolioImagesChange,
   userRole,
   isOwnProfile,
-  isVisible,
-  onSelectPortfolioFiles,
-  onClearSelectedPortfolio,
-  onUploadPortfolio,
   onOpenPortfolio,
 }: PortfolioSectionProps) {
+  const [selectedPortfolioFiles, setSelectedPortfolioFiles] = useState<File[]>(
+    [],
+  );
+  const [selectedPortfolioPreviews, setSelectedPortfolioPreviews] = useState<
+    string[]
+  >([]);
+  const [portfolioUploading, setPortfolioUploading] = useState(false);
+  const [portfolioError, setPortfolioError] = useState("");
+
+  useEffect(() => {
+    const urls = selectedPortfolioPreviews;
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, [selectedPortfolioPreviews]);
+
   const delays = [
     styles.visibleDelay2,
     styles.visibleDelay3,
@@ -45,9 +54,72 @@ export default function PortfolioSection({
     styles.visibleDelay13,
   ];
 
+  const handleSelectPortfolioFiles = (files: FileList | null) => {
+    setPortfolioError("");
+    if (!files || files.length === 0) return;
+
+    const currentCount = portfolioImages?.length ?? 0;
+    const nextCount = currentCount + files.length;
+    if (nextCount > 30) {
+      setPortfolioError(
+        `You can have up to 30 portfolio images (currently ${currentCount}).`,
+      );
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const arr = Array.from(files);
+    for (const f of arr) {
+      if (!allowedTypes.includes(f.type)) {
+        setPortfolioError("Only JPG, PNG, or WebP images are allowed.");
+        return;
+      }
+      if (f.size > 4 * 1024 * 1024) {
+        setPortfolioError("Each image must be 4MB or smaller.");
+        return;
+      }
+    }
+
+    const previews = arr.map((f) => URL.createObjectURL(f));
+    setSelectedPortfolioFiles(arr);
+    setSelectedPortfolioPreviews(previews);
+  };
+
+  const clearSelectedPortfolio = () => {
+    for (const url of selectedPortfolioPreviews) URL.revokeObjectURL(url);
+    setSelectedPortfolioFiles([]);
+    setSelectedPortfolioPreviews([]);
+  };
+
+  const handleUploadPortfolio = async () => {
+    setPortfolioError("");
+    if (selectedPortfolioFiles.length === 0) return;
+
+    setPortfolioUploading(true);
+    try {
+      const list = await uploadPortfolioImages(selectedPortfolioFiles);
+      onPortfolioImagesChange(list);
+      clearSelectedPortfolio();
+    } catch (err) {
+      setPortfolioError(err instanceof Error ? err.message : "Upload failed");
+      if (userRole === "master" && isOwnProfile) {
+        try {
+          const list = await fetchMyPortfolio();
+          onPortfolioImagesChange(list);
+        } catch {
+          /* keep prior list */
+        }
+      }
+    } finally {
+      setPortfolioUploading(false);
+    }
+  };
+
   return (
     <>
-      <div className={`${styles.portfolioHeader} ${styles.scrollReveal} ${isVisible ? styles.visibleDelay1 : ""}`}>
+      <div
+        className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.visibleDelay1}`}
+      >
         <h2 className={styles.portfolioTitle}>Portfolio</h2>
         {userRole === "master" && isOwnProfile && (
           <label className={styles.portfolioAddBtn}>
@@ -59,7 +131,7 @@ export default function PortfolioSection({
               className={styles.hiddenInput}
               disabled={portfolioUploading}
               onChange={(e) => {
-                onSelectPortfolioFiles(e.currentTarget.files);
+                handleSelectPortfolioFiles(e.currentTarget.files);
                 e.currentTarget.value = "";
               }}
             />
@@ -91,7 +163,7 @@ export default function PortfolioSection({
             <button
               type="button"
               className={styles.cancelBtn}
-              onClick={onClearSelectedPortfolio}
+              onClick={clearSelectedPortfolio}
               disabled={portfolioUploading}
             >
               Cancel
@@ -99,7 +171,7 @@ export default function PortfolioSection({
             <button
               type="button"
               className={styles.submitBtn}
-              onClick={onUploadPortfolio}
+              onClick={() => void handleUploadPortfolio()}
               disabled={portfolioUploading}
             >
               {portfolioUploading ? "Uploading..." : "Upload photos"}
@@ -113,7 +185,7 @@ export default function PortfolioSection({
           {portfolioImages.map((src, index) => (
             <div
               key={src}
-              className={`${styles.workCard} ${styles.scrollReveal} ${isVisible ? (delays[index] ?? styles.visibleDelay13) : ""}`}
+              className={`${styles.workCard} ${styles.scrollReveal} ${delays[index] ?? styles.visibleDelay13}`}
               role="button"
               tabIndex={0}
               onClick={() => onOpenPortfolio(index)}

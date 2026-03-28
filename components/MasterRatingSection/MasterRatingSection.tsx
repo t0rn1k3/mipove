@@ -1,6 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link as I18nLink } from "@/i18n/navigation";
 import styles from "./masterRatingSection.module.css";
@@ -14,14 +15,7 @@ type MasterRatingSectionProps = {
   canVoteRole: boolean;
   userRole: string | null;
   rateInitialStars: number | null;
-  rateHover: number;
-  rateSelected: number;
-  rateSubmitting: boolean;
-  rateSuccess: boolean;
-  rateError: string;
-  onRateHover: (value: number) => void;
-  onRateSelect: (value: number) => void;
-  onRateSubmit: () => void;
+  onRateSubmit: (stars: number) => Promise<void>;
 };
 
 export default function MasterRatingSection({
@@ -33,16 +27,44 @@ export default function MasterRatingSection({
   canVoteRole,
   userRole,
   rateInitialStars,
-  rateHover,
-  rateSelected,
-  rateSubmitting,
-  rateSuccess,
-  rateError,
-  onRateHover,
-  onRateSelect,
   onRateSubmit,
 }: MasterRatingSectionProps) {
   const tProfile = useTranslations("profile");
+  const [rateHover, setRateHover] = useState(0);
+  const [rateSelected, setRateSelected] = useState(0);
+  const [rateSubmitting, setRateSubmitting] = useState(false);
+  const [rateSuccess, setRateSuccess] = useState(false);
+  const [rateError, setRateError] = useState("");
+
+  useEffect(() => {
+    setRateSuccess((s) => (s ? false : s));
+  }, [slug]);
+
+  useEffect(() => {
+    const target = rateInitialStars ?? 0;
+    setRateSelected((s) => (s !== target ? target : s));
+    setRateError((e) => (e !== "" ? "" : e));
+  }, [rateInitialStars, slug]);
+
+  const handleRateSelect = (stars: number) => {
+    setRateSelected(stars);
+    setRateSuccess(false);
+  };
+
+  const handleRateSubmit = async () => {
+    if (!slug || slug === "me" || rateSelected < 1 || rateSubmitting) return;
+    setRateError("");
+    setRateSuccess(false);
+    setRateSubmitting(true);
+    try {
+      await onRateSubmit(rateSelected);
+      setRateSuccess(true);
+    } catch (e) {
+      setRateError(e instanceof Error ? e.message : tProfile("ratingError"));
+    } finally {
+      setRateSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -96,7 +118,7 @@ export default function MasterRatingSection({
               className={styles.rateStarsRow}
               role="group"
               aria-label={tProfile("yourRating")}
-              onMouseLeave={() => onRateHover(0)}
+              onMouseLeave={() => setRateHover(0)}
             >
               {[1, 2, 3, 4, 5].map((n) => {
                 const displayStars = rateHover || rateSelected;
@@ -105,8 +127,8 @@ export default function MasterRatingSection({
                     key={n}
                     type="button"
                     className={`${styles.rateStarBtn} ${n <= displayStars ? styles.rateStarBtnActive : ""}`}
-                    onMouseEnter={() => onRateHover(n)}
-                    onClick={() => onRateSelect(n)}
+                    onMouseEnter={() => setRateHover(n)}
+                    onClick={() => handleRateSelect(n)}
                     aria-label={tProfile("starLabel", { n })}
                   >
                     <Star
@@ -121,7 +143,7 @@ export default function MasterRatingSection({
               type="button"
               className={styles.rateSubmitBtn}
               disabled={rateSelected < 1 || rateSubmitting}
-              onClick={() => void onRateSubmit()}
+              onClick={() => void handleRateSubmit()}
             >
               {rateSubmitting
                 ? tProfile("saving")
