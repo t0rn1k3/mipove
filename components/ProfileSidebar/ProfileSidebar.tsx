@@ -4,24 +4,8 @@ import Image from "next/image";
 import { MapPin, Phone, Mail, Globe, Instagram } from "lucide-react";
 import { getImageUrl } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import type { ProfileSidebarProps } from "@/lib/types";
 import styles from "./profileSidebar.module.css";
-
-export type ProfileSidebarProps = {
-  name: string;
-  specialty: string;
-  location: string;
-  bio: string;
-  phone: string;
-  email: string;
-  instagram?: string;
-  website?: string;
-  image: string;
-  isOwnProfile?: boolean;
-  onEdit?: () => void;
-  onLogout?: () => void;
-  onChangePhoto?: (file: File) => void;
-  isUploadingPhoto?: boolean;
-};
 
 export default function ProfileSidebar({
   name,

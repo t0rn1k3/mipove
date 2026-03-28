@@ -1,28 +1,8 @@
 "use client";
 
-import type { FormEventHandler } from "react";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import type { EditProfileModalProps } from "@/lib/types";
 import styles from "./editProfileModal.module.css";
-
-type EditProfileValues = {
-  name: string;
-  email: string;
-  phone: string;
-  specialty: string;
-  location: string;
-  bio: string;
-  instagram?: string;
-  website?: string;
-};
-
-type EditProfileModalProps = {
-  open: boolean;
-  values: EditProfileValues;
-  editError: string;
-  editLoading: boolean;
-  onClose: () => void;
-  onSubmit: FormEventHandler<HTMLFormElement>;
-};
 
 export default function EditProfileModal({
   open,

@@ -6,15 +6,8 @@ import {
   fetchMyPortfolio,
   uploadPortfolioImages,
 } from "@/lib/api";
+import type { PortfolioSectionProps } from "@/lib/types";
 import styles from "./portfolioSection.module.css";
-
-type PortfolioSectionProps = {
-  portfolioImages: string[];
-  onPortfolioImagesChange: (images: string[]) => void;
-  userRole: string | null;
-  isOwnProfile: boolean;
-  onOpenPortfolio: (index: number) => void;
-};
 
 export default function PortfolioSection({
   portfolioImages,

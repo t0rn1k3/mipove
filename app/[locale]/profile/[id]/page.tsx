@@ -19,29 +19,13 @@ import {
   uploadProfileImage,
   rateMaster,
 } from "@/lib/api";
-import type { RatedMasterItem } from "@/lib/types";
+import type {
+  MeProfileApiFields,
+  ProfileData,
+  RatedMasterItem,
+  Work,
+} from "@/lib/types";
 import styles from "../profilePage.module.css";
-
-type ProfileData = {
-  name: string;
-  specialty: string;
-  location: string;
-  bio: string;
-  rating?: number;
-  reviewCount?: number;
-  phone: string;
-  email: string;
-  instagram?: string;
-  website?: string;
-  image: string;
-  portfolioImages: string[];
-  works: Array<{
-    id: string;
-    title: string;
-    description?: string;
-    image: string;
-  }>;
-};
 
 const DEFAULT_PROFILE: ProfileData = {
   name: "Elena Martinez",
@@ -60,31 +44,7 @@ const DEFAULT_PROFILE: ProfileData = {
   works: [],
 };
 
-type Work = ProfileData["works"][0];
-
-function mapMeToProfile(
-  data: {
-    name: string;
-    email: string;
-    phone?: string;
-    specialty?: string;
-    location?: string;
-    bio?: string;
-    rating?: number;
-    reviewCount?: number;
-    image?: string;
-    instagram?: string;
-    website?: string;
-    works?: Array<{
-      id: string;
-      title: string;
-      description?: string;
-      image: string;
-    }>;
-    portfolioImages?: string[];
-  },
-  role?: string
-): ProfileData {
+function mapMeToProfile(data: MeProfileApiFields, role?: string): ProfileData {
   return {
     name: data.name,
     email: data.email,

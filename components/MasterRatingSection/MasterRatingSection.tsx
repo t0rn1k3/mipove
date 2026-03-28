@@ -4,19 +4,8 @@ import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link as I18nLink } from "@/i18n/navigation";
+import type { MasterRatingSectionProps } from "@/lib/types";
 import styles from "./masterRatingSection.module.css";
-
-type MasterRatingSectionProps = {
-  isMasterProfile: boolean;
-  rating?: number;
-  reviewCount?: number;
-  isOwnProfile: boolean;
-  slug?: string;
-  canVoteRole: boolean;
-  userRole: string | null;
-  rateInitialStars: number | null;
-  onRateSubmit: (stars: number) => Promise<void>;
-};
 
 export default function MasterRatingSection({
   isMasterProfile,

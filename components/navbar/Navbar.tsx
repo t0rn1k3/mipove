@@ -8,8 +8,7 @@ import LocaleSwitcher from "@/components/LocaleSwitcher/LocaleSwitcher";
 import { useState, useEffect } from "react";
 import { getMe } from "@/lib/api";
 import { useTranslations } from "next-intl";
-
-type UserInfo = { name: string; image?: string } | null;
+import type { NavbarUserInfo } from "@/lib/types";
 
 /** Stable across locale-only URL changes (avoids header remount + entrance animation). */
 function routeKeyFromPathname(pathname: string | undefined): string {
@@ -24,7 +23,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [user, setUser] = useState<UserInfo>(null);
+  const [user, setUser] = useState<NavbarUserInfo>(null);
   const pathname = usePathname();
   const routeKey = routeKeyFromPathname(pathname);
   const isAdminRoute = pathname?.startsWith("/admin");

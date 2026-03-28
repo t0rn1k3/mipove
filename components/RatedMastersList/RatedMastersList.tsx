@@ -5,12 +5,8 @@ import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getImageUrl } from "@/lib/api";
-import type { RatedMasterItem } from "@/lib/types";
+import type { RatedMastersListProps } from "@/lib/types";
 import styles from "./ratedMastersList.module.css";
-
-type RatedMastersListProps = {
-  ratedMasters: RatedMasterItem[];
-};
 
 export default function RatedMastersList({ ratedMasters }: RatedMastersListProps) {
   const tProfile = useTranslations("profile");

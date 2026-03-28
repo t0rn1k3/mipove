@@ -4,26 +4,13 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 import { NextIntlClientProvider } from "next-intl";
 import { usePathname } from "next/navigation";
 import { getPathname } from "@/i18n/navigation";
+import type { AppLocale, LocaleContextValue, LocaleProviderProps } from "@/lib/types";
 
 const NEXT_LOCALE = "NEXT_LOCALE";
 
-type Locale = "en" | "ka";
-
-type LocaleProviderProps = {
-  initialLocale: Locale;
-  enMessages: Record<string, unknown>;
-  kaMessages: Record<string, unknown>;
-  children: React.ReactNode;
-};
-
-type LocaleContextValue = {
-  locale: Locale;
-  setLocale: (locale: Locale) => void;
-};
-
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function setLocaleCookie(locale: Locale) {
+function setLocaleCookie(locale: AppLocale) {
   document.cookie = `${NEXT_LOCALE}=${locale};path=/;max-age=31536000;samesite=lax`;
 }
 
@@ -33,16 +20,16 @@ export function LocaleProvider({
   kaMessages,
   children,
 }: LocaleProviderProps) {
-  const allMessages = useMemo<Record<Locale, Record<string, unknown>>>(
+  const allMessages = useMemo<Record<AppLocale, Record<string, unknown>>>(
     () => ({ en: enMessages, ka: kaMessages }),
     [enMessages, kaMessages],
   );
 
-  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
   const pathname = usePathname();
 
   const setLocale = useCallback(
-    (newLocale: Locale) => {
+    (newLocale: AppLocale) => {
       if (newLocale === locale) return;
 
       setLocaleState(newLocale);

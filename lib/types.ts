@@ -1,3 +1,5 @@
+import type { FormEventHandler, ReactNode } from "react";
+
 /* ========== Auth ========== */
 
 export type RegisterInput = {
@@ -167,3 +169,194 @@ export type ApiErrorResponse = {
   statusCode?: number;
   error?: string;
 };
+
+/* ========== Profile page (client) ========== */
+
+export type ProfileData = {
+  name: string;
+  specialty: string;
+  location: string;
+  bio: string;
+  rating?: number;
+  reviewCount?: number;
+  phone: string;
+  email: string;
+  instagram?: string;
+  website?: string;
+  image: string;
+  portfolioImages: string[];
+  works: Work[];
+};
+
+/** Fields from GET /me (or similar) consumed by mapMeToProfile */
+export type MeProfileApiFields = {
+  name: string;
+  email: string;
+  phone?: string;
+  specialty?: string;
+  location?: string;
+  bio?: string;
+  rating?: number;
+  reviewCount?: number;
+  image?: string;
+  instagram?: string;
+  website?: string;
+  works?: Work[];
+  portfolioImages?: string[];
+};
+
+/* ========== Admin UI ========== */
+
+export type AdminUsersFilterStatus = "all" | "active" | "blocked" | "new";
+
+/* ========== UI: Components ========== */
+
+export type PortfolioSectionProps = {
+  portfolioImages: string[];
+  onPortfolioImagesChange: (images: string[]) => void;
+  userRole: string | null;
+  isOwnProfile: boolean;
+  onOpenPortfolio: (index: number) => void;
+};
+
+export type MasterRatingSectionProps = {
+  isMasterProfile: boolean;
+  rating?: number;
+  reviewCount?: number;
+  isOwnProfile: boolean;
+  slug?: string;
+  canVoteRole: boolean;
+  userRole: string | null;
+  rateInitialStars: number | null;
+  onRateSubmit: (stars: number) => Promise<void>;
+};
+
+export type PortfolioLightboxProps = {
+  images: string[];
+  index: number | null;
+  onIndexChange: (index: number | null) => void;
+  onClose: () => void;
+  title?: string;
+};
+
+export type EditProfileValues = {
+  name: string;
+  email: string;
+  phone: string;
+  specialty: string;
+  location: string;
+  bio: string;
+  instagram?: string;
+  website?: string;
+};
+
+export type EditProfileModalProps = {
+  open: boolean;
+  values: EditProfileValues;
+  editError: string;
+  editLoading: boolean;
+  onClose: () => void;
+  onSubmit: FormEventHandler<HTMLFormElement>;
+};
+
+export type RatedMastersListProps = {
+  ratedMasters: RatedMasterItem[];
+};
+
+export type SelectOption = {
+  value: string;
+  label: string;
+};
+
+export type CustomSelectProps = {
+  options: SelectOption[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  id?: string;
+  "aria-label"?: string;
+};
+
+export type MasterCardProps = {
+  master: MasterListItem;
+  delay?: number;
+  canRate?: boolean;
+  myRating?: number | null;
+  onRate?: (masterSlug: string, stars: number) => Promise<void>;
+};
+
+export type NavbarUserInfo = { name: string; image?: string } | null;
+
+export type AppLocale = "en" | "ka";
+
+export type LocaleProviderProps = {
+  initialLocale: AppLocale;
+  enMessages: Record<string, unknown>;
+  kaMessages: Record<string, unknown>;
+  children: ReactNode;
+};
+
+export type LocaleContextValue = {
+  locale: AppLocale;
+  setLocale: (locale: AppLocale) => void;
+};
+
+export type ProfileSidebarProps = {
+  name: string;
+  specialty: string;
+  location: string;
+  bio: string;
+  phone: string;
+  email: string;
+  instagram?: string;
+  website?: string;
+  image: string;
+  isOwnProfile?: boolean;
+  onEdit?: () => void;
+  onLogout?: () => void;
+  onChangePhoto?: (file: File) => void;
+  isUploadingPhoto?: boolean;
+};
+
+export type LogoProps = {
+  size?: number;
+  showText?: boolean;
+  asLink?: boolean;
+  className?: string;
+};
+
+export type CityAutocompleteProps = {
+  id?: string;
+  name?: string;
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+  onSelect?: (value: string, city: GeocodeCity) => void;
+  onBlur?: () => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+};
+
+export type LightboxModalBaseProps = {
+  onClose: () => void;
+};
+
+export type LightboxModalSingleProps = LightboxModalBaseProps & {
+  image: string;
+  title: string;
+  description?: string;
+};
+
+export type LightboxModalGalleryProps = LightboxModalBaseProps & {
+  images: string[];
+  index: number;
+  onIndexChange: (nextIndex: number) => void;
+  title?: string;
+};
+
+export type LightboxModalProps =
+  | LightboxModalSingleProps
+  | LightboxModalGalleryProps;

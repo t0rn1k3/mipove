@@ -1,23 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useId } from "react";
+import type { CustomSelectProps, SelectOption } from "@/lib/types";
 import styles from "./customSelect.module.css";
-
-export type SelectOption = {
-  value: string;
-  label: string;
-};
-
-type CustomSelectProps = {
-  options: SelectOption[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  className?: string;
-  id?: string;
-  "aria-label"?: string;
-};
 
 export default function CustomSelect({
   options,

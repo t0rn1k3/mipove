@@ -1,14 +1,7 @@
 "use client";
 
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
-
-type PortfolioLightboxProps = {
-  images: string[];
-  index: number | null;
-  onIndexChange: (index: number | null) => void;
-  onClose: () => void;
-  title?: string;
-};
+import type { PortfolioLightboxProps } from "@/lib/types";
 
 export default function PortfolioLightbox({
   images,

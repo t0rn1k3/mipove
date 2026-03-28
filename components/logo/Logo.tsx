@@ -1,12 +1,6 @@
 import Link from "next/link";
+import type { LogoProps } from "@/lib/types";
 import styles from "./logo.module.css";
-
-export type LogoProps = {
-  size?: number;
-  showText?: boolean;
-  asLink?: boolean;
-  className?: string;
-};
 
 export default function Logo({
   size = 35,

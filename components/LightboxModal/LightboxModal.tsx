@@ -3,26 +3,8 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import type { LightboxModalProps } from "@/lib/types";
 import styles from "./lightboxModal.module.css";
-
-type LightboxModalBaseProps = {
-  onClose: () => void;
-};
-
-type LightboxModalSingleProps = LightboxModalBaseProps & {
-  image: string;
-  title: string;
-  description?: string;
-};
-
-type LightboxModalGalleryProps = LightboxModalBaseProps & {
-  images: string[];
-  index: number;
-  onIndexChange: (nextIndex: number) => void;
-  title?: string;
-};
-
-type LightboxModalProps = LightboxModalSingleProps | LightboxModalGalleryProps;
 
 export default function LightboxModal({
   onClose,

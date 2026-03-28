@@ -6,16 +6,14 @@ import {
   blockAdminUser,
   unblockAdminUser,
 } from "@/lib/api";
-import type { AdminUser } from "@/lib/types";
+import type { AdminUser, AdminUsersFilterStatus } from "@/lib/types";
 import styles from "../admin.module.css";
-
-type FilterStatus = "all" | "active" | "blocked" | "new";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState<FilterStatus>("all");
+  const [filter, setFilter] = useState<AdminUsersFilterStatus>("all");
   const [search, setSearch] = useState("");
   const [actionId, setActionId] = useState<string | null>(null);
 

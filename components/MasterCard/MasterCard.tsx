@@ -7,16 +7,8 @@ import { motion } from "motion/react";
 import { Link as I18nLink } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { getImageUrl } from "@/lib/api";
-import type { MasterListItem } from "@/lib/types";
+import type { MasterCardProps } from "@/lib/types";
 import styles from "./masterCard.module.css";
-
-type MasterCardProps = {
-  master: MasterListItem;
-  delay?: number;
-  canRate?: boolean;
-  myRating?: number | null;
-  onRate?: (masterSlug: string, stars: number) => Promise<void>;
-};
 
 function LocationIcon() {
   return (

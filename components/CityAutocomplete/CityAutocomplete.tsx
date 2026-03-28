@@ -2,22 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { searchCities } from "@/lib/api";
-import type { GeocodeCity } from "@/lib/types";
+import type { CityAutocompleteProps, GeocodeCity } from "@/lib/types";
 import { useTranslations } from "next-intl";
 import styles from "./cityAutocomplete.module.css";
-
-type CityAutocompleteProps = {
-  id?: string;
-  name?: string;
-  value?: string;
-  defaultValue?: string;
-  onChange?: (value: string) => void;
-  onSelect?: (value: string, city: GeocodeCity) => void;
-  onBlur?: () => void;
-  placeholder?: string;
-  className?: string;
-  disabled?: boolean;
-};
 
 export default function CityAutocomplete({
   id,
