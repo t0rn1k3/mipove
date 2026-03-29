@@ -118,10 +118,6 @@ export default function ProfileSidebar({
           )}
         </div>
 
-        <a href={`mailto:${email}`} className={styles.ctaButton}>
-          {t("getInTouch")}
-        </a>
-
         {isOwnProfile && (onEdit || onLogout) && (
           <div className={styles.actions}>
             {onEdit && (

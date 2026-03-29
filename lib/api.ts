@@ -10,6 +10,7 @@ import type {
   AdminMaster,
   AdminRegisterInput,
   GeocodeCity,
+  Professions,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -154,6 +155,12 @@ export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
   return json;
 }
 
+export async function getProfessions(): Promise<Professions[]> {
+  const res = await fetch(`${api("/masters/professions")}`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failet to get professions");
+  return json.data ?? json as Professions[];
+}
 export async function searchCities(query: string, count = 10): Promise<GeocodeCity[]> {
   if (!query || query.trim().length < 2) return [];
   const q = encodeURIComponent(query.trim());
@@ -222,7 +229,7 @@ export async function getProfileBySlug(slug: string): Promise<{
   };
 }
 
-/** Rate a master (1–5 stars). Backend: `POST /masters/:slug/rate` body `{ stars }`. */
+
 export async function rateMaster(
   slug: string,
   stars: number,
@@ -254,7 +261,7 @@ export async function rateMaster(
       typeof json.message === "string" ? json.message : "Failed to save rating",
     );
   }
-  // Support both `{ data: { ... } }` and flat `{ ratedMasters, rating, ... }`.
+  // Support both `{ data: { ... } }` and flat `{ ratedMasters, rating, ... }`. 
   const raw = json.data;
   const inner =
     raw != null && typeof raw === "object" && !Array.isArray(raw)

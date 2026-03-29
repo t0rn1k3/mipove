@@ -360,3 +360,9 @@ export type LightboxModalGalleryProps = LightboxModalBaseProps & {
 export type LightboxModalProps =
   | LightboxModalSingleProps
   | LightboxModalGalleryProps;
+
+
+  export type Professions = {
+    id: string;
+    label: string;
+  }

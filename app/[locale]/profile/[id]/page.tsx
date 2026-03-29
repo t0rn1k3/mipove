@@ -73,6 +73,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editModalKey, setEditModalKey] = useState(0);
   const [editError, setEditError] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -234,8 +235,8 @@ export default function ProfilePage() {
     try {
       const { data } = await getMe();
       setRatedMasters(data.ratedMasters ?? res.data?.ratedMasters ?? []);
-    } catch {
-      /* keep ratedMasters from rate response or prior state */
+    } catch(e) {
+      console.error("Failed to get me", e);
     }
   };
 
@@ -258,7 +259,10 @@ export default function ProfilePage() {
               <ProfileSidebar
                 {...profile}
                 isOwnProfile={isOwnProfile}
-                onEdit={() => setShowEditModal(true)}
+                onEdit={() => {
+                  setEditModalKey((k) => k + 1);
+                  setShowEditModal(true);
+                }}
                 onLogout={handleLogout}
                 onChangePhoto={handleChangePhoto}
                 isUploadingPhoto={photoUploading}
@@ -299,6 +303,7 @@ export default function ProfilePage() {
       </div>
 
       <EditProfileModal
+        key={editModalKey}
         open={showEditModal}
         values={{
           name: profile.name,

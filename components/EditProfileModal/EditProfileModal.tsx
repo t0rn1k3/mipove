@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
-import type { EditProfileModalProps } from "@/lib/types";
+import CustomSelect from "@/components/CustomSelect/CustomSelect";
+import type { EditProfileModalProps, SelectOption } from "@/lib/types";
 import styles from "./editProfileModal.module.css";
+import { getProfessions } from "@/lib/api";
 
 export default function EditProfileModal({
   open,
@@ -12,6 +15,30 @@ export default function EditProfileModal({
   onClose,
   onSubmit,
 }: EditProfileModalProps) {
+  const [specialtyOptions, setSpecialtyOptions] = useState<SelectOption[]>([]);
+  const [specialtyValue, setSpecialtyValue] = useState(
+    () => (values.specialty === "—" ? "" : values.specialty),
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    getProfessions()
+      .then((professions) => {
+        if (!cancelled) {
+          setSpecialtyOptions(
+            professions.map((p) => ({ value: p.id, label: p.label })),
+          );
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSpecialtyOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (
@@ -66,10 +93,19 @@ export default function EditProfileModal({
           <div className={styles.formRow}>
             <div className={styles.formField}>
               <label htmlFor="edit-specialty">Specialty</label>
-              <input
+              {/* <input
                 id="edit-specialty"
                 name="specialty"
                 defaultValue={values.specialty === "—" ? "" : values.specialty}
+              /> */}
+              <input type="hidden" name="specialty" value={specialtyValue} />
+              <CustomSelect
+                id="edit-specialty"
+                aria-label="Specialty"
+                value={specialtyValue}
+                placeholder="Select a specialty"
+                options={specialtyOptions}
+                onChange={setSpecialtyValue}
               />
             </div>
             <div className={styles.formField}>
