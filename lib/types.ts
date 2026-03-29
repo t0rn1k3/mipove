@@ -361,8 +361,7 @@ export type LightboxModalProps =
   | LightboxModalSingleProps
   | LightboxModalGalleryProps;
 
-
-  export type Professions = {
-    id: string;
-    label: string;
-  }
+export type Professions = {
+  id: string;
+  label: string;
+};

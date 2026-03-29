@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { Link as I18nLink } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { getImageUrl } from "@/lib/api";
+import { translateProfessionDisplay } from "@/lib/professions";
 import type { MasterCardProps } from "@/lib/types";
 import styles from "./masterCard.module.css";
 
@@ -30,6 +31,7 @@ export default function MasterCard({
   onRate,
 }: MasterCardProps) {
   const t = useTranslations("masters");
+  const tProfessions = useTranslations("professions");
   const imageUrl =
     getImageUrl(master.image) ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(master.name)}&size=200`;
@@ -108,7 +110,10 @@ export default function MasterCard({
 
           <div className={styles.content}>
             <h2 className={styles.name}>{master.name}</h2>
-            <p className={styles.specialty}>{master.specialty || "—"}</p>
+            <p className={styles.specialty}>
+              {translateProfessionDisplay(master.specialty, tProfessions) ||
+                "—"}
+            </p>
 
             <div className={styles.ratingSection}>
               <div

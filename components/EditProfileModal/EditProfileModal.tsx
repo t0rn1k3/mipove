@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import CustomSelect from "@/components/CustomSelect/CustomSelect";
-import type { EditProfileModalProps, SelectOption } from "@/lib/types";
+import type { EditProfileModalProps, Professions } from "@/lib/types";
 import styles from "./editProfileModal.module.css";
 import { getProfessions } from "@/lib/api";
+import { mapProfessionsToSelectOptions } from "@/lib/professions";
 
 export default function EditProfileModal({
   open,
@@ -15,24 +17,29 @@ export default function EditProfileModal({
   onClose,
   onSubmit,
 }: EditProfileModalProps) {
-  const [specialtyOptions, setSpecialtyOptions] = useState<SelectOption[]>([]);
+  const tProfessions = useTranslations("professions");
+  const [professionsRaw, setProfessionsRaw] = useState<Professions[]>([]);
   const [specialtyValue, setSpecialtyValue] = useState(
     () => (values.specialty === "—" ? "" : values.specialty),
+  );
+
+  const specialtyOptions = useMemo(
+    () => mapProfessionsToSelectOptions(professionsRaw, tProfessions),
+    [professionsRaw, tProfessions],
   );
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     getProfessions()
-      .then((professions) => {
+      .then((list) => {
         if (!cancelled) {
-          setSpecialtyOptions(
-            professions.map((p) => ({ value: p.id, label: p.label })),
-          );
+          const arr = Array.isArray(list) ? list : [];
+          setProfessionsRaw(arr);
         }
       })
       .catch(() => {
-        if (!cancelled) setSpecialtyOptions([]);
+        if (!cancelled) setProfessionsRaw([]);
       });
     return () => {
       cancelled = true;

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { MapPin, Phone, Mail, Globe, Instagram } from "lucide-react";
 import { getImageUrl } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import { translateProfessionDisplay } from "@/lib/professions";
 import type { ProfileSidebarProps } from "@/lib/types";
 import styles from "./profileSidebar.module.css";
 
@@ -25,6 +26,7 @@ export default function ProfileSidebar({
 }: ProfileSidebarProps) {
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
+  const tProfessions = useTranslations("professions");
   const resolvedImage = typeof image === "string" ? getImageUrl(image.trim()) : "";
   const avatarSrc =
     resolvedImage.length > 0
@@ -64,7 +66,9 @@ export default function ProfileSidebar({
           )}
         </div>
         <h1 className={styles.name}>{name}</h1>
-        <p className={styles.specialty}>{specialty}</p>
+        <p className={styles.specialty}>
+          {translateProfessionDisplay(specialty, tProfessions) || specialty}
+        </p>
         <div className={styles.location}>
           <MapPin size={18} className={styles.locationIcon} />
           <span>{location}</span>

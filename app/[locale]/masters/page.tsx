@@ -7,7 +7,8 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import styles from "./mastersPage.module.css";
 import { getMasters, getMe, getProfessions, rateMaster } from "@/lib/api";
-import type { MasterListItem, SelectOption } from "@/lib/types";
+import { mapProfessionsToSelectOptions } from "@/lib/professions";
+import type { MasterListItem, Professions } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import CustomSelect from "@/components/CustomSelect/CustomSelect";
 import MasterCard from "@/components/MasterCard/MasterCard";
@@ -15,6 +16,7 @@ import MasterCard from "@/components/MasterCard/MasterCard";
 export default function MastersPage() {
   const t = useTranslations("masters");
   const tCommon = useTranslations("common");
+  const tProfessions = useTranslations("professions");
   const searchParams = useSearchParams();
   const [masters, setMasters] = useState<MasterListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ export default function MastersPage() {
   const [location, setLocation] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [search, setSearch] = useState("");
-  const [professionOptions, setProfessionOptions] = useState<SelectOption[]>([]);
+  const [professionsRaw, setProfessionsRaw] = useState<Professions[]>([]);
   const [viewerRole, setViewerRole] = useState<string | null>(null);
   const [viewerMasterSlug, setViewerMasterSlug] = useState<string | null>(null);
   const [myRatingsBySlug, setMyRatingsBySlug] = useState<Record<string, number>>({});
@@ -35,15 +37,20 @@ export default function MastersPage() {
       .then((list) => {
         if (cancelled) return;
         const arr = Array.isArray(list) ? list : [];
-        setProfessionOptions(arr.map((p) => ({ value: p.id, label: p.label })));
+        setProfessionsRaw(arr);
       })
       .catch(() => {
-        if (!cancelled) setProfessionOptions([]);
+        if (!cancelled) setProfessionsRaw([]);
       });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const professionOptions = useMemo(
+    () => mapProfessionsToSelectOptions(professionsRaw, tProfessions),
+    [professionsRaw, tProfessions],
+  );
 
   useEffect(() => {
     let cancelled = false;

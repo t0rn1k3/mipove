@@ -5,11 +5,13 @@ import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getImageUrl } from "@/lib/api";
+import { translateProfessionDisplay } from "@/lib/professions";
 import type { RatedMastersListProps } from "@/lib/types";
 import styles from "./ratedMastersList.module.css";
 
 export default function RatedMastersList({ ratedMasters }: RatedMastersListProps) {
   const tProfile = useTranslations("profile");
+  const tProfessions = useTranslations("professions");
 
   return (
     <>
@@ -48,7 +50,12 @@ export default function RatedMastersList({ ratedMasters }: RatedMastersListProps
               </div>
               <h3 className={styles.name}>{item.master.name}</h3>
               {item.master.specialty && (
-                <p className={styles.specialty}>{item.master.specialty}</p>
+                <p className={styles.specialty}>
+                  {translateProfessionDisplay(
+                    item.master.specialty,
+                    tProfessions,
+                  )}
+                </p>
               )}
               {item.master.location && (
                 <div className={styles.location}>

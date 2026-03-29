@@ -295,6 +295,24 @@
     "failedToUnblockUser": "მომხმარებლის განბლოკვა ვერ მოხერხდა",
     "failedToLoadDashboard": "პანელის ჩატვირთვა ვერ მოხერხდა"
   },
+  "professions": {
+    "painter": "მხატვარი",
+    "sculptor": "ქანდაკი",
+    "illustrator": "ილუსტრატორი",
+    "calligrapher": "კალიგრაფი",
+    "tattoo_artist": "ტატუ მხატვარი",
+    "jewelry_Designer": "საიუველირო დიზაინერი",
+    "ceramicist": "კერამიკოსი",
+    "enamel_artist": "მინანქრის ხელოვანი",
+    "woodworker": "ხის ხელოსანი",
+    "tailor": "ტანსაცმლის შემკეთებელი",
+    "leather_Crafter": "ტყავის ხელოსანი",
+    "shoe_Designer": "ფეხსაცმლის დიზაინერი",
+    "photographer": "ფოტოგრაფი",
+    "videographer": "ვიდეოგრაფი",
+    "restorer": "რესტავრატორი",
+    "other": "სხვა"
+  },
   "metadata": {
     "title": "Mipove",
     "description": "Mipove არის პლატფორმა ოსტატებისთვის სხვადასხვა სფეროში"

@@ -295,6 +295,24 @@
     "failedToUnblockUser": "Failed to unblock user",
     "failedToLoadDashboard": "Failed to load dashboard"
   },
+  "professions": {
+    "painter": "Painter",
+    "sculptor": "Sculptor",
+    "illustrator": "Illustrator",
+    "calligrapher": "Calligrapher",
+    "tattoo_artist": "Tattoo Artist",
+    "jewelry_Designer": "Jewelry Designer",
+    "ceramicist": "Ceramicist",
+    "enamel_artist": "Enamel Artist",
+    "woodworker": "Woodworker",
+    "tailor": "Tailor",
+    "leather_Crafter": "Leather Crafter",
+    "shoe_Designer": "Shoe Designer",
+    "photographer": "Photographer",
+    "videographer": "Videographer",
+    "restorer": "Restorer",
+    "other": "Other"
+  },
   "metadata": {
     "title": "Mipove",
     "description": "Mipove is a platform for masters in different fields"
