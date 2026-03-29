@@ -25,3 +25,13 @@ export function translateProfessionDisplay(
   if (tp.has(s)) return tp(s);
   return s;
 }
+
+export function specialtyQueryParamForApi(
+  value: string,
+  professions: Professions[],
+): string {
+  const v = value.trim();
+  if (!v) return "";
+  const match = professions.find((p) => p.id === v);
+  return match?.label ?? v;
+}

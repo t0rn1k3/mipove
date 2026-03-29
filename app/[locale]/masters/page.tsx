@@ -7,7 +7,10 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import styles from "./mastersPage.module.css";
 import { getMasters, getMe, getProfessions, rateMaster } from "@/lib/api";
-import { mapProfessionsToSelectOptions } from "@/lib/professions";
+import {
+  mapProfessionsToSelectOptions,
+  specialtyQueryParamForApi,
+} from "@/lib/professions";
 import type { MasterListItem, Professions } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import CustomSelect from "@/components/CustomSelect/CustomSelect";
@@ -30,22 +33,6 @@ export default function MastersPage() {
   const [myRatingsBySlug, setMyRatingsBySlug] = useState<Record<string, number>>({});
   const [isFiltersReady, setIsFiltersReady] = useState(false);
   const skipNextDebounce = useRef(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    getProfessions()
-      .then((list) => {
-        if (cancelled) return;
-        const arr = Array.isArray(list) ? list : [];
-        setProfessionsRaw(arr);
-      })
-      .catch(() => {
-        if (!cancelled) setProfessionsRaw([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const professionOptions = useMemo(
     () => mapProfessionsToSelectOptions(professionsRaw, tProfessions),
@@ -90,10 +77,22 @@ export default function MastersPage() {
       setLoading(true);
       setError(null);
       try {
+        let profList = professionsRaw;
+        if (profList.length === 0) {
+          try {
+            const list = await getProfessions();
+            profList = Array.isArray(list) ? list : [];
+            if (!cancelled) setProfessionsRaw(profList);
+          } catch {
+            profList = [];
+          }
+        }
+        const specForApi =
+          specialtyQueryParamForApi(specialtyFromUrl, profList) || undefined;
         const params =
           specialtyFromUrl || locationFromUrl || searchFromUrl
             ? {
-                specialty: specialtyFromUrl || undefined,
+                specialty: specForApi,
                 location: locationFromUrl || undefined,
                 search: searchFromUrl || undefined,
               }
@@ -128,7 +127,8 @@ export default function MastersPage() {
       setError(null);
       void getMasters({
         location: location || undefined,
-        specialty: specialty || undefined,
+        specialty:
+          specialtyQueryParamForApi(specialty, professionsRaw) || undefined,
         search: search || undefined,
       })
         .then((data) => {
@@ -142,7 +142,7 @@ export default function MastersPage() {
         });
     }, 300);
     return () => window.clearTimeout(timeoutId);
-  }, [isFiltersReady, location, specialty, search, t]);
+  }, [isFiltersReady, location, specialty, search, t, professionsRaw]);
 
   const handleRateMaster = useCallback(
     async (masterSlug: string, stars: number) => {
