@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import styles from "./mastersPage.module.css";
-import { getMasters, getMe, rateMaster } from "@/lib/api";
-import type { MasterListItem } from "@/lib/types";
+import { getMasters, getMe, getProfessions, rateMaster } from "@/lib/api";
+import type { MasterListItem, SelectOption } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import CustomSelect from "@/components/CustomSelect/CustomSelect";
 import MasterCard from "@/components/MasterCard/MasterCard";
@@ -22,12 +22,28 @@ export default function MastersPage() {
   const [location, setLocation] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [search, setSearch] = useState("");
-  const [allSpecialties, setAllSpecialties] = useState<string[]>([]);
+  const [professionOptions, setProfessionOptions] = useState<SelectOption[]>([]);
   const [viewerRole, setViewerRole] = useState<string | null>(null);
   const [viewerMasterSlug, setViewerMasterSlug] = useState<string | null>(null);
   const [myRatingsBySlug, setMyRatingsBySlug] = useState<Record<string, number>>({});
   const [isFiltersReady, setIsFiltersReady] = useState(false);
   const skipNextDebounce = useRef(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProfessions()
+      .then((list) => {
+        if (cancelled) return;
+        const arr = Array.isArray(list) ? list : [];
+        setProfessionOptions(arr.map((p) => ({ value: p.id, label: p.label })));
+      })
+      .catch(() => {
+        if (!cancelled) setProfessionOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,14 +94,6 @@ export default function MastersPage() {
         const data = await getMasters(params);
         if (cancelled) return;
         setMasters(data);
-        const specialties = Array.from(
-          new Set(
-            data
-              .map((m) => (m.specialty ?? "").trim())
-              .filter((s) => s.length > 0),
-          ),
-        ).sort((a, b) => a.localeCompare(b));
-        setAllSpecialties(specialties);
         skipNextDebounce.current = true;
         setIsFiltersReady(true);
       } catch (err) {
@@ -177,9 +185,9 @@ export default function MastersPage() {
   const specialtySelectOptions = useMemo(
     () => [
       { value: "", label: t("allSpecialties") },
-      ...allSpecialties.map((s) => ({ value: s, label: s })),
+      ...professionOptions,
     ],
-    [allSpecialties, t],
+    [professionOptions, t],
   );
 
   const filtersEl = (

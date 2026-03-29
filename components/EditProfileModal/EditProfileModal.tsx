@@ -93,11 +93,6 @@ export default function EditProfileModal({
           <div className={styles.formRow}>
             <div className={styles.formField}>
               <label htmlFor="edit-specialty">Specialty</label>
-              {/* <input
-                id="edit-specialty"
-                name="specialty"
-                defaultValue={values.specialty === "—" ? "" : values.specialty}
-              /> */}
               <input type="hidden" name="specialty" value={specialtyValue} />
               <CustomSelect
                 id="edit-specialty"
