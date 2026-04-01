@@ -50,7 +50,38 @@
     "adminPanel": "ადმინ პანელი",
     "roleClient": "კლიენტი",
     "roleMaster": "ოსტატი",
-    "loadingProfile": "იტვირთება…"
+    "loadingProfile": "იტვირთება…",
+    "metaPriceRange": "ფასის დიაპაზონი",
+    "metaExpectedBy": "სავარაუდო ვადა",
+    "dummyOrders": [
+      {
+        "imageSrc": "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=200&q=80",
+        "imageAlt": "ხელნაკეთი კერამიკული ლარჩი",
+        "title": "კერამიკული ლარჩების კომპლექტი",
+        "description": "სამი ცალი მაგიდის ლარჩი, მქისე გლაზური, მიწის ტონებში სასადილოსთვის.",
+        "priceRange": "₾320 – ₾480",
+        "location": "თბილისი",
+        "expectedBy": "12 აპრ, 2026"
+      },
+      {
+        "imageSrc": "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=200&q=80",
+        "imageAlt": "მუხის სამზარეულო მაგიდა",
+        "title": "მუხის სადილის მაგიდა (6 ადგილი)",
+        "description": "ფერმერული სტილი მასიური მუხით, ზეთის ფინიში და გამძლე ფეხებით.",
+        "priceRange": "₾2,800 – ₾4,200",
+        "location": "ქუთაისი",
+        "expectedBy": "3 მაი, 2026"
+      },
+      {
+        "imageSrc": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=200&q=80",
+        "imageAlt": "ყალიბში რკინის კარიბჭე",
+        "title": "ბაღის კარიბჭე და გვერდითი პანელები",
+        "description": "საფეხური რკინის კარიბჭე შესაბამისი ფიქსირებული პანელებით, შავი პულვერი.",
+        "priceRange": "₾1,900 – ₾2,600",
+        "location": "ბათუმი",
+        "expectedBy": "28 აპრ, 2026"
+      }
+    ]
   },
   "hero": {
     "title": "იპოვეთ თქვენთვის იდეალური ოსტატი",

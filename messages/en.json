@@ -50,7 +50,38 @@
     "adminPanel": "Admin panel",
     "roleClient": "Client",
     "roleMaster": "Master",
-    "loadingProfile": "Loading…"
+    "loadingProfile": "Loading…",
+    "metaPriceRange": "Price range",
+    "metaExpectedBy": "Expected by",
+    "dummyOrders": [
+      {
+        "imageSrc": "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=200&q=80",
+        "imageAlt": "Handmade ceramic vase",
+        "title": "Custom stoneware vase set",
+        "description": "Three-piece table vase set, matte glaze, earth tones to match your dining space.",
+        "priceRange": "₾320 – ₾480",
+        "location": "Tbilisi",
+        "expectedBy": "Apr 12, 2026"
+      },
+      {
+        "imageSrc": "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=200&q=80",
+        "imageAlt": "Oak dining table",
+        "title": "Oak dining table (6 seats)",
+        "description": "Farmhouse-style solid oak table with oil finish and sturdy trestle base.",
+        "priceRange": "₾2,800 – ₾4,200",
+        "location": "Kutaisi",
+        "expectedBy": "May 3, 2026"
+      },
+      {
+        "imageSrc": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=200&q=80",
+        "imageAlt": "Wrought iron gate",
+        "title": "Garden gate & side panels",
+        "description": "Wrought iron pedestrian gate with matching fixed panels, powder-coated black.",
+        "priceRange": "₾1,900 – ₾2,600",
+        "location": "Batumi",
+        "expectedBy": "Apr 28, 2026"
+      }
+    ]
   },
   "hero": {
     "title": "Find Your Perfect Craftsperson",

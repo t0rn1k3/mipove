@@ -15,9 +15,20 @@ type SessionUser = {
   slug?: string;
 };
 
+type DummyOrder = {
+  imageSrc: string;
+  imageAlt: string;
+  title: string;
+  description: string;
+  priceRange: string;
+  location: string;
+  expectedBy: string;
+};
+
 export default function OrderPage() {
   const t = useTranslations("order");
   const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
@@ -94,7 +105,37 @@ export default function OrderPage() {
             {t("ordersList")}
           </h2>
           <div className={styles.ordersBody}>
-            <p className={styles.emptyOrders}>{t("noOrders")}</p>
+            {(t.raw("dummyOrders") as DummyOrder[]).map((order) => (
+              <article key={`${order.title}-${order.expectedBy}`} className={styles.orderRow}>
+                <div className={styles.orderThumb}>
+                  <Image
+                    src={order.imageSrc}
+                    alt={order.imageAlt}
+                    width={88}
+                    height={88}
+                    className={styles.orderThumbImg}
+                  />
+                </div>
+                <div className={styles.orderMain}>
+                  <h3 className={styles.orderTitle}>{order.title}</h3>
+                  <p className={styles.orderDescription}>{order.description}</p>
+                </div>
+                <dl className={styles.orderMeta}>
+                  <div className={styles.orderMetaBlock}>
+                    <dt className={styles.orderMetaLabel}>{t("metaPriceRange")}</dt>
+                    <dd className={styles.orderMetaValue}>{order.priceRange}</dd>
+                  </div>
+                  <div className={styles.orderMetaBlock}>
+                    <dt className={styles.orderMetaLabel}>{tCommon("location")}</dt>
+                    <dd className={styles.orderMetaValue}>{order.location}</dd>
+                  </div>
+                  <div className={styles.orderMetaBlock}>
+                    <dt className={styles.orderMetaLabel}>{t("metaExpectedBy")}</dt>
+                    <dd className={styles.orderMetaValue}>{order.expectedBy}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
           </div>
         </section>
 
