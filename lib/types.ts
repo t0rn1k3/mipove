@@ -101,6 +101,30 @@ export type MasterListItem = {
   description?: string;
 };
 
+/* ========== Orders page ========== */
+
+export type OrdersPageSessionUser = {
+  name: string;
+  email: string;
+  image?: string;
+  role: string;
+  slug?: string;
+};
+
+/** Shape of `order.dummyOrders` entries in locale messages (and future API rows). */
+export type DummyOrder = {
+  imageSrc: string;
+  imageAlt: string;
+  title: string;
+  description: string;
+  priceRange: string;
+  location: string;
+  expectedBy: string;
+  publisherName: string;
+  publisherPhone: string;
+  publisherEmail: string;
+};
+
 /* ========== Profile Update ========== */
 
 export type UpdateProfileInput = {

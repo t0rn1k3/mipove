@@ -5,7 +5,6 @@
 }
 
 .header {
-  max-width: 1200px;
   margin: 0 auto 1.5rem;
 }
 
@@ -23,8 +22,40 @@
   color: #5c5c68;
 }
 
+.toolbar {
+  margin: 0 auto 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.addOrderBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.35rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #111827;
+  background: #4dd0e1;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 128, 128, 0.2);
+  transition:
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.addOrderBtn:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 6px 18px rgba(0, 128, 128, 0.28);
+}
+
+.addOrderBtn:focus-visible {
+  outline: 2px solid #0f766e;
+  outline-offset: 3px;
+}
+
 .layout {
-  max-width: 1200px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(240px, 300px);
@@ -68,8 +99,9 @@
 }
 
 .orderTop {
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) minmax(140px, 220px);
+
+  display: flex;
+  justify-content: space-between;
   gap: 1rem 1.25rem;
   align-items: start;
 }
@@ -81,8 +113,6 @@
   justify-content: flex-end;
   gap: 0.75rem 1rem;
   margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(26, 26, 26, 0.08);
 }
 
 .contactInfoBtn {
@@ -107,32 +137,63 @@
   outline-offset: 2px;
 }
 
-.orderContactExtra {
+.contactReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin-top: 0;
+  transition:
+    grid-template-rows 0.3s ease,
+    margin-top 0.3s ease;
+}
+
+.contactRevealOpen {
+  grid-template-rows: 1fr;
   margin-top: 0.75rem;
+}
+
+.contactRevealInner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.contactRevealOpen .contactRevealInner {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contactReveal,
+  .contactRevealInner {
+    transition: none;
+  }
+}
+
+.orderContactExtra {
   padding: 1rem 1.1rem;
   background: #faf9f6;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
 }
 
-.contactExtraRow {
+.contactNamePhoneRow {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.75rem;
+  align-items: center;
+  gap: 1rem 1.75rem;
 }
 
-.contactExtraLabel {
-  flex: 0 0 auto;
-  min-width: 4.5rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #9ca3af;
+.contactInlineGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.contactExtraIcon {
+  flex-shrink: 0;
+  color: #0f766e;
+  opacity: 0.9;
 }
 
 .contactExtraValue {
@@ -168,9 +229,6 @@
   object-fit: cover;
 }
 
-.orderMain {
-  min-width: 0;
-}
 
 .orderTitle {
   font-family: var(--font-serif);
@@ -189,24 +247,27 @@
 }
 
 .orderMeta {
+  width: 150px;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  text-align: right;
+  align-items: flex-end;
 }
 
-.orderMetaBlock {
+.orderMetaRow {
+  width:100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
   margin: 0;
 }
 
-.orderMetaLabel {
-  margin: 0 0 0.15rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #9ca3af;
+.orderMetaIcon {
+  flex-shrink: 0;
+  color: #0f766e;
+  opacity: 0.9;
 }
 
 .orderMetaValue {
@@ -214,6 +275,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
+  text-align: right;
 }
 
 /* Profile / guest aside */
@@ -350,15 +412,19 @@
 
   .orderMeta {
     grid-area: meta;
-    text-align: left;
+    align-items: flex-start;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 1rem 1.5rem;
     padding-top: 0.25rem;
   }
 
-  .orderMetaBlock {
-    min-width: 7rem;
+  .orderMetaRow {
+    justify-content: flex-start;
+  }
+
+  .orderMetaValue {
+    text-align: left;
   }
 
   .contactInfoBtn {

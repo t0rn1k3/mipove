@@ -5,34 +5,15 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getMe, getImageUrl } from "@/lib/api";
+import type { DummyOrder, OrdersPageSessionUser } from "@/lib/types";
+import { Banknote, MapPin, CalendarClock, User, Phone } from "lucide-react";
 import styles from "./orderPage.module.css";
-
-type SessionUser = {
-  name: string;
-  email: string;
-  image?: string;
-  role: string;
-  slug?: string;
-};
-
-type DummyOrder = {
-  imageSrc: string;
-  imageAlt: string;
-  title: string;
-  description: string;
-  priceRange: string;
-  location: string;
-  expectedBy: string;
-  publisherName: string;
-  publisherPhone: string;
-  publisherEmail: string;
-};
 
 export default function OrderPage() {
   const t = useTranslations("order");
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
-  const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
+  const [sessionUser, setSessionUser] = useState<OrdersPageSessionUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
 
@@ -98,6 +79,12 @@ export default function OrderPage() {
         <p className={styles.subtitle}>{t("description")}</p>
       </header>
 
+      <div className={styles.toolbar}>
+        <Link href="/join" className={styles.addOrderBtn}>
+          {t("addYourOrder")}
+        </Link>
+      </div>
+
       <div className={styles.layout}>
         <aside className={`${styles.panel} ${styles.filterColumn}`} aria-label={t("smartFilter")}>
           <h2 className={styles.panelTitle}>{t("smartFilter")}</h2>
@@ -130,20 +117,29 @@ export default function OrderPage() {
                       <h3 className={styles.orderTitle}>{order.title}</h3>
                       <p className={styles.orderDescription}>{order.description}</p>
                     </div>
-                    <dl className={styles.orderMeta}>
-                      <div className={styles.orderMetaBlock}>
-                        <dt className={styles.orderMetaLabel}>{t("metaPriceRange")}</dt>
-                        <dd className={styles.orderMetaValue}>{order.priceRange}</dd>
+                    <div className={styles.orderMeta}>
+                      <div
+                        className={styles.orderMetaRow}
+                        aria-label={`${t("metaPriceRange")}: ${order.priceRange}`}
+                      >
+                        <Banknote size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
+                        <span className={styles.orderMetaValue}>{order.priceRange}</span>
                       </div>
-                      <div className={styles.orderMetaBlock}>
-                        <dt className={styles.orderMetaLabel}>{tCommon("location")}</dt>
-                        <dd className={styles.orderMetaValue}>{order.location}</dd>
+                      <div
+                        className={styles.orderMetaRow}
+                        aria-label={`${tCommon("location")}: ${order.location}`}
+                      >
+                        <MapPin size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
+                        <span className={styles.orderMetaValue}>{order.location}</span>
                       </div>
-                      <div className={styles.orderMetaBlock}>
-                        <dt className={styles.orderMetaLabel}>{t("metaExpectedBy")}</dt>
-                        <dd className={styles.orderMetaValue}>{order.expectedBy}</dd>
+                      <div
+                        className={styles.orderMetaRow}
+                        aria-label={`${t("metaExpectedBy")}: ${order.expectedBy}`}
+                      >
+                        <CalendarClock size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
+                        <span className={styles.orderMetaValue}>{order.expectedBy}</span>
                       </div>
-                    </dl>
+                    </div>
                   </div>
                   <div className={styles.orderFooter}>
                     <button
@@ -158,26 +154,38 @@ export default function OrderPage() {
                       {contactOpen ? t("hideContactInformation") : t("seeContactInformation")}
                     </button>
                   </div>
-                  {contactOpen ? (
-                    <div className={styles.orderContactExtra} id={contactPanelId} role="region">
-                      <div className={styles.contactExtraRow}>
-                        <span className={styles.contactExtraLabel}>{tCommon("name")}</span>
-                        <span className={styles.contactExtraValue}>{order.publisherName}</span>
-                      </div>
-                      <div className={styles.contactExtraRow}>
-                        <span className={styles.contactExtraLabel}>{tCommon("phone")}</span>
-                        <a href={telHref} className={styles.contactExtraLink}>
-                          {order.publisherPhone}
-                        </a>
-                      </div>
-                      <div className={styles.contactExtraRow}>
-                        <span className={styles.contactExtraLabel}>{tCommon("email")}</span>
-                        <a href={`mailto:${order.publisherEmail}`} className={styles.contactExtraLink}>
-                          {order.publisherEmail}
-                        </a>
+                  <div
+                    className={`${styles.contactReveal} ${contactOpen ? styles.contactRevealOpen : ""}`}
+                  >
+                    <div className={styles.contactRevealInner}>
+                      <div
+                        className={styles.orderContactExtra}
+                        id={contactPanelId}
+                        role="region"
+                        aria-hidden={!contactOpen}
+                        inert={contactOpen ? undefined : true}
+                      >
+                        <div className={styles.contactNamePhoneRow}>
+                          <div
+                            className={styles.contactInlineGroup}
+                            aria-label={`${tCommon("name")}: ${order.publisherName}`}
+                          >
+                            <User size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
+                            <span className={styles.contactExtraValue}>{order.publisherName}</span>
+                          </div>
+                          <div
+                            className={styles.contactInlineGroup}
+                            aria-label={`${tCommon("phone")}: ${order.publisherPhone}`}
+                          >
+                            <Phone size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
+                            <a href={telHref} className={styles.contactExtraLink}>
+                              {order.publisherPhone}
+                            </a>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  ) : null}
+                  </div>
                 </article>
               );
             })}
