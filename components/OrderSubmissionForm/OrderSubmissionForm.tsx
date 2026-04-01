@@ -1,0 +1,461 @@
+"use client";
+
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { Hammer, Wrench } from "lucide-react";
+import CustomSelect from "@/components/CustomSelect/CustomSelect";
+import type { SelectOption } from "@/lib/types";
+import styles from "./OrderSubmissionForm.module.css";
+
+const CATEGORY_VALUES = ["wood", "clay", "metal", "textiles", "restoration"] as const;
+
+const CATEGORY_MSG_KEYS: Record<(typeof CATEGORY_VALUES)[number], string> = {
+  wood: "categoryWood",
+  clay: "categoryClay",
+  metal: "categoryMetal",
+  textiles: "categoryTextiles",
+  restoration: "categoryRestoration",
+};
+
+const REGION_VALUES = [
+  "tbilisi",
+  "batumi",
+  "kutaisi",
+  "rustavi",
+  "zugdidi",
+  "gori",
+  "poti",
+  "telavi",
+  "akhaltsikhe",
+  "mtskheta",
+  "other",
+] as const;
+
+const DEADLINE_VALUES = ["urgent", "week", "month"] as const;
+
+const DEADLINE_MSG_KEYS: Record<(typeof DEADLINE_VALUES)[number], string> = {
+  urgent: "deadlineUrgent",
+  week: "deadlineWeek",
+  month: "deadlineMonth",
+};
+
+const REGION_MSG_KEYS: Record<(typeof REGION_VALUES)[number], string> = {
+  tbilisi: "regionTbilisi",
+  batumi: "regionBatumi",
+  kutaisi: "regionKutaisi",
+  rustavi: "regionRustavi",
+  zugdidi: "regionZugdidi",
+  gori: "regionGori",
+  poti: "regionPoti",
+  telavi: "regionTelavi",
+  akhaltsikhe: "regionAkhaltsikhe",
+  mtskheta: "regionMtskheta",
+  other: "regionOther",
+};
+
+export type OrderFormState = {
+  title: string;
+  category: string;
+  description: string;
+  images: File[];
+  location: string;
+  budgetMin: string;
+  budgetMax: string;
+  priceNegotiable: boolean;
+  deadline: (typeof DEADLINE_VALUES)[number] | "";
+};
+
+const initialState: OrderFormState = {
+  title: "",
+  category: "",
+  description: "",
+  images: [],
+  location: "",
+  budgetMin: "",
+  budgetMax: "",
+  priceNegotiable: false,
+  deadline: "",
+};
+
+export default function OrderSubmissionForm({
+  onSubmit,
+  embedded = false,
+}: {
+  onSubmit?: (data: OrderFormState) => void | Promise<void>;
+  embedded?: boolean;
+}) {
+  const t = useTranslations("orderForm");
+  const formId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState<OrderFormState>(initialState);
+  const [dragOver, setDragOver] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (form.images.length === 0) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(form.images[0]);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [form.images]);
+
+  const categoryOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: t("categoryPlaceholder") },
+      ...CATEGORY_VALUES.map((v) => ({
+        value: v,
+        label: t(CATEGORY_MSG_KEYS[v] as "categoryWood"),
+      })),
+    ],
+    [t],
+  );
+
+  const regionOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: t("locationPlaceholder") },
+      ...REGION_VALUES.map((v) => ({
+        value: v,
+        label: t(REGION_MSG_KEYS[v] as "regionTbilisi"),
+      })),
+    ],
+    [t],
+  );
+
+  const setField = useCallback(<K extends keyof OrderFormState>(key: K, value: OrderFormState[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setErrors((e) => {
+      const next = { ...e };
+      delete next[key as string];
+      return next;
+    });
+  }, []);
+
+  const addFiles = useCallback((list: FileList | File[]) => {
+    const incoming = Array.from(list).filter((f) => f.type.startsWith("image/"));
+    if (incoming.length === 0) return;
+    setForm((prev) => ({
+      ...prev,
+      images: [...prev.images, ...incoming].slice(0, 8),
+    }));
+  }, []);
+
+  const validateStep = (s: number): boolean => {
+    const next: Record<string, string> = {};
+    if (s === 1) {
+      if (!form.title.trim()) next.title = t("errorTitle");
+      if (!form.category) next.category = t("errorCategory");
+      if (!form.description.trim()) next.description = t("errorDescription");
+    }
+    if (s === 2) {
+      if (!form.location) next.location = t("errorLocation");
+    }
+    if (s === 3) {
+      if (!form.priceNegotiable) {
+        const min = parseFloat(form.budgetMin);
+        const max = parseFloat(form.budgetMax);
+        if (
+          Number.isNaN(min) ||
+          Number.isNaN(max) ||
+          min < 0 ||
+          max < 0 ||
+          min > max
+        ) {
+          next.budget = t("errorBudget");
+        }
+      }
+      if (!form.deadline) next.deadline = t("errorDeadline");
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const goNext = () => {
+    if (!validateStep(step)) return;
+    setStep((x) => Math.min(3, x + 1));
+  };
+
+  const goBack = () => {
+    setErrors({});
+    setStep((x) => Math.max(1, x - 1));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateStep(3)) return;
+    setSubmitting(true);
+    try {
+      await onSubmit?.(form);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form
+      className={`${styles.form} ${embedded ? styles.formEmbedded : ""}`}
+      onSubmit={handleSubmit}
+      noValidate
+    >
+      <div className={styles.steps} aria-label={t("stepsAria")}>
+        {[1, 2, 3].map((n) => (
+          <div
+            key={n}
+            className={`${styles.stepDot} ${step >= n ? styles.stepDotActive : ""} ${
+              step === n ? styles.stepDotCurrent : ""
+            }`}
+          >
+            <span className={styles.stepDotNum}>{n}</span>
+          </div>
+        ))}
+      </div>
+      <p className={styles.stepMeta}>
+        {t("stepLabel", { step })}
+      </p>
+
+      {step === 1 ? (
+        <div className={styles.stepCard}>
+          <h2 className={styles.stepTitle}>{t("step1Heading")}</h2>
+          <label className={styles.label} htmlFor={`${formId}-title`}>
+            {t("projectTitle")}
+          </label>
+          <input
+            id={`${formId}-title`}
+            className={`${styles.input} ${errors.title ? styles.fieldError : ""}`}
+            type="text"
+            value={form.title}
+            onChange={(e) => setField("title", e.target.value)}
+            placeholder={t("projectTitlePlaceholder")}
+            autoComplete="off"
+          />
+          {errors.title ? <p className={styles.errorText}>{errors.title}</p> : null}
+
+          <span className={styles.label}>{t("category")}</span>
+          <CustomSelect
+            id={`${formId}-category`}
+            options={categoryOptions}
+            value={form.category}
+            onChange={(v) => setField("category", v)}
+            placeholder={t("categoryPlaceholder")}
+            aria-label={t("category")}
+            className={errors.category ? styles.selectError : ""}
+          />
+          {errors.category ? <p className={styles.errorText}>{errors.category}</p> : null}
+
+          <label className={styles.label} htmlFor={`${formId}-desc`}>
+            {t("description")}
+          </label>
+          <textarea
+            id={`${formId}-desc`}
+            className={`${styles.textarea} ${errors.description ? styles.fieldError : ""}`}
+            value={form.description}
+            onChange={(e) => setField("description", e.target.value)}
+            placeholder={t("descriptionPlaceholder")}
+            rows={6}
+          />
+          {errors.description ? <p className={styles.errorText}>{errors.description}</p> : null}
+        </div>
+      ) : null}
+
+      {step === 2 ? (
+        <div className={styles.stepCard}>
+          <h2 className={styles.stepTitle}>{t("step2Heading")}</h2>
+          <p className={styles.fieldHint}>{t("visualsHeading")}</p>
+          <div
+            className={`${styles.dropzone} ${dragOver ? styles.dropzoneActive : ""} ${
+              form.images.length ? styles.dropzoneHasFile : ""
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              addFiles(e.dataTransfer.files);
+            }}
+            onClick={() => fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
+            aria-label={t("dropPrompt")}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className={styles.hiddenInput}
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files?.length) addFiles(files);
+                e.target.value = "";
+              }}
+            />
+            {previewUrl && form.images.length > 0 ? (
+              <div className={styles.previewWrap}>
+                <Image
+                  src={previewUrl}
+                  alt=""
+                  width={200}
+                  height={140}
+                  className={styles.previewImg}
+                  unoptimized
+                />
+                <span className={styles.previewBadge}>
+                  {t("imageCount", { count: form.images.length })}
+                </span>
+              </div>
+            ) : (
+              <div className={styles.dropzonePlaceholder}>
+                <span className={styles.toolIcons} aria-hidden>
+                  <Hammer size={32} strokeWidth={1.75} />
+                  <Wrench size={28} strokeWidth={1.75} />
+                </span>
+                <span className={styles.dropzoneText}>{t("dropPrompt")}</span>
+                <span className={styles.dropzoneHint}>{t("dropHint")}</span>
+              </div>
+            )}
+          </div>
+          {form.images.length > 0 ? (
+            <button
+              type="button"
+              className={styles.textBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                setField("images", []);
+              }}
+            >
+              {t("clearImages")}
+            </button>
+          ) : null}
+
+          <span className={styles.label}>{t("location")}</span>
+          <CustomSelect
+            id={`${formId}-location`}
+            options={regionOptions}
+            value={form.location}
+            onChange={(v) => setField("location", v)}
+            placeholder={t("locationPlaceholder")}
+            aria-label={t("location")}
+            className={errors.location ? styles.selectError : ""}
+          />
+          {errors.location ? <p className={styles.errorText}>{errors.location}</p> : null}
+        </div>
+      ) : null}
+
+      {step === 3 ? (
+        <div className={styles.stepCard}>
+          <h2 className={styles.stepTitle}>{t("step3Heading")}</h2>
+          <p className={styles.fieldHint}>{t("budgetHeading")}</p>
+          <label className={styles.negotiableRow}>
+            <input
+              type="checkbox"
+              checked={form.priceNegotiable}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setForm((prev) => ({
+                  ...prev,
+                  priceNegotiable: checked,
+                  ...(checked ? { budgetMin: "", budgetMax: "" } : {}),
+                }));
+                setErrors((err) => {
+                  const n = { ...err };
+                  delete n.budget;
+                  return n;
+                });
+              }}
+            />
+            <span>{t("priceNegotiable")}</span>
+          </label>
+          <div
+            className={`${styles.budgetRow} ${
+              form.priceNegotiable ? styles.budgetRowDisabled : ""
+            }`}
+          >
+            <div className={styles.budgetField}>
+              <label className={styles.sublabel} htmlFor={`${formId}-min`}>
+                {t("budgetMin")}
+              </label>
+              <input
+                id={`${formId}-min`}
+                type="number"
+                min={0}
+                step="1"
+                className={`${styles.input} ${errors.budget ? styles.fieldError : ""}`}
+                value={form.budgetMin}
+                onChange={(e) => setField("budgetMin", e.target.value)}
+                disabled={form.priceNegotiable}
+                placeholder="0"
+              />
+            </div>
+            <div className={styles.budgetField}>
+              <label className={styles.sublabel} htmlFor={`${formId}-max`}>
+                {t("budgetMax")}
+              </label>
+              <input
+                id={`${formId}-max`}
+                type="number"
+                min={0}
+                step="1"
+                className={`${styles.input} ${errors.budget ? styles.fieldError : ""}`}
+                value={form.budgetMax}
+                onChange={(e) => setField("budgetMax", e.target.value)}
+                disabled={form.priceNegotiable}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          {errors.budget ? <p className={styles.errorText}>{errors.budget}</p> : null}
+
+          <p className={`${styles.fieldHint} ${styles.deadlineHint}`}>{t("deadlineHeading")}</p>
+          <div className={styles.deadlineGroup} role="group" aria-label={t("deadlineHeading")}>
+            {DEADLINE_VALUES.map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={`${styles.deadlinePill} ${
+                  form.deadline === value ? styles.deadlinePillActive : ""
+                } ${errors.deadline ? styles.deadlinePillError : ""}`}
+                onClick={() => setField("deadline", value)}
+              >
+                {t(DEADLINE_MSG_KEYS[value] as "deadlineUrgent")}
+              </button>
+            ))}
+          </div>
+          {errors.deadline ? <p className={styles.errorText}>{errors.deadline}</p> : null}
+        </div>
+      ) : null}
+
+      <div className={styles.actions}>
+        {step > 1 ? (
+          <button type="button" className={styles.btnSecondary} onClick={goBack}>
+            {t("back")}
+          </button>
+        ) : (
+          <span />
+        )}
+        {step < 3 ? (
+          <button type="button" className={styles.btnPrimary} onClick={goNext}>
+            {t("next")}
+          </button>
+        ) : (
+          <button type="submit" className={styles.btnPrimary} disabled={submitting}>
+            {submitting ? t("submitting") : t("submit")}
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}

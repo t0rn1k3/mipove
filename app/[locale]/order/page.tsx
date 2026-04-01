@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getMe, getImageUrl } from "@/lib/api";
 import type { DummyOrder, OrdersPageSessionUser } from "@/lib/types";
+import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
+import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
 import { Banknote, MapPin, CalendarClock, User, Phone } from "lucide-react";
 import styles from "./orderPage.module.css";
 
@@ -16,6 +18,7 @@ export default function OrderPage() {
   const [sessionUser, setSessionUser] = useState<OrdersPageSessionUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
+  const [formModalOpen, setFormModalOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,15 +77,17 @@ export default function OrderPage() {
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>{t("title")}</h1>
-        <p className={styles.subtitle}>{t("description")}</p>
-      </header>
+      <BackgroundImage />
+     
 
       <div className={styles.toolbar}>
-        <Link href="/join" className={styles.addOrderBtn}>
+        <button
+          type="button"
+          className={styles.addOrderBtn}
+          onClick={() => setFormModalOpen(true)}
+        >
           {t("addYourOrder")}
-        </Link>
+        </button>
       </div>
 
       <div className={styles.layout}>
@@ -224,6 +229,8 @@ export default function OrderPage() {
           )}
         </aside>
       </div>
+
+      <OrderFormModal open={formModalOpen} onClose={() => setFormModalOpen(false)} />
     </main>
   );
 }

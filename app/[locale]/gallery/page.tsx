@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./galleryPage.module.css";
 import Image from "next/image";
+import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
 
 export default function Gallery() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -89,6 +90,7 @@ export default function Gallery() {
   ];
   return (
     <div ref={sectionRef} className={styles.container}>
+      <BackgroundImage />
       <div className={isVisible ? styles.visible : ""}>
         <header className={styles.header}>
           <h1
