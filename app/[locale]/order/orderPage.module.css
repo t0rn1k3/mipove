@@ -56,25 +56,101 @@
   min-height: 200px;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1.25rem;
 }
 
-.orderRow {
+.orderCard {
+  padding: 1.25rem 1.35rem;
+  background: #f5f2eb;
+  border-radius: 14px;
+  border: 1px solid #e8e4db;
+  box-shadow: 0 2px 14px rgba(26, 26, 26, 0.06);
+}
+
+.orderTop {
   display: grid;
   grid-template-columns: 88px minmax(0, 1fr) minmax(140px, 220px);
   gap: 1rem 1.25rem;
-  padding: 1.15rem 0;
-  border-bottom: 1px solid #e8e6e1;
   align-items: start;
 }
 
-.orderRow:first-of-type {
-  padding-top: 0;
+.orderFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.08);
 }
 
-.orderRow:last-of-type {
-  border-bottom: none;
-  padding-bottom: 0;
+.contactInfoBtn {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #111827;
+  background: #4dd0e1;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.contactInfoBtn:hover {
+  filter: brightness(1.06);
+}
+
+.contactInfoBtn:focus-visible {
+  outline: 2px solid #0f766e;
+  outline-offset: 2px;
+}
+
+.orderContactExtra {
+  margin-top: 0.75rem;
+  padding: 1rem 1.1rem;
+  background: #faf9f6;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.contactExtraRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+}
+
+.contactExtraLabel {
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.contactExtraValue {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.contactExtraLink {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f766e;
+  word-break: break-all;
+  text-decoration: none;
+}
+
+.contactExtraLink:hover {
+  text-decoration: underline;
 }
 
 .orderThumb {
@@ -255,7 +331,7 @@
 }
 
 @media (max-width: 720px) {
-  .orderRow {
+  .orderTop {
     grid-template-columns: 64px minmax(0, 1fr);
     grid-template-areas:
       "thumb main"
@@ -283,5 +359,9 @@
 
   .orderMetaBlock {
     min-width: 7rem;
+  }
+
+  .contactInfoBtn {
+    width: 100%;
   }
 }

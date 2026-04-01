@@ -53,6 +53,8 @@
     "loadingProfile": "იტვირთება…",
     "metaPriceRange": "ფასის დიაპაზონი",
     "metaExpectedBy": "სავარაუდო ვადა",
+    "seeContactInformation": "საკონტაქტო ინფორმაციის ნახვა",
+    "hideContactInformation": "საკონტაქტოს დამალვა",
     "dummyOrders": [
       {
         "imageSrc": "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=200&q=80",
@@ -61,7 +63,10 @@
         "description": "სამი ცალი მაგიდის ლარჩი, მქისე გლაზური, მიწის ტონებში სასადილოსთვის.",
         "priceRange": "₾320 – ₾480",
         "location": "თბილისი",
-        "expectedBy": "12 აპრ, 2026"
+        "expectedBy": "12 აპრ, 2026",
+        "publisherName": "ნინო კვარაცხელია",
+        "publisherPhone": "+995 555 12 34 01",
+        "publisherEmail": "nino.k@example.ge"
       },
       {
         "imageSrc": "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=200&q=80",
@@ -70,7 +75,10 @@
         "description": "ფერმერული სტილი მასიური მუხით, ზეთის ფინიში და გამძლე ფეხებით.",
         "priceRange": "₾2,800 – ₾4,200",
         "location": "ქუთაისი",
-        "expectedBy": "3 მაი, 2026"
+        "expectedBy": "3 მაი, 2026",
+        "publisherName": "გიორგი ბერიძე",
+        "publisherPhone": "+995 599 98 76 54",
+        "publisherEmail": "giorgi.b@example.ge"
       },
       {
         "imageSrc": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=200&q=80",
@@ -79,7 +87,10 @@
         "description": "საფეხური რკინის კარიბჭე შესაბამისი ფიქსირებული პანელებით, შავი პულვერი.",
         "priceRange": "₾1,900 – ₾2,600",
         "location": "ბათუმი",
-        "expectedBy": "28 აპრ, 2026"
+        "expectedBy": "28 აპრ, 2026",
+        "publisherName": "მარიამ გელაშვილი",
+        "publisherPhone": "+995 555 44 20 18",
+        "publisherEmail": "mariam.g@example.ge"
       }
     ]
   },

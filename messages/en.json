@@ -53,6 +53,8 @@
     "loadingProfile": "Loading…",
     "metaPriceRange": "Price range",
     "metaExpectedBy": "Expected by",
+    "seeContactInformation": "See contact information",
+    "hideContactInformation": "Hide contact information",
     "dummyOrders": [
       {
         "imageSrc": "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=200&q=80",
@@ -61,7 +63,10 @@
         "description": "Three-piece table vase set, matte glaze, earth tones to match your dining space.",
         "priceRange": "₾320 – ₾480",
         "location": "Tbilisi",
-        "expectedBy": "Apr 12, 2026"
+        "expectedBy": "Apr 12, 2026",
+        "publisherName": "Nino Kvaratskhelia",
+        "publisherPhone": "+995 555 12 34 01",
+        "publisherEmail": "nino.k@example.ge"
       },
       {
         "imageSrc": "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=200&q=80",
@@ -70,7 +75,10 @@
         "description": "Farmhouse-style solid oak table with oil finish and sturdy trestle base.",
         "priceRange": "₾2,800 – ₾4,200",
         "location": "Kutaisi",
-        "expectedBy": "May 3, 2026"
+        "expectedBy": "May 3, 2026",
+        "publisherName": "Giorgi Beridze",
+        "publisherPhone": "+995 599 98 76 54",
+        "publisherEmail": "giorgi.b@example.ge"
       },
       {
         "imageSrc": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=200&q=80",
@@ -79,7 +87,10 @@
         "description": "Wrought iron pedestrian gate with matching fixed panels, powder-coated black.",
         "priceRange": "₾1,900 – ₾2,600",
         "location": "Batumi",
-        "expectedBy": "Apr 28, 2026"
+        "expectedBy": "Apr 28, 2026",
+        "publisherName": "Mariam Gelashvili",
+        "publisherPhone": "+995 555 44 20 18",
+        "publisherEmail": "mariam.g@example.ge"
       }
     ]
   },
