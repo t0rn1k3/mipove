@@ -71,6 +71,7 @@ export default function Navbar() {
     { name: t("home"), href: "/" },
     { name: t("gallery"), href: "/gallery" },
     { name: t("masters"), href: "/masters" },
+    { name: t("orders"), href: "/order" },
     { name: t("about"), href: "/about" },
   ];
   return (

@@ -1,0 +1,24 @@
+.page {
+  padding: 100px 5% 80px;
+  background: var(--cream);
+  min-height: 100vh;
+}
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.title {
+  font-family: var(--font-sharpe);
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #1a1a1a;
+  margin: 0 0 1rem;
+}
+
+.description {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #444;
+}

@@ -28,9 +28,14 @@
     "home": "Home",
     "gallery": "Gallery",
     "masters": "Masters",
+    "orders": "Orders",
     "about": "About",
     "admin": "Admin",
     "joinUs": "Join Us"
+  },
+  "order": {
+    "title": "Orders",
+    "description": "Your orders will appear here."
   },
   "hero": {
     "title": "Find Your Perfect Craftsperson",
