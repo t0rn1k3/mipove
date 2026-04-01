@@ -35,7 +35,22 @@
   },
   "order": {
     "title": "Orders",
-    "description": "Your orders will appear here."
+    "description": "Your orders will appear here.",
+    "smartFilter": "Smart filter",
+    "searchPlaceholder": "Search orders…",
+    "filterByCity": "Filter by city…",
+    "statusLabel": "Status",
+    "statusAll": "All statuses",
+    "statusActive": "Active",
+    "statusCompleted": "Completed",
+    "ordersList": "Your orders",
+    "noOrders": "No orders yet. When you start a project, it will show up here.",
+    "loginRequired": "You need to sign in to place an order or contact a master.",
+    "viewProfile": "View profile",
+    "adminPanel": "Admin panel",
+    "roleClient": "Client",
+    "roleMaster": "Master",
+    "loadingProfile": "Loading…"
   },
   "hero": {
     "title": "Find Your Perfect Craftsperson",

@@ -1,24 +1,180 @@
 .page {
-  padding: 100px 5% 80px;
+  padding: 100px 4% 80px;
   background: var(--cream);
   min-height: 100vh;
 }
 
-.inner {
-  max-width: 720px;
-  margin: 0 auto;
+.header {
+  max-width: 1200px;
+  margin: 0 auto 1.5rem;
 }
 
 .title {
   font-family: var(--font-sharpe);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
   color: #1a1a1a;
+  margin: 0 0 0.35rem;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #5c5c68;
+}
+
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(240px, 300px);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.panel {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.panelTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
   margin: 0 0 1rem;
 }
 
-.description {
+.filterSlot {
+  min-height: 120px;
+}
+
+.ordersBody {
+  min-height: 200px;
+}
+
+.emptyOrders {
   margin: 0;
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: #444;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* Profile / guest aside */
+.asideCard {
+  background: #1a1a1a;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 96px;
+}
+
+.asideLoading {
+  color: #9ca3af;
+  font-size: 0.9375rem;
+  text-align: center;
+  margin: 0;
+  padding: 1rem 0;
+}
+
+.avatarWrap {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  border: 2px solid #4dd0e1;
+  overflow: hidden;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.asideName {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  margin: 0 0 0.25rem;
+}
+
+.asideRole {
+  font-size: 0.875rem;
+  color: #4dd0e1;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 1rem;
+}
+
+.asideEmail {
+  font-size: 0.8125rem;
+  color: #d1d5db;
+  text-align: center;
+  word-break: break-word;
+  margin: 0 0 1.25rem;
+}
+
+.asideBtnBase {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    filter 0.2s;
+}
+
+.asideBtnPrimary {
+  composes: asideBtnBase;
+  background: #4dd0e1;
+  color: #111827;
+  border: none;
+  cursor: pointer;
+}
+
+.asideBtnPrimary:hover {
+  filter: brightness(1.05);
+}
+
+.asideBtnOutline {
+  composes: asideBtnBase;
+  background: transparent;
+  color: #4dd0e1;
+  border: 2px solid #4dd0e1;
+}
+
+.asideBtnOutline:hover {
+  background: rgba(77, 208, 225, 0.12);
+}
+
+.guestText {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #e5e7eb;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .asideCard {
+    position: static;
+  }
 }
