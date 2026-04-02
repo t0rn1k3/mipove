@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -11,6 +11,35 @@ import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
 import { Banknote, MapPin, CalendarClock, User, Phone } from "lucide-react";
 import styles from "./orderPage.module.css";
 
+const ORDER_CARD_DELAY = [
+  styles.scrollRevealDelay1,
+  styles.scrollRevealDelay2,
+  styles.scrollRevealDelay3,
+  styles.scrollRevealDelay4,
+  styles.scrollRevealDelay5,
+  styles.scrollRevealDelay6,
+] as const;
+
+function useScrollReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -32px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, visible };
+}
+
 export default function OrderPage() {
   const t = useTranslations("order");
   const tNav = useTranslations("nav");
@@ -19,6 +48,9 @@ export default function OrderPage() {
   const [sessionLoading, setSessionLoading] = useState(true);
   const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const toolbarReveal = useScrollReveal();
+  const layoutReveal = useScrollReveal();
+  const ordersReveal = useScrollReveal();
 
   useEffect(() => {
     let cancelled = false;
@@ -80,34 +112,55 @@ export default function OrderPage() {
       <BackgroundImage />
      
 
-      <div className={styles.toolbar}>
-        <button
-          type="button"
-          className={styles.addOrderBtn}
-          onClick={() => setFormModalOpen(true)}
-        >
-          {t("addYourOrder")}
-        </button>
+      <div
+        ref={toolbarReveal.ref}
+        className={`${styles.toolbarReveal} ${toolbarReveal.visible ? styles.revealVisible : ""}`}
+      >
+        <div className={styles.toolbar}>
+          <button
+            type="button"
+            className={`${styles.addOrderBtn} ${styles.scrollReveal}`}
+            onClick={() => setFormModalOpen(true)}
+          >
+            {t("addYourOrder")}
+          </button>
+        </div>
       </div>
 
-      <div className={styles.layout}>
-        <aside className={`${styles.panel} ${styles.filterColumn}`} aria-label={t("smartFilter")}>
+      <div
+        ref={layoutReveal.ref}
+        className={layoutReveal.visible ? styles.revealVisible : ""}
+      >
+        <div className={styles.layout}>
+        <aside
+          className={`${styles.panel} ${styles.filterColumn} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
+          aria-label={t("smartFilter")}
+        >
           <h2 className={styles.panelTitle}>{t("smartFilter")}</h2>
           <div className={styles.filterSlot} />
         </aside>
 
-        <section className={`${styles.panel} ${styles.ordersColumn}`} aria-labelledby="orders-heading">
+        <section
+          className={`${styles.panel} ${styles.ordersColumn} ${styles.scrollReveal} ${styles.scrollRevealDelay2}`}
+          aria-labelledby="orders-heading"
+        >
           <h2 id="orders-heading" className={styles.panelTitle}>
             {t("ordersList")}
           </h2>
-          <div className={styles.ordersBody}>
+          <div
+            ref={ordersReveal.ref}
+            className={`${styles.ordersBody} ${ordersReveal.visible ? styles.revealVisible : ""}`}
+          >
             {(t.raw("dummyOrders") as DummyOrder[]).map((order, index) => {
               const cardKey = `${order.title}-${order.expectedBy}`;
               const contactPanelId = `order-contact-${index}`;
               const telHref = `tel:${order.publisherPhone.replace(/\s/g, "")}`;
               const contactOpen = expandedContactKey === cardKey;
               return (
-                <article key={cardKey} className={styles.orderCard}>
+                <article
+                  key={cardKey}
+                  className={`${styles.orderCard} ${styles.scrollReveal} ${ORDER_CARD_DELAY[index % ORDER_CARD_DELAY.length]}`}
+                >
                   <div className={styles.orderTop}>
                     <div className={styles.orderThumb}>
                       <Image
@@ -197,7 +250,10 @@ export default function OrderPage() {
           </div>
         </section>
 
-        <aside className={styles.asideCard} aria-label={t("viewProfile")}>
+        <aside
+          className={`${styles.asideCard} ${styles.scrollReveal} ${styles.scrollRevealDelay3}`}
+          aria-label={t("viewProfile")}
+        >
           {sessionLoading ? (
             <p className={styles.asideLoading}>{t("loadingProfile")}</p>
           ) : sessionUser ? (
@@ -228,6 +284,7 @@ export default function OrderPage() {
             </>
           )}
         </aside>
+        </div>
       </div>
 
       <OrderFormModal open={formModalOpen} onClose={() => setFormModalOpen(false)} />

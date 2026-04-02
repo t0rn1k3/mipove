@@ -1,3 +1,58 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Parent gets .revealVisible when section enters viewport */
+.scrollReveal {
+  opacity: 0;
+}
+
+.revealVisible .scrollReveal {
+  animation: fadeInUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.revealVisible .scrollRevealDelay1 {
+  animation-delay: 0.05s;
+}
+.revealVisible .scrollRevealDelay2 {
+  animation-delay: 0.12s;
+}
+.revealVisible .scrollRevealDelay3 {
+  animation-delay: 0.19s;
+}
+.revealVisible .scrollRevealDelay4 {
+  animation-delay: 0.26s;
+}
+.revealVisible .scrollRevealDelay5 {
+  animation-delay: 0.33s;
+}
+.revealVisible .scrollRevealDelay6 {
+  animation-delay: 0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollReveal {
+    opacity: 1;
+  }
+
+  .revealVisible .scrollReveal {
+    animation: none;
+  }
+}
+
+.toolbarReveal {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .page {
   padding: 100px 4% 80px;
   min-height: 100vh;

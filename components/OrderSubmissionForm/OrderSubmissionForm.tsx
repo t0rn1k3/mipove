@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Hammer, Wrench } from "lucide-react";
@@ -54,14 +62,16 @@ const REGION_MSG_KEYS: Record<(typeof REGION_VALUES)[number], string> = {
   other: "regionOther",
 };
 
+const BUDGET_MAX = 5000;
+
 export type OrderFormState = {
   title: string;
   category: string;
   description: string;
   images: File[];
   location: string;
-  budgetMin: string;
-  budgetMax: string;
+  budgetMin: number;
+  budgetMax: number;
   priceNegotiable: boolean;
   deadline: (typeof DEADLINE_VALUES)[number] | "";
 };
@@ -72,8 +82,8 @@ const initialState: OrderFormState = {
   description: "",
   images: [],
   location: "",
-  budgetMin: "",
-  budgetMax: "",
+  budgetMin: 0,
+  budgetMax: BUDGET_MAX,
   priceNegotiable: false,
   deadline: "",
 };
@@ -132,6 +142,7 @@ export default function OrderSubmissionForm({
     setErrors((e) => {
       const next = { ...e };
       delete next[key as string];
+      if (key === "budgetMin" || key === "budgetMax") delete next.budget;
       return next;
     });
   }, []);
@@ -157,14 +168,13 @@ export default function OrderSubmissionForm({
     }
     if (s === 3) {
       if (!form.priceNegotiable) {
-        const min = parseFloat(form.budgetMin);
-        const max = parseFloat(form.budgetMax);
+        const { budgetMin: lo, budgetMax: hi } = form;
         if (
-          Number.isNaN(min) ||
-          Number.isNaN(max) ||
-          min < 0 ||
-          max < 0 ||
-          min > max
+          !Number.isFinite(lo) ||
+          !Number.isFinite(hi) ||
+          lo < 0 ||
+          hi > BUDGET_MAX ||
+          lo > hi
         ) {
           next.budget = t("errorBudget");
         }
@@ -195,6 +205,11 @@ export default function OrderSubmissionForm({
       setSubmitting(false);
     }
   };
+  const steps = [
+    { number: 1, title: "აღწერა" },
+    { number: 2, title: "სურათები" },
+    { number: 3, title: "ფასი" },
+  ];
 
   return (
     <form
@@ -203,38 +218,40 @@ export default function OrderSubmissionForm({
       noValidate
     >
       <div className={styles.steps} aria-label={t("stepsAria")}>
-        {[1, 2, 3].map((n) => (
-          <div
-            key={n}
-            className={`${styles.stepDot} ${step >= n ? styles.stepDotActive : ""} ${
-              step === n ? styles.stepDotCurrent : ""
-            }`}
-          >
-            <span className={styles.stepDotNum}>{n}</span>
+        {steps.map((stepItem) => (
+          <div key={stepItem.number} className={`${styles.stepDotContainer} ${stepItem.number <= step ? styles.stepDotContainerActive : ""}`}>
+            <span
+              className={`${styles.stepDot} ${stepItem.number <= step ? styles.stepDotActive : ""} ${
+                stepItem.number === step ? styles.stepDotCurrent : ""
+              }`}
+            >
+              {stepItem.number}
+            </span>
+            <span className={styles.stepDotText}>{stepItem.title}</span>
           </div>
         ))}
       </div>
-      <p className={styles.stepMeta}>
-        {t("stepLabel", { step })}
-      </p>
+    
 
       {step === 1 ? (
         <div className={styles.stepCard}>
-          <h2 className={styles.stepTitle}>{t("step1Heading")}</h2>
-          <label className={styles.label} htmlFor={`${formId}-title`}>
-            {t("projectTitle")}
-          </label>
-          <input
-            id={`${formId}-title`}
-            className={`${styles.input} ${errors.title ? styles.fieldError : ""}`}
-            type="text"
-            value={form.title}
-            onChange={(e) => setField("title", e.target.value)}
-            placeholder={t("projectTitlePlaceholder")}
-            autoComplete="off"
-          />
+          <div className={styles.stepCardHeader}>
+            <div>
+              <label className={styles.label} htmlFor={`${formId}-title`}>
+              {t("projectTitle")}
+            </label>
+            <input
+              id={`${formId}-title`}
+              className={`${styles.input} ${errors.title ? styles.fieldError : ""}`}
+              type="text"
+              value={form.title}
+              onChange={(e) => setField("title", e.target.value)}
+              placeholder={t("projectTitlePlaceholder")}
+              autoComplete="off"
+            />
           {errors.title ? <p className={styles.errorText}>{errors.title}</p> : null}
-
+            </div>
+          <div>
           <span className={styles.label}>{t("category")}</span>
           <CustomSelect
             id={`${formId}-category`}
@@ -243,9 +260,15 @@ export default function OrderSubmissionForm({
             onChange={(v) => setField("category", v)}
             placeholder={t("categoryPlaceholder")}
             aria-label={t("category")}
-            className={errors.category ? styles.selectError : ""}
+            className={`${errors.category ? styles.selectError : ""} ${styles.select}`}
           />
           {errors.category ? <p className={styles.errorText}>{errors.category}</p> : null}
+          </div>
+       
+
+          </div>
+
+          
 
           <label className={styles.label} htmlFor={`${formId}-desc`}>
             {t("description")}
@@ -368,7 +391,7 @@ export default function OrderSubmissionForm({
                 setForm((prev) => ({
                   ...prev,
                   priceNegotiable: checked,
-                  ...(checked ? { budgetMin: "", budgetMax: "" } : {}),
+                  ...(checked ? { budgetMin: 0, budgetMax: BUDGET_MAX } : {}),
                 }));
                 setErrors((err) => {
                   const n = { ...err };
@@ -380,41 +403,94 @@ export default function OrderSubmissionForm({
             <span>{t("priceNegotiable")}</span>
           </label>
           <div
-            className={`${styles.budgetRow} ${
+            className={`${styles.budgetRangeBlock} ${
               form.priceNegotiable ? styles.budgetRowDisabled : ""
             }`}
           >
-            <div className={styles.budgetField}>
-              <label className={styles.sublabel} htmlFor={`${formId}-min`}>
-                {t("budgetMin")}
-              </label>
-              <input
-                id={`${formId}-min`}
-                type="number"
-                min={0}
-                step="1"
-                className={`${styles.input} ${errors.budget ? styles.fieldError : ""}`}
-                value={form.budgetMin}
-                onChange={(e) => setField("budgetMin", e.target.value)}
-                disabled={form.priceNegotiable}
-                placeholder="0"
-              />
-            </div>
-            <div className={styles.budgetField}>
-              <label className={styles.sublabel} htmlFor={`${formId}-max`}>
-                {t("budgetMax")}
-              </label>
-              <input
-                id={`${formId}-max`}
-                type="number"
-                min={0}
-                step="1"
-                className={`${styles.input} ${errors.budget ? styles.fieldError : ""}`}
-                value={form.budgetMax}
-                onChange={(e) => setField("budgetMax", e.target.value)}
-                disabled={form.priceNegotiable}
-                placeholder="0"
-              />
+            <span className={styles.sublabel}>{t("budgetRangeLabel")}</span>
+            <div className={styles.budgetDualRow}>
+              <span className={styles.budgetDualEnd} aria-live="polite">
+                ₾ {form.budgetMin.toLocaleString()}
+              </span>
+              <div
+                className={styles.budgetDualTrack}
+                style={
+                  {
+                    "--min-pct": `${(form.budgetMin / BUDGET_MAX) * 100}%`,
+                    "--max-pct": `${(form.budgetMax / BUDGET_MAX) * 100}%`,
+                  } as CSSProperties
+                }
+              >
+                <div className={styles.budgetDualRail} aria-hidden />
+                <div className={styles.budgetDualActive} aria-hidden />
+                <input
+                  type="range"
+                  min={0}
+                  max={BUDGET_MAX}
+                  step={50}
+                  value={form.budgetMin}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    setForm((prev) => {
+                      const nextMax = prev.budgetMax;
+                      return {
+                        ...prev,
+                        budgetMin: Math.min(v, nextMax),
+                      };
+                    });
+                    setErrors((err) => {
+                      const n = { ...err };
+                      delete n.budget;
+                      return n;
+                    });
+                  }}
+                  className={`${styles.budgetDualInput} ${styles.budgetDualInputMin} ${
+                    errors.budget ? styles.budgetDualInputError : ""
+                  }`}
+                  style={{ zIndex: form.budgetMin > BUDGET_MAX - 500 ? 4 : 3 }}
+                  id={`${formId}-budget-min`}
+                  disabled={form.priceNegotiable}
+                  aria-label={t("budgetMinAria")}
+                  aria-valuemin={0}
+                  aria-valuemax={BUDGET_MAX}
+                  aria-valuenow={form.budgetMin}
+                />
+                <input
+                  type="range"
+                  min={0}
+                  max={BUDGET_MAX}
+                  step={50}
+                  value={form.budgetMax}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    setForm((prev) => {
+                      const nextMin = prev.budgetMin;
+                      return {
+                        ...prev,
+                        budgetMax: Math.max(v, nextMin),
+                      };
+                    });
+                    setErrors((err) => {
+                      const n = { ...err };
+                      delete n.budget;
+                      return n;
+                    });
+                  }}
+                  className={`${styles.budgetDualInput} ${styles.budgetDualInputMax} ${
+                    errors.budget ? styles.budgetDualInputError : ""
+                  }`}
+                  style={{ zIndex: form.budgetMin > BUDGET_MAX - 500 ? 3 : 4 }}
+                  id={`${formId}-budget-max`}
+                  disabled={form.priceNegotiable}
+                  aria-label={t("budgetMaxAria")}
+                  aria-valuemin={0}
+                  aria-valuemax={BUDGET_MAX}
+                  aria-valuenow={form.budgetMax}
+                />
+              </div>
+              <span className={styles.budgetDualEnd} aria-live="polite">
+                ₾ {form.budgetMax.toLocaleString()}
+              </span>
             </div>
           </div>
           {errors.budget ? <p className={styles.errorText}>{errors.budget}</p> : null}

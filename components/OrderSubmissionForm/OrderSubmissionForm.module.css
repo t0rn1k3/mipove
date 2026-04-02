@@ -10,15 +10,33 @@
 
 .steps {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.stepDotContainer {
+  display: flex;
+  width: 10rem ;
+  align-items: center;
+  background-color: rgba(185, 185, 185, 0.35);
+  padding: 0.5rem;
+  border-radius: 999px;
+  
+  color: #374151;
+}
+
+.stepDotText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  width: 90%;
 }
 
 .stepDot {
-  width: 36px;
-  height: 36px;
   border-radius: 50%;
+  width: 25px;
+  height: 25px;
   display: grid;
   place-items: center;
   background: #e5e7eb;
@@ -29,18 +47,24 @@
     background 0.2s ease,
     color 0.2s ease;
 }
-
 .stepDotActive {
   background: rgba(77, 208, 225, 0.35);
   color: #0f766e;
 }
+
+.stepDotContainerActive {
+  color: #0f766e;
+}
+
 
 .stepDotCurrent {
   box-shadow: 0 0 0 2px #0f766e;
 }
 
 .stepDotNum {
-  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
 }
 
 .stepMeta {
@@ -51,11 +75,15 @@
 }
 
 .stepCard {
-  background: #fff;
   border-radius: 1rem;
-  padding: 1.5rem;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e8e6e1;
+}
+
+.stepCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
 .stepTitle {
@@ -91,6 +119,14 @@
   background: #fafafa;
   margin-bottom: 0.75rem;
 }
+.input, .select {
+  width: 350px;
+}
+
+.select button {
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+}
 
 .input:focus,
 .textarea:focus {
@@ -101,7 +137,7 @@
 
 .textarea {
   resize: vertical;
-  min-height: 120px;
+  max-height: 80px;
   margin-bottom: 0.75rem;
 }
 
@@ -244,11 +280,8 @@
   accent-color: #0f766e;
 }
 
-.budgetRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+.budgetRangeBlock {
+  margin-bottom: 0.75rem;
 }
 
 .budgetRowDisabled {
@@ -256,8 +289,125 @@
   pointer-events: none;
 }
 
-.budgetField {
+/* Dual-handle budget: min (left), max (right), one row */
+.budgetDualRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.budgetDualEnd {
+  flex: 0 0 auto;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f766e;
+  min-width: 4.25rem;
+}
+
+.budgetDualEnd:first-child {
+  text-align: left;
+}
+
+.budgetDualEnd:last-child {
+  text-align: right;
+}
+
+.budgetDualTrack {
+  position: relative;
+  flex: 1;
   min-width: 0;
+  height: 2.25rem;
+  --min-pct: 0%;
+  --max-pct: 100%;
+}
+
+.budgetDualRail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 6px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  pointer-events: none;
+}
+
+.budgetDualActive {
+  position: absolute;
+  left: var(--min-pct);
+  width: calc(var(--max-pct) - var(--min-pct));
+  top: 50%;
+  transform: translateY(-50%);
+  height: 6px;
+  border-radius: 999px;
+  background: #0f766e;
+  pointer-events: none;
+}
+
+.budgetDualInput {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 6px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  appearance: none;
+  pointer-events: none;
+  accent-color: #0f766e;
+}
+
+.budgetDualInput::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border: none;
+}
+
+.budgetDualInput::-moz-range-track {
+  height: 6px;
+  background: transparent;
+  border: none;
+}
+
+.budgetDualInput::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #4dd0e1;
+  border: 2px solid #0f766e;
+  cursor: grab;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.budgetDualInput::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4dd0e1;
+  border: 2px solid #0f766e;
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.budgetDualInput:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid #0f766e;
+  outline-offset: 2px;
+}
+
+.budgetDualInputError::-webkit-slider-thumb {
+  border-color: #dc2626;
+}
+
+.budgetDualInputError::-moz-range-thumb {
+  border-color: #dc2626;
 }
 
 .sublabel {
@@ -356,10 +506,6 @@
 }
 
 @media (max-width: 520px) {
-  .budgetRow {
-    grid-template-columns: 1fr;
-  }
-
   .actions {
     flex-direction: column-reverse;
     align-items: stretch;

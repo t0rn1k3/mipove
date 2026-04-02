@@ -134,8 +134,9 @@
     "regionMtskheta": "Mtskheta",
     "regionOther": "Other",
     "budgetHeading": "Budget (₾)",
-    "budgetMin": "Minimum",
-    "budgetMax": "Maximum",
+    "budgetRangeLabel": "Budget range (₾0 – ₾5,000)",
+    "budgetMinAria": "Minimum budget",
+    "budgetMaxAria": "Maximum budget",
     "priceNegotiable": "Price negotiable",
     "deadlineHeading": "Timeline",
     "deadlineUrgent": "Urgent",
@@ -149,7 +150,7 @@
     "errorCategory": "Choose a category",
     "errorDescription": "Add a description",
     "errorLocation": "Select a location",
-    "errorBudget": "Enter a valid minimum and maximum, or mark price negotiable",
+    "errorBudget": "Set a valid min–max range (₾0 – ₾5,000) or mark price negotiable",
     "errorDeadline": "Choose a timeline"
   },
   "hero": {

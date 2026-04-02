@@ -59,16 +59,8 @@ export default function OrderFormModal({ open, onClose, onSubmit }: OrderFormMod
             <h2 id={TITLE_ID} className={styles.title}>
               {tForm("pageTitle")}
             </h2>
-            <p className={styles.subtitle}>{tForm("pageSubtitle")}</p>
           </div>
-          <button
-            type="button"
-            className={styles.close}
-            onClick={onClose}
-            aria-label={tCommon("close")}
-          >
-            <X size={22} strokeWidth={2} aria-hidden />
-          </button>
+         
         </div>
         <OrderSubmissionForm
           key={formKey}

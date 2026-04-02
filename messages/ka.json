@@ -134,8 +134,9 @@
     "regionMtskheta": "მცხეთა",
     "regionOther": "სხვა",
     "budgetHeading": "ბიუჯეტი (₾)",
-    "budgetMin": "მინიმუმი",
-    "budgetMax": "მაქსიმუმი",
+    "budgetRangeLabel": "ბიუჯეტის დიაპაზონი (₾0 – ₾5,000)",
+    "budgetMinAria": "ბიუჯეტის ქვედა ზღვარი",
+    "budgetMaxAria": "ბიუჯეტის ზედა ზღვარი",
     "priceNegotiable": "ფასი შეთანხმებით",
     "deadlineHeading": "ვადა",
     "deadlineUrgent": "სასწრაფო",
@@ -149,7 +150,7 @@
     "errorCategory": "აირჩიეთ კატეგორია",
     "errorDescription": "დაამატეთ აღწერა",
     "errorLocation": "აირჩიეთ მდებარეობა",
-    "errorBudget": "მიუთითეთ მინ./მაქს. ან მონიშნეთ ფასი შეთანხმებით",
+    "errorBudget": "მიუთითეთ სწორი მინ–მაქს (₾0 – ₾5,000) ან მონიშნეთ შეთანხმებით",
     "errorDeadline": "აირჩიეთ ვადა"
   },
   "hero": {
