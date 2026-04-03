@@ -85,21 +85,8 @@ export default function Hero() {
             <button type="submit" className={styles.searchBarButton}>{t("searchButton")}</button>
           </form>
 
-          {/* Popular Tags */}
-          <div className={`${styles.popularTags} ${styles.reveal} ${styles.revealDelay4}`}>
-            <span className={styles.popularTagsTitle}>{t("popular")}</span>
-
-            {popularSkills.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={styles.popularTagsButton}
-                onClick={() => handlePopularClick(item)}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
+      
+          
         </div>
 
         {/* RIGHT SIDE IMAGES */}

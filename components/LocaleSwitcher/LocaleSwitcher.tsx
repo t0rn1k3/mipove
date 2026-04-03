@@ -1,31 +1,37 @@
 "use client";
 
 import { Globe } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useLocaleSwitch } from "@/components/LocaleProvider/LocaleProvider";
+import type { AppLocale } from "@/lib/types";
+
 import styles from "./localeSwitcher.module.css";
 
 const LANGUAGES = [
-  { code: "en", label: "EN" },
-  { code: "ka", label: "KA" },
-] as const;
+  { code: "ka" as const, label: "ქარ" },
+  { code: "en" as const, label: "EN" },
+];
 
 export default function LocaleSwitcher() {
+  const t = useTranslations("nav");
   const { locale, setLocale } = useLocaleSwitch();
 
+  const active = LANGUAGES.find((l) => l.code === locale) ?? LANGUAGES[1];
+
+  const toggle = () => {
+    const next: AppLocale = locale === "ka" ? "en" : "ka";
+    setLocale(next);
+  };
+
   return (
-    <div className={styles.wrapper}>
+    <button
+      type="button"
+      className={styles.toggle}
+      onClick={toggle}
+      aria-label={t("languageToggle")}
+    >
       <Globe size={16} className={styles.globeIcon} aria-hidden />
-      {LANGUAGES.map((lang) => (
-        <button
-          key={lang.code}
-          type="button"
-          onClick={() => setLocale(lang.code)}
-          aria-pressed={locale === lang.code}
-          className={`${styles.button} ${locale === lang.code ? styles.buttonActive : ""}`}
-        >
-          {lang.label}
-        </button>
-      ))}
-    </div>
+      <span className={styles.label}>{active.label}</span>
+    </button>
   );
 }

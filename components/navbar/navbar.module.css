@@ -14,7 +14,7 @@
   z-index: 100;
   height: 5rem;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   background: transparent;
   transition: background 0.3s ease, box-shadow 0.3s ease;
@@ -32,19 +32,18 @@
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .navContainer {
-  width: 60%;
+  width: 70%;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .navigation {
-  width: 55%;
+  width: 60%;   
   display: flex;
   gap: 2rem;
   justify-content: space-evenly;
@@ -56,6 +55,7 @@
   position: relative;
   transition: color 0.3s ease, transform 0.3s ease;
 }
+
 .navLink::after {
   content: "";
   position: absolute;
@@ -74,6 +74,28 @@
   transform: translateY(-2px);
 }
 
+.navLink:first-child {
+  background-color: var(--teal);
+  padding: 4px 7px;
+  border-radius: 10px;
+  color: white;
+}
+.navLink:first-child:hover {
+  transform: translate(0);
+  transform: scale(1.04);
+}
+.navLink:first-child.navLinkActive{
+  background-color: var(--charcoal);
+}
+.navLink:first-child.navLinkActive::after {
+  width: 0;
+}
+
+
+.navLink:first-child:hover::after{
+  width: 0;
+} 
+
 .navLinkActive {
   color: var(--teal);
 }
@@ -91,9 +113,11 @@
 }
 
 .ctaButton {
+  width: 150px;
   background: var(--teal);
   color: #fff;
-  padding: 0.5rem 1.5rem;
+  text-align: center;
+  padding: 0.5rem;
   border-radius: 9999px;
   text-decoration: none;
   font-size: 1rem;
@@ -172,7 +196,6 @@
 }
 
 /* ========== Responsive ========== */
-/* Tablet (768-1025px): full nav visible, slightly reduced spacing */
 @media (max-width: 1024px) {
   .navContainer {
     width: auto;

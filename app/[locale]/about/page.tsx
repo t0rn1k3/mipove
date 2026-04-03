@@ -6,32 +6,7 @@ import Image from "next/image";
 import Logo from "@/components/logo/Logo";
 import styles from "./about.module.css";
 
-const TEAM = [
-  {
-    name: "Giorgi Beridze",
-    role: "Co-Founder & CEO",
-    bio: "Leading mipove's mission to connect Georgia's finest artisans with the world.",
-    image: "/images/team/giorgi.jpg",
-  },
-  {
-    name: "Mariam Gelashvili",
-    role: "Co-Founder & Creative",
-    bio: "Shaping the vision and creative direction of the platform.",
-    image: "/images/team/mariam.jpg",
-  },
-  {
-    name: "Luka Kvaratskhelia",
-    role: "Head of Technology",
-    bio: "Building the technology that makes connections seamless.",
-    image: "/images/team/luka.jpg",
-  },
-  {
-    name: "Tamara Chkheidze",
-    role: "Community Manager",
-    bio: "Fostering our community of artisans and masters.",
-    image: "/images/team/tamara.jpg",
-  },
-];
+
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -53,9 +28,7 @@ function useScrollReveal() {
 
 export default function AboutPage() {
   const storySection = useScrollReveal();
-  const metricsSection = useScrollReveal();
   const drivesSection = useScrollReveal();
-  const creatorsSection = useScrollReveal();
   const joinSection = useScrollReveal();
   const footerSection = useScrollReveal();
 
@@ -81,7 +54,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* Our Story */}
+   
       <section ref={storySection.ref} className={styles.section}>
         <div
           className={`${styles.sectionInner} ${storySection.isVisible ? styles.visible : ""}`}
@@ -121,41 +94,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Metrics */}
-      <section
-        ref={metricsSection.ref}
-        className={`${styles.section} ${styles.sectionAltBg}`}
-      >
-        <div
-          className={`${styles.sectionInner} ${metricsSection.isVisible ? styles.visible : ""}`}
-        >
-          <div className={styles.metricsGrid}>
-            {[
-              { number: "500+", label: "Verified Masters" },
-              { number: "50+", label: "Craft Categories" },
-              { number: "10K+", label: "Connections Made" },
-              { number: "95%", label: "Satisfaction Rate" },
-            ].map((metric, i) => (
-              <div
-                key={metric.label}
-                className={`${styles.metricCard} ${styles.scrollReveal} ${
-                  [
-                    styles.scrollRevealDelay1,
-                    styles.scrollRevealDelay2,
-                    styles.scrollRevealDelay3,
-                    styles.scrollRevealDelay4,
-                  ][i]
-                }`}
-              >
-                <div className={styles.metricNumber}>
-                  {metric.number.toLocaleString()}
-                </div>
-                <div className={styles.metricLabel}>{metric.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* What Drives Us */}
       <section ref={drivesSection.ref} className={styles.section}>
@@ -217,52 +155,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Meet the Creators */}
-      <section
-        ref={creatorsSection.ref}
-        className={`${styles.section} ${styles.sectionAltBg}`}
-      >
-        <div
-          className={`${styles.sectionInner} ${creatorsSection.isVisible ? styles.visible : ""}`}
-        >
-          <h2
-            className={`${styles.sectionTitle} ${styles.sectionTitleCenter} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
-          >
-            Meet the Creators
-          </h2>
-          <p
-            className={`${styles.sectionSubtitle} ${styles.sectionSubtitleCenter} ${styles.scrollReveal} ${styles.scrollRevealDelay2}`}
-          >
-            The passionate team behind mipove
-          </p>
-          <div className={styles.creatorsGrid}>
-            {TEAM.map((member, i) => (
-              <div
-                key={member.name}
-                className={`${styles.creatorCard} ${styles.scrollReveal} ${
-                  [
-                    styles.scrollRevealDelay3,
-                    styles.scrollRevealDelay4,
-                    styles.scrollRevealDelay5,
-                    styles.scrollRevealDelay6,
-                  ][i]
-                }`}
-              >
-                <Image
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=120`}
-                  alt={member.name}
-                  width={120}
-                  height={120}
-                  className={styles.creatorImage}
-                />
-                <h3 className={styles.creatorName}>{member.name}</h3>
-                <p className={styles.creatorRole}>{member.role}</p>
-                <p className={styles.creatorBio}>{member.bio}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+     
 
       {/* Join Community */}
       <section ref={joinSection.ref} className={styles.joinSection}>
@@ -276,7 +169,7 @@ export default function AboutPage() {
               or someone seeking exceptional talent, mipove is your platform.
             </p>
             <div className={styles.joinButtons}>
-              <Link href="/gallery" className={styles.joinBtnPrimary}>
+              <Link href="/masters" className={styles.joinBtnPrimary}>
                 Find Professionals
               </Link>
               <Link href="/join" className={styles.joinBtnSecondary}>

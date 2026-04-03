@@ -31,7 +31,8 @@
     "orders": "Orders",
     "about": "About",
     "admin": "Admin",
-    "joinUs": "Join Us"
+    "joinUs": "Join Us",
+    "languageToggle": "Switch site language"
   },
   "order": {
     "title": "Orders",
@@ -154,8 +155,8 @@
     "errorDeadline": "Choose a timeline"
   },
   "hero": {
-    "title": "Find Your Perfect Craftsperson",
-    "description": "Connect with exceptional artisans, sculptors, painters, and craftspeople who bring vision to life.",
+    "title": "Find Your Wanted Craftsperson",
+    "description": "Find and connect with exceptional artisans, sculptors, painters, and craftspeople who bring vision to life",
     "searchBySkill": "Search by skill...",
     "locationPlaceholder": "Location...",
     "searchButton": "Search",
@@ -367,7 +368,7 @@
   "notFound": {
     "status": "404",
     "title": "Oops! Something went wrong",
-    "message": "The page you're looking for doesn't exist or has been moved.",
+    "message": "The page you're looking for doesn't exist",
     "goHome": "Go Home",
     "goBack": "Go Back",
     "needHelp": "Need help?"

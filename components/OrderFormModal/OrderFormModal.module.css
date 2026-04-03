@@ -8,14 +8,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.overlayVisible {
+  opacity: 1;
 }
 
 .content {
-  position: relative; 
+  position: relative;
   width: 90%;
   max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
+  transform: translateY(-115vh);
+  transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.contentVisible {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition: opacity 0.2s ease;
+  }
+
+  .content {
+    transform: translateY(-1.5rem);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .contentVisible {
+    transform: translateY(0);
+  }
 }
 
 .header {

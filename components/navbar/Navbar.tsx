@@ -10,7 +10,6 @@ import { getMe } from "@/lib/api";
 import { useTranslations } from "next-intl";
 import type { NavbarUserInfo } from "@/lib/types";
 
-/** Stable across locale-only URL changes (avoids header remount + entrance animation). */
 function routeKeyFromPathname(pathname: string | undefined): string {
   const raw = pathname ?? "/";
   const stripped = raw.replace(/^\/(en|ka)(\/|$)/, "$2") || "/";
@@ -68,10 +67,10 @@ export default function Navbar() {
   if (isAdminRoute) return null;
 
   const navLinks = [
+    { name: t("orders"), href: "/order" },
     { name: t("home"), href: "/" },
     { name: t("gallery"), href: "/gallery" },
     { name: t("masters"), href: "/masters" },
-    { name: t("orders"), href: "/order" },
     { name: t("about"), href: "/about" },
   ];
   return (

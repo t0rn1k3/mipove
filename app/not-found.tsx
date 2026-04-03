@@ -19,7 +19,6 @@ export default function NotFound() {
           <Logo showText size={64} />
         </div>
         <p className={styles.status}>{t("status")}</p>
-        <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.message}>
           {t("message")}
         </p>
