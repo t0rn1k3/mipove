@@ -17,7 +17,9 @@
   justify-content: space-between;
   align-items: center;
   background: transparent;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
   animation: headerAnimation 0.3s ease-out forwards;
   animation-delay: 0.3s;
   transform: translateY(-100%);
@@ -40,10 +42,11 @@
   width: 70%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  gap: 20px;
 }
 .navigation {
-  width: 60%;   
+  width: 65%;
   display: flex;
   gap: 2rem;
   justify-content: space-evenly;
@@ -53,7 +56,12 @@
   text-decoration: none;
   font-size: 1rem;
   position: relative;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navLink::after {
@@ -84,23 +92,32 @@
   transform: translate(0);
   transform: scale(1.04);
 }
-.navLink:first-child.navLinkActive{
+.navLink:first-child.navLinkActive {
   background-color: var(--charcoal);
 }
 .navLink:first-child.navLinkActive::after {
   width: 0;
 }
 
-
-.navLink:first-child:hover::after{
+.navLink:first-child:hover::after {
   width: 0;
-} 
+}
 
 .navLinkActive {
   color: var(--teal);
 }
 .navLinkActive::after {
   width: 100%;
+}
+@media (max-width: 1150px) {
+  .ctaButton {
+    width: 110px;
+  }
+}
+@media (max-width: 1125px) {
+  .navLink {
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -139,7 +156,9 @@
   color: var(--charcoal);
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .profileLink:hover {
@@ -196,49 +215,77 @@
 }
 
 /* ========== Responsive ========== */
+
+@media (max-width: 1150px) {
+  .navContainer {
+    width: 80%;
+  }
+}
 @media (max-width: 1024px) {
   .navContainer {
     width: auto;
     gap: 1.25rem;
   }
-  .navigation {
-    gap: 1.5rem;
-  }
-  .navLink {
-    font-size: 1rem;
+
+  .ctaButton {
+    font-size: 0.8rem;
   }
 }
 
+@media (max-width: 950px) {
+  .navContainer {
+    width: 82%;
+    gap: 10px;
+  }
+  .navigation {
+    width: 80%;
+    gap: 0.5rem;
+  }
+}
+@media (max-width: 900px) {
+  .navContainer {
+    width: 83%;
+  }
+}
 /* Mobile: hamburger menu with slide-out drawer */
+@media (max-width: 1350px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
 @media (max-width: 768px) {
   .navContainer {
     position: fixed;
-    top: 0;
+    top: 100%;
     right: 0;
-    width: 280px;
-    max-width: 85vw;
-    height: 100vh;
-    background: var(--white-95);
+    width: 100%;
+    height: 60vh;
+    background: white;
     backdrop-filter: blur(1rem);
     z-index: 101;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 80px 24px 24px;
+    padding: 20px 24px 24px;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
     transform: translateX(100%);
     transition: transform 0.3s ease;
   }
+
   .navContainer.open {
     transform: translateX(0);
   }
   .navigation {
     flex-direction: column;
-    gap: 0;
+    gap: 5px;
     align-items: stretch;
+    margin: 0 auto;
+  }
+  .ctaButton {
+    margin: 0 auto;
   }
   .navLink {
-    padding: 16px 0;
+    padding: 10px 0;
     border-bottom: 1px solid #eee;
     font-size: 1.1rem;
   }
@@ -274,7 +321,6 @@
     display: flex;
   }
 }
-
 .hamburgerLine {
   width: 100%;
   height: 2px;
@@ -291,7 +337,6 @@
 .hamburger.open .hamburgerLine:nth-child(3) {
   transform: translateY(-8px) rotate(-45deg);
 }
-
 .overlay {
   display: none;
   position: fixed;

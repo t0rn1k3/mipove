@@ -22,7 +22,12 @@ export default function Hero() {
     router.push(`/masters${params.toString() ? `?${params}` : ""}`);
   };
 
-  const popularSkills = [t("painting"), t("sculpture"), t("pottery"), t("woodwork")];
+  const popularSkills = [
+    t("painting"),
+    t("sculpture"),
+    t("pottery"),
+    t("woodwork"),
+  ];
 
   const handlePopularClick = (item: string) => {
     setSkill(item);
@@ -35,11 +40,15 @@ export default function Hero() {
       <div className={styles.container}>
         {/* LEFT SIDE */}
         <div className={styles.leftSide}>
-          <h1 className={`${styles.title} ${styles.reveal} ${styles.revealDelay1}`}>
+          <h1
+            className={`${styles.title} ${styles.reveal} ${styles.revealDelay1}`}
+          >
             {t("title")}
           </h1>
 
-          <p className={`${styles.description} ${styles.reveal} ${styles.revealDelay2}`}>
+          <p
+            className={`${styles.description} ${styles.reveal} ${styles.revealDelay2}`}
+          >
             {t("description")}
           </p>
 
@@ -82,16 +91,17 @@ export default function Hero() {
               </div>
             </div>
 
-            <button type="submit" className={styles.searchBarButton}>{t("searchButton")}</button>
+            <button type="submit" className={styles.searchBarButton}>
+              {t("searchButton")}
+            </button>
           </form>
-
-      
-          
         </div>
 
         {/* RIGHT SIDE IMAGES */}
         <div className={styles.rightSide}>
-          <div className={`${styles.mainImage} ${styles.reveal} ${styles.revealDelay5}`}>
+          <div
+            className={`${styles.mainImage} ${styles.reveal} ${styles.revealDelay5}`}
+          >
             <Image
               src="/images/artisan-2.jpg"
               alt={t("heroMainAlt")}
@@ -100,7 +110,9 @@ export default function Hero() {
             />
           </div>
 
-          <div className={`${styles.secondaryImage} ${styles.reveal} ${styles.revealDelay6}`}>
+          <div
+            className={`${styles.secondaryImage} ${styles.reveal} ${styles.revealDelay6}`}
+          >
             <Image
               src="/images/artisan-2.jpg"
               alt={t("heroSecondaryAlt")}
