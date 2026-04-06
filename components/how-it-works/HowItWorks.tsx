@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./howItWorks.module.css";
-import { Search, ImageIcon, MessageCircle } from "lucide-react";
+import { Search, ImageIcon, ClipboardList } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function HowItWorks() {
@@ -13,7 +13,7 @@ export default function HowItWorks() {
   const STEPS = [
     { icon: Search, title: t("step1Title"), description: t("step1Desc") },
     { icon: ImageIcon, title: t("step2Title"), description: t("step2Desc") },
-    { icon: MessageCircle, title: t("step3Title"), description: t("step3Desc") },
+    { icon: ClipboardList, title: t("step3Title"), description: t("step3Desc") },
   ];
 
   useEffect(() => {

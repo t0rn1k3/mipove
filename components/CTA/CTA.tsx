@@ -10,9 +10,6 @@ export default function CTA() {
     <section className={styles.section}>
       <div className={styles.container}>
         <h2 className={styles.title}>{t("title")}</h2>
-        <p className={styles.description}>
-          {t("description")}
-        </p>
         <div className={styles.buttons}>
           <Link href="/gallery" className={styles.buttonPrimary}>
             {t("exploreGallery")}

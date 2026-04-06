@@ -12,7 +12,6 @@
 .section {
   position: relative;
   width: 100%;
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,13 +58,12 @@
   );
 }
 .container {
-  width: 100%;
+  width: 90%;
   height: 100%;
   z-index: 1;
   position: relative;
-  max-width: 1400px;
+  max-width: 1700px;
   margin: 0 auto;
-  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -181,11 +179,8 @@
 }
 
 .rightSide {
-  display: flex;
   height: 280px;
-  justify-content: space-between;
-  align-items: end;
-  width: 40%;
+  width: 550px;
   position: relative;
 }
 .mainImage,
@@ -216,7 +211,18 @@
 }
 
 /* ========== Responsive ========== */
-/* Tablet: 768px - 1025px - horizontal search bar, full nav visible */
+
+@media (max-width: 1470px) {
+  .rightSide {
+    width: 500px;
+  }
+  .mainImage,
+.secondaryImage {
+  width:250px ;
+  height: 250px;
+}
+}
+
 @media (max-width: 1025px) {
   .container {
     flex-direction: column;

@@ -3,8 +3,9 @@
 }
 
 .container {
-  max-width: 48rem;
   margin: 0 auto;
+  width: 90%;
+  max-width: 1700px;
   padding: 5rem 2rem;
   background: linear-gradient(135deg, var(--teal), rgba(91, 154, 158, 0.8));
   border-radius: var(--radius-3xl);
@@ -14,10 +15,10 @@
 
 .title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 700;
   color: white;
-  margin-bottom: 1rem;
+  margin-bottom: 2.5rem;
 }
 
 .description {

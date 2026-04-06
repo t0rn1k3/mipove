@@ -171,11 +171,11 @@
   "howItWorks": {
     "title": "How It Works",
     "step1Title": "Search & Discover",
-    "step1Desc": "Browse categories or search directly for the perfect craftsperson for your project.",
+    "step1Desc": "Use filters to find the perfect master for your project. Search by name, specialty, or location, or browse our gallery of talented artisans.",
     "step2Title": "Review Portfolios",
     "step2Desc": "Explore work samples, read reviews, and find masters who match your vision.",
-    "step3Title": "Connect Directly",
-    "step3Desc": "Message masters and start your project with confidence."
+    "step3Title": "Make Orders",
+    "step3Desc": "Post your project, set your budget and timeline, and let the right masters come to you."
   },
   "categories": {
     "title": "Browse by Category",
@@ -190,10 +190,9 @@
     "sculpture": "Sculpture"
   },
   "cta": {
-    "title": "Ready to Find Your Artisan?",
-    "description": "Browse our curated directory of master craftspeople",
-    "exploreGallery": "Explore Gallery",
-    "joinProfessional": "Join as Professional"
+    "title": "Do you want to find your artisan quickly and easily?",
+    "exploreGallery": "Explore the gallery",
+    "joinProfessional": "Join mipove"
   },
   "masters": {
     "title": "Masters Directory",
