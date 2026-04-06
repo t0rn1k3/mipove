@@ -24,13 +24,34 @@
   animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.revealDelay1 { animation-delay: 0.1s; opacity: 0; }
-.revealDelay2 { animation-delay: 0.2s; opacity: 0; }
-.revealDelay3 { animation-delay: 0.35s; opacity: 0; }
-.revealDelay4 { animation-delay: 0.5s; opacity: 0; }
-.revealDelay5 { animation-delay: 0.65s; opacity: 0; }
-.revealDelay6 { animation-delay: 0.8s; opacity: 0; }
-.revealDelay7 { animation-delay: 0.95s; opacity: 0; }
+.revealDelay1 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+.revealDelay2 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+.revealDelay3 {
+  animation-delay: 0.35s;
+  opacity: 0;
+}
+.revealDelay4 {
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+.revealDelay5 {
+  animation-delay: 0.65s;
+  opacity: 0;
+}
+.revealDelay6 {
+  animation-delay: 0.8s;
+  opacity: 0;
+}
+.revealDelay7 {
+  animation-delay: 0.95s;
+  opacity: 0;
+}
 
 .backgroundImage {
   position: absolute;
@@ -153,7 +174,7 @@
   position: relative;
   background-color: white;
 }
-.searchBarSeparator:after {
+/* .searchBarSeparator:after {
   content: "";
   position: absolute;
   top: 50%;
@@ -163,7 +184,7 @@
   height: 45px;
   border-radius: 15px;
   background-color: white;
-}
+} */
 .searchBarButton {
   background-color: rgba(89, 151, 155, 1);
   color: #fff;
