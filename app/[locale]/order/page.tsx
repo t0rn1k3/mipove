@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -8,6 +8,12 @@ import { getMe, getImageUrl } from "@/lib/api";
 import type { DummyOrder, OrdersPageSessionUser } from "@/lib/types";
 import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
 import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
+import OrdersSmartFilter, {
+  FILTER_BUDGET_MAX,
+  FILTER_LOCATION_VALUES,
+  type OrderFilterState,
+} from "@/components/OrdersSmartFilter/OrdersSmartFilter";
+import { MOCK_ORDERS } from "@/lib/mockOrders";
 import { Banknote, MapPin, CalendarClock, User, Phone } from "lucide-react";
 import styles from "./orderPage.module.css";
 
@@ -19,6 +25,46 @@ const ORDER_CARD_DELAY = [
   styles.scrollRevealDelay5,
   styles.scrollRevealDelay6,
 ] as const;
+
+const INITIAL_FILTER_STATE: OrderFilterState = {
+  search: "",
+  categories: [],
+  location: "",
+  budgetMin: 0,
+  budgetMax: FILTER_BUDGET_MAX,
+  negotiableOnly: false,
+  deadlines: [],
+};
+
+const LOCATION_ALIASES: Record<string, (typeof FILTER_LOCATION_VALUES)[number]> = {
+  tbilisi: "tbilisi",
+  თბილისი: "tbilisi",
+  batumi: "batumi",
+  ბათუმი: "batumi",
+  kutaisi: "kutaisi",
+  ქუთაისი: "kutaisi",
+  rustavi: "rustavi",
+  რუსთავი: "rustavi",
+  zugdidi: "zugdidi",
+  ზუგდიდი: "zugdidi",
+  gori: "gori",
+  გორი: "gori",
+  poti: "poti",
+  ფოთი: "poti",
+  telavi: "telavi",
+  თელავი: "telavi",
+  akhaltsikhe: "akhaltsikhe",
+  ახალციხე: "akhaltsikhe",
+  mtskheta: "mtskheta",
+  მცხეთა: "mtskheta",
+  other: "other",
+  სხვა: "other",
+};
+
+function normalizeLocation(raw: string): string {
+  const key = raw.trim().toLowerCase();
+  return LOCATION_ALIASES[key] ?? key;
+}
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -37,7 +83,7 @@ function useScrollReveal() {
     return () => observer.disconnect();
   }, []);
 
-  return { ref, visible };
+  return [ref, visible] as const;
 }
 
 export default function OrderPage() {
@@ -48,9 +94,18 @@ export default function OrderPage() {
   const [sessionLoading, setSessionLoading] = useState(true);
   const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
   const [formModalOpen, setFormModalOpen] = useState(false);
-  const toolbarReveal = useScrollReveal();
-  const layoutReveal = useScrollReveal();
-  const ordersReveal = useScrollReveal();
+  const [filterState, setFilterState] = useState<OrderFilterState>(INITIAL_FILTER_STATE);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [toolbarRef, toolbarVisible] = useScrollReveal();
+  const [layoutRef, layoutVisible] = useScrollReveal();
+  const [ordersRef, ordersVisible] = useScrollReveal();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(filterState.search.trim().toLowerCase());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filterState.search]);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,14 +162,46 @@ export default function OrderPage() {
       })()
     : "";
 
+  const filteredOrders = useMemo(() => {
+    const query = debouncedSearch;
+    return MOCK_ORDERS.filter((order) => {
+      if (query) {
+        const haystack = `${order.title} ${order.description}`.toLowerCase();
+        if (!haystack.includes(query)) return false;
+      }
+
+      if (filterState.categories.length > 0 && !filterState.categories.includes(order.category)) {
+        return false;
+      }
+
+      if (filterState.location) {
+        if (normalizeLocation(order.location) !== filterState.location) return false;
+      }
+
+      if (filterState.negotiableOnly && !order.priceNegotiable) return false;
+
+      if (!order.priceNegotiable) {
+        const overlaps =
+          order.budgetMax >= filterState.budgetMin && order.budgetMin <= filterState.budgetMax;
+        if (!overlaps) return false;
+      }
+
+      if (filterState.deadlines.length > 0 && !filterState.deadlines.includes(order.deadline)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [debouncedSearch, filterState]);
+
   return (
     <main className={styles.page}>
       <BackgroundImage />
      
 
       <div
-        ref={toolbarReveal.ref}
-        className={`${styles.toolbarReveal} ${toolbarReveal.visible ? styles.revealVisible : ""}`}
+        ref={toolbarRef}
+        className={`${styles.toolbarReveal} ${toolbarVisible ? styles.revealVisible : ""}`}
       >
         <div className={styles.toolbar}>
           <button
@@ -128,8 +215,8 @@ export default function OrderPage() {
       </div>
 
       <div
-        ref={layoutReveal.ref}
-        className={layoutReveal.visible ? styles.revealVisible : ""}
+        ref={layoutRef}
+        className={layoutVisible ? styles.revealVisible : ""}
       >
         <div className={styles.layout}>
         <aside
@@ -137,7 +224,13 @@ export default function OrderPage() {
           aria-label={t("smartFilter")}
         >
           <h2 className={styles.panelTitle}>{t("smartFilter")}</h2>
-          <div className={styles.filterSlot} />
+          <div className={styles.filterSlot}>
+            <OrdersSmartFilter
+              value={filterState}
+              onChange={setFilterState}
+              onClear={() => setFilterState(INITIAL_FILTER_STATE)}
+            />
+          </div>
         </aside>
 
         <section
@@ -148,10 +241,10 @@ export default function OrderPage() {
             {t("ordersList")}
           </h2>
           <div
-            ref={ordersReveal.ref}
-            className={`${styles.ordersBody} ${ordersReveal.visible ? styles.revealVisible : ""}`}
+            ref={ordersRef}
+            className={`${styles.ordersBody} ${ordersVisible ? styles.revealVisible : ""}`}
           >
-            {(t.raw("dummyOrders") as DummyOrder[]).map((order, index) => {
+            {filteredOrders.map((order: DummyOrder, index) => {
               const cardKey = `${order.title}-${order.expectedBy}`;
               const contactPanelId = `order-contact-${index}`;
               const telHref = `tel:${order.publisherPhone.replace(/\s/g, "")}`;
@@ -247,6 +340,9 @@ export default function OrderPage() {
                 </article>
               );
             })}
+            {filteredOrders.length === 0 ? (
+              <p className={styles.noOrdersMatch}>{t("noOrdersMatch")}</p>
+            ) : null}
           </div>
         </section>
 

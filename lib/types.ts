@@ -117,8 +117,13 @@ export type DummyOrder = {
   imageAlt: string;
   title: string;
   description: string;
+  category: string;
   priceRange: string;
+  budgetMin: number;
+  budgetMax: number;
+  priceNegotiable: boolean;
   location: string;
+  deadline: string;
   expectedBy: string;
   publisherName: string;
   publisherPhone: string;

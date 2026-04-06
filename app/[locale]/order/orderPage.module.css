@@ -157,6 +157,8 @@
 
 .filterSlot {
   min-height: 120px;
+  display: flex;
+  flex-direction: column;
 }
 
 .ordersBody {
@@ -164,6 +166,16 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.noOrdersMatch {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.9rem;
 }
 
 .orderCard {

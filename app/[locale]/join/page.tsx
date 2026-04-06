@@ -174,7 +174,7 @@ export default function JoinPage() {
 
       {/* Main Content */}
       <div className={styles.content}>
-        {/* Left Card - Role & Benefits (hidden in admin mode) */}
+        {/* Left Card - Role & Benefits */}
         <div
           className={`${styles.leftCard} ${styles.reveal} ${styles.revealDelay4}`}
         >
@@ -212,9 +212,9 @@ export default function JoinPage() {
                     onClick={() => setRole("master")}
                   >
                     <Briefcase className={styles.roleIcon} />
-                    <span className={styles.roleName}>Professional</span>
+                    <span className={styles.roleName}>{t("professional")}</span>
                     <span className={styles.roleDesc}>
-                      Showcase your work and connect with clients
+                      {t("professionalDesc")}
                     </span>
                   </button>
                 </div>
