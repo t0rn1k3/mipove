@@ -337,6 +337,9 @@ export type ProfileSidebarProps = {
   specialty: string;
   location: string;
   bio: string;
+  rating?: number;
+  reviewCount?: number;
+  credits?: number;
   phone: string;
   email: string;
   instagram?: string;

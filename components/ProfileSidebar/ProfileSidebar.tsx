@@ -13,6 +13,9 @@ export default function ProfileSidebar({
   specialty,
   location,
   bio,
+  rating,
+  reviewCount,
+  credits,
   phone,
   email,
   instagram,
@@ -73,6 +76,24 @@ export default function ProfileSidebar({
           <MapPin size={18} className={styles.locationIcon} />
           <span>{location}</span>
         </div>
+        {(typeof rating === "number" || typeof credits === "number") && (
+          <div className={styles.quickStats}>
+            {typeof rating === "number" && (
+              <div className={styles.statPill}>
+                <span className={styles.statLabel}>Rating</span>
+                <span className={styles.statValue}>
+                  {rating.toFixed(1)}{typeof reviewCount === "number" ? ` (${reviewCount})` : ""}
+                </span>
+              </div>
+            )}
+            {typeof credits === "number" && (
+              <div className={styles.creditCard}>
+                <span className={styles.creditLabel}>Available credits</span>
+                <strong className={styles.creditValue}>{credits}</strong>
+              </div>
+            )}
+          </div>
+        )}
         <p className={styles.bio}>{bio}</p>
 
         <div className={styles.separator} />

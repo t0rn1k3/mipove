@@ -96,6 +96,60 @@
   color: #4dd0e1;
 }
 
+.quickStats {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+}
+
+.statPill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.75rem;
+  background: #242424;
+  border: 1px solid #353535;
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 0.9rem;
+  color: #f9fafb;
+  font-weight: 700;
+}
+
+.creditCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.11);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.creditLabel {
+  font-size: 0.75rem;
+  color: #d1d5db;
+}
+
+.creditValue {
+  font-size: 1.15rem;
+  color: #4dd0e1;
+  font-weight: 800;
+}
+
 .bio {
   font-size: 0.95rem;
   line-height: 1.6;
@@ -125,11 +179,12 @@
   background: #2d2d2d;
   border-radius: 0.75rem;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 
 .contactBlock:hover {
   background: #333333;
+  transform: translateY(-1px);
 }
 
 .contactIcon {
