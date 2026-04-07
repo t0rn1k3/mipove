@@ -15,7 +15,9 @@ import type {
   OrderUpsertInput,
   CreditHistoryResult,
   CreditTransaction,
+  SpendCreditsResult,
 } from "./types";
+import { InsufficientCreditsError } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -529,6 +531,41 @@ export async function getCreditHistory(
   const pages =
     typeof inner.pages === "number" && Number.isFinite(inner.pages) ? inner.pages : Math.max(1, Math.ceil(total / limit));
   return { transactions, total, page: pageNum, pages };
+}
+
+export async function spendCredits(
+  action: string,
+  targetId: string,
+): Promise<SpendCreditsResult> {
+  const res = await authFetch(`${api("/credits/spend")}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, targetId }),
+  });
+  const json = await readJsonSafe(res);
+  if (res.status === 402) {
+    const inner = (json.data ?? json) as Record<string, unknown>;
+    const required =
+      typeof inner.required === "number" && Number.isFinite(inner.required) ? inner.required : 1;
+    const balance =
+      typeof inner.balance === "number" && Number.isFinite(inner.balance) ? inner.balance : 0;
+    throw new InsufficientCreditsError(
+      extractMessage(json, "Insufficient credits"),
+      required,
+      balance,
+    );
+  }
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to spend credits"));
+  const inner = (json.data ?? json) as Record<string, unknown>;
+  const success = inner.success === true;
+  const remaining =
+    typeof inner.remaining === "number" && Number.isFinite(inner.remaining) ? inner.remaining : 0;
+  const dataRaw = inner.data;
+  const data =
+    dataRaw != null && typeof dataRaw === "object" && !Array.isArray(dataRaw)
+      ? (dataRaw as { phone?: string; email?: string })
+      : undefined;
+  return { success, remaining, data };
 }
 
 /* ========== Admin ========== */

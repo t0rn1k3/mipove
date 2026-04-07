@@ -195,6 +195,24 @@ export type CreditHistoryResult = {
   pages: number;
 };
 
+export type SpendCreditsResult = {
+  success: boolean;
+  remaining: number;
+  data?: { phone?: string; email?: string };
+};
+
+export class InsufficientCreditsError extends Error {
+  required: number;
+  balance: number;
+  constructor(message: string, required: number, balance: number) {
+    super(message);
+    this.name = "InsufficientCreditsError";
+    this.required = required;
+    this.balance = balance;
+    Object.setPrototypeOf(this, InsufficientCreditsError.prototype);
+  }
+}
+
 /* ========== Profile Update ========== */
 
 export type UpdateProfileInput = {
