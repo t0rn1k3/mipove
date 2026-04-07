@@ -26,9 +26,11 @@ export default function ProfileSidebar({
   onLogout,
   onChangePhoto,
   isUploadingPhoto,
+  onBuyCredits,
 }: ProfileSidebarProps) {
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
+  const tCredits = useTranslations("credits");
   const tProfessions = useTranslations("professions");
   const resolvedImage = typeof image === "string" ? getImageUrl(image.trim()) : "";
   const avatarSrc =
@@ -76,7 +78,7 @@ export default function ProfileSidebar({
           <MapPin size={18} className={styles.locationIcon} />
           <span>{location}</span>
         </div>
-        {(typeof rating === "number" || typeof credits === "number") && (
+        {(typeof rating === "number" || typeof credits === "number" || onBuyCredits) && (
           <div className={styles.quickStats}>
             {typeof rating === "number" && (
               <div className={styles.statPill}>
@@ -86,12 +88,23 @@ export default function ProfileSidebar({
                 </span>
               </div>
             )}
-            {typeof credits === "number" && (
-              <div className={styles.creditCard}>
-                <span className={styles.creditLabel}>Available credits</span>
-                <strong className={styles.creditValue}>{credits}</strong>
+            {typeof credits === "number" ? (
+              <div className={styles.creditWrap}>
+                <div className={styles.creditCard}>
+                  <span className={styles.creditLabel}>Available credits</span>
+                  <strong className={styles.creditValue}>{credits}</strong>
+                </div>
+                {onBuyCredits ? (
+                  <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                    {tCredits("buy")}
+                  </button>
+                ) : null}
               </div>
-            )}
+            ) : onBuyCredits ? (
+              <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                {tCredits("buy")}
+              </button>
+            ) : null}
           </div>
         )}
         <p className={styles.bio}>{bio}</p>

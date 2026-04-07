@@ -36,6 +36,7 @@ import type {
 } from "@/lib/types";
 import styles from "../profilePage.module.css";
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
+import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
 
 function isImageAttachment(url: string): boolean {
   return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
@@ -83,6 +84,7 @@ export default function ProfilePage() {
   const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null);
   const [favoriteError, setFavoriteError] = useState("");
   const [toast, setToast] = useState<string>("");
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isMasterProfile, setIsMasterProfile] = useState(false);
@@ -314,6 +316,9 @@ export default function ProfilePage() {
                 onLogout={handleLogout}
                 onChangePhoto={handleChangePhoto}
                 isUploadingPhoto={photoUploading}
+                onBuyCredits={
+                  isOwnProfile && userRole === "master" ? () => setBuyCreditsOpen(true) : undefined
+                }
               />
               {photoError && <p className={styles.emptyRated}>{photoError}</p>}
             </div>
@@ -493,6 +498,11 @@ export default function ProfilePage() {
         onClose={() => setSelectedPortfolioIndex(null)}
       />
       {toast ? <div className={styles.profileToast}>{toast}</div> : null}
+      <BuyCreditsModal
+        open={buyCreditsOpen}
+        onClose={() => setBuyCreditsOpen(false)}
+        onError={(message) => setToast(message)}
+      />
     </div>
   );
 }

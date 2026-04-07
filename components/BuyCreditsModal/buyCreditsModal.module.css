@@ -1,0 +1,112 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(17, 24, 39, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.card {
+  width: min(460px, 100%);
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.desc {
+  margin: 0.4rem 0 0.8rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.meta {
+  margin: 0 0 0.8rem;
+  font-size: 0.86rem;
+  color: #6b7280;
+}
+
+.error {
+  margin: 0 0 0.8rem;
+  font-size: 0.86rem;
+  color: #b91c1c;
+}
+
+.packsList {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.packCard {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  border-radius: 10px;
+  padding: 0.75rem 0.8rem;
+}
+
+.packName {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.packCredits {
+  margin: 0.3rem 0 0;
+  font-size: 0.86rem;
+  color: #4b5563;
+}
+
+.packPrice {
+  margin: 0.4rem 0 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.buyNowBtn {
+  border: none;
+  background: #4dd0e1;
+  color: #111827;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.buyNowBtn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.buyNowBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.closeBtn {
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #111827;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.closeBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

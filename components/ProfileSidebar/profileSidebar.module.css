@@ -126,6 +126,12 @@
   font-weight: 700;
 }
 
+.creditWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .creditCard {
   display: flex;
   align-items: center;
@@ -148,6 +154,28 @@
   font-size: 1.15rem;
   color: #4dd0e1;
   font-weight: 800;
+}
+
+.buyCreditsBtn {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #111827;
+  background: #4dd0e1;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.buyCreditsBtn:hover {
+  filter: brightness(1.06);
+}
+
+.buyCreditsBtn:focus-visible {
+  outline: 2px solid #4dd0e1;
+  outline-offset: 2px;
 }
 
 .bio {

@@ -17,10 +17,9 @@ import {
   getMasterFavoriteOrders,
   spendCredits,
   getUnlockedIds,
-  getCreditPacks,
-  purchaseCredits,
 } from "@/lib/api";
-import type { OrdersPageSessionUser, OrderRecord, CreditPack } from "@/lib/types";
+import type { OrdersPageSessionUser, OrderRecord } from "@/lib/types";
+import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
 import { InsufficientCreditsError } from "@/lib/types";
 import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
 import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
@@ -123,9 +122,6 @@ export default function OrderPage() {
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
-  const [creditPacks, setCreditPacks] = useState<CreditPack[]>([]);
-  const [creditPacksLoading, setCreditPacksLoading] = useState(false);
-  const [creditPacksError, setCreditPacksError] = useState("");
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OrderRecord | null>(null);
   const [filterState, setFilterState] = useState<OrderFilterState>(INITIAL_FILTER_STATE);
@@ -379,21 +375,6 @@ export default function OrderPage() {
     }
   };
 
-  const openBuyCreditsModal = async () => {
-    setBuyCreditsOpen(true);
-    if (creditPacks.length > 0 || creditPacksLoading) return;
-    setCreditPacksLoading(true);
-    setCreditPacksError("");
-    try {
-      const packs = await getCreditPacks();
-      setCreditPacks(packs);
-    } catch (err) {
-      setCreditPacksError(err instanceof Error ? err.message : "Failed to load credit packs");
-    } finally {
-      setCreditPacksLoading(false);
-    }
-  };
-
   const handleUnlockContact = async (orderId: string) => {
     if (sessionUser?.role !== "master") return;
     setBusyKey(`unlock:${orderId}`);
@@ -416,7 +397,7 @@ export default function OrderPage() {
             balance: err.balance,
           }),
         });
-        await openBuyCreditsModal();
+        setBuyCreditsOpen(true);
         return;
       }
       setToast({
@@ -744,55 +725,16 @@ export default function OrderPage() {
           {toast.message}
         </div>
       ) : null}
-      {buyCreditsOpen ? (
-        <div className={styles.modalOverlay} onClick={() => setBuyCreditsOpen(false)}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal>
-            <h3 className={styles.modalTitle}>{tCredits("insufficientTitle")}</h3>
-            <p className={styles.modalDesc}>{tCredits("buy")}</p>
-            {creditPacksLoading ? (
-              <p className={styles.modalMeta}>{tCommon("loading")}...</p>
-            ) : null}
-            {creditPacksError ? (
-              <p className={styles.modalError}>{creditPacksError}</p>
-            ) : null}
-            {!creditPacksLoading && !creditPacksError ? (
-              <div className={styles.packsList}>
-                {creditPacks.map((pack) => (
-                  <button
-                    key={pack._id}
-                    type="button"
-                    className={styles.packBtn}
-                    onClick={async () => {
-                      setBusyKey(`pack:${pack._id}`);
-                      try {
-                        const { paymentUrl } = await purchaseCredits(pack._id);
-                        window.location.href = paymentUrl;
-                      } catch (err) {
-                        setToast({
-                          type: "error",
-                          message: err instanceof Error ? err.message : tCredits("buy"),
-                        });
-                      } finally {
-                        setBusyKey(null);
-                      }
-                    }}
-                    disabled={busyKey === `pack:${pack._id}`}
-                  >
-                    {pack.name} · {pack.credits + pack.bonusCredits} · ₾{pack.priceGel}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-            <button
-              type="button"
-              className={styles.modalCloseBtn}
-              onClick={() => setBuyCreditsOpen(false)}
-            >
-              {tCommon("close")}
-            </button>
-          </div>
-        </div>
-      ) : null}
+      <BuyCreditsModal
+        open={buyCreditsOpen}
+        onClose={() => setBuyCreditsOpen(false)}
+        onError={(message) => {
+          setToast({
+            type: "error",
+            message,
+          });
+        }}
+      />
     </main>
   );
 }

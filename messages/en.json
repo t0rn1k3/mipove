@@ -38,6 +38,7 @@
   "credits": {
     "balance": "Credits",
     "buy": "Buy credits",
+    "buyNow": "Buy now",
     "history": "Credit history",
     "insufficientTitle": "Not enough credits",
     "insufficientDesc": "You need {required} credit(s) but have {balance}.",

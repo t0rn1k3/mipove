@@ -38,6 +38,7 @@
   "credits": {
     "balance": "კრედიტები",
     "buy": "კრედიტების ყიდვა",
+    "buyNow": "ახლა ყიდვა",
     "history": "კრედიტების ისტორია",
     "insufficientTitle": "საკმარისი კრედიტები არ გაქვთ",
     "insufficientDesc": "გჭირდებათ {required} კრედიტი, გაქვთ {balance}.",

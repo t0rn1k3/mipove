@@ -432,6 +432,8 @@ export type ProfileSidebarProps = {
   onLogout?: () => void;
   onChangePhoto?: (file: File) => void;
   isUploadingPhoto?: boolean;
+  /** Master: opens buy-credits flow (e.g. modal). */
+  onBuyCredits?: () => void;
 };
 
 export type LogoProps = {
