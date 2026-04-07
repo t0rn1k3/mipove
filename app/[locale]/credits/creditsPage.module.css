@@ -1,0 +1,119 @@
+.page {
+  min-height: calc(100svh - 72px);
+  padding: clamp(1rem, 2.5vw, 2rem);
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.card {
+  max-width: 880px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.12rem;
+  color: #111827;
+}
+
+.buyBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #111827;
+  background: #4dd0e1;
+  border: none;
+  cursor: pointer;
+}
+
+.buyBtn:hover {
+  filter: brightness(1.06);
+}
+
+.meta {
+  margin: 0.25rem 0;
+  color: #6b7280;
+}
+
+.error {
+  margin: 0.25rem 0;
+  color: #b91c1c;
+}
+
+.list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.txRow {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  background: #fff;
+}
+
+.txType {
+  margin: 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+.txDate {
+  margin: 0.2rem 0 0;
+  font-size: 0.84rem;
+  color: #6b7280;
+}
+
+.txRight {
+  text-align: right;
+}
+
+.txAmount {
+  margin: 0;
+  font-weight: 800;
+}
+
+.plus {
+  color: #15803d;
+}
+
+.minus {
+  color: #b91c1c;
+}
+
+.txBalance {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: #4b5563;
+}
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1500;
+  padding: 0.62rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  font-size: 0.84rem;
+}

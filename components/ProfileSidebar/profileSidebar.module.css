@@ -178,6 +178,29 @@
   outline-offset: 2px;
 }
 
+.creditActions {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.historyLinkBtn {
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  padding: 0.46rem 1rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e5e7eb;
+  background: transparent;
+  border: 1px solid #3f3f46;
+  transition: border-color 0.15s ease;
+}
+
+.historyLinkBtn:hover {
+  border-color: #4dd0e1;
+}
+
 .bio {
   font-size: 0.95rem;
   line-height: 1.6;

@@ -5,6 +5,7 @@ import { MapPin, Phone, Mail, Globe, Instagram } from "lucide-react";
 import { getImageUrl } from "@/lib/api";
 import { useTranslations } from "next-intl";
 import { translateProfessionDisplay } from "@/lib/professions";
+import { Link } from "@/i18n/navigation";
 import type { ProfileSidebarProps } from "@/lib/types";
 import styles from "./profileSidebar.module.css";
 
@@ -95,15 +96,25 @@ export default function ProfileSidebar({
                   <strong className={styles.creditValue}>{credits}</strong>
                 </div>
                 {onBuyCredits ? (
-                  <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
-                    {tCredits("buy")}
-                  </button>
+                  <div className={styles.creditActions}>
+                    <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                      {tCredits("buy")}
+                    </button>
+                    <Link href="/credits" className={styles.historyLinkBtn}>
+                      {tCredits("history")}
+                    </Link>
+                  </div>
                 ) : null}
               </div>
             ) : onBuyCredits ? (
-              <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
-                {tCredits("buy")}
-              </button>
+              <div className={styles.creditActions}>
+                <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                  {tCredits("buy")}
+                </button>
+                <Link href="/credits" className={styles.historyLinkBtn}>
+                  {tCredits("history")}
+                </Link>
+              </div>
             ) : null}
           </div>
         )}
