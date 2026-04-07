@@ -30,7 +30,7 @@ import OrdersSmartFilter, {
   type OrderFilterState,
 } from "@/components/OrdersSmartFilter/OrdersSmartFilter";
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
-import { Banknote, MapPin, CalendarClock, User, Phone, Heart } from "lucide-react";
+import { Banknote, MapPin, CalendarClock, User, Phone, Heart, Lock, Loader2 } from "lucide-react";
 import styles from "./orderPage.module.css";
 
 const ORDER_CARD_DELAY = [
@@ -607,8 +607,16 @@ export default function OrderPage() {
                         className={styles.contactInfoBtn}
                         onClick={() => void handleUnlockContact(order._id)}
                         disabled={unlockBusy}
+                        aria-busy={unlockBusy}
                       >
-                        {unlockBusy ? tCommon("loading") : tCredits("unlockContact")}
+                        <span className={styles.contactInfoBtnInner}>
+                          {unlockBusy ? (
+                            <Loader2 size={16} className={styles.contactInfoBtnIconSpin} strokeWidth={2} aria-hidden />
+                          ) : (
+                            <Lock size={16} strokeWidth={2} aria-hidden />
+                          )}
+                          <span>{unlockBusy ? tCredits("unlockContactLoading") : tCredits("unlockContact")}</span>
+                        </span>
                       </button>
                     ) : null}
                     {!isMaster ? (

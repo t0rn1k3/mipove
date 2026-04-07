@@ -42,6 +42,7 @@
     "insufficientTitle": "Not enough credits",
     "insufficientDesc": "You need {required} credit(s) but have {balance}.",
     "unlockContact": "Unlock contact (1 credit)",
+    "unlockContactLoading": "Unlocking…",
     "contactUnlocked": "Contact unlocked",
     "purchaseSuccess": "Credits added to your account!",
     "transaction": {

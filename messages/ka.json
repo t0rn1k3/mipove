@@ -42,6 +42,7 @@
     "insufficientTitle": "საკმარისი კრედიტები არ გაქვთ",
     "insufficientDesc": "გჭირდებათ {required} კრედიტი, გაქვთ {balance}.",
     "unlockContact": "კონტაქტის გახსნა (1 კრედიტი)",
+    "unlockContactLoading": "იხსნება…",
     "contactUnlocked": "კონტაქტი გახსნილია",
     "purchaseSuccess": "კრედიტები დაემატა თქვენს ანგარიშს!",
     "transaction": {

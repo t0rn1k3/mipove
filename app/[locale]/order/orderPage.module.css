@@ -265,6 +265,38 @@
   outline-offset: 2px;
 }
 
+.contactInfoBtn:disabled {
+  opacity: 0.88;
+  cursor: not-allowed;
+}
+
+.contactInfoBtn:disabled:hover {
+  filter: none;
+}
+
+.contactInfoBtnInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.contactInfoBtnIconSpin {
+  flex-shrink: 0;
+  animation: contactInfoBtnSpin 0.7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contactInfoBtnIconSpin {
+    animation: none;
+  }
+}
+
+@keyframes contactInfoBtnSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .secondaryBtn,
 .dangerBtn {
   padding: 0.45rem 0.85rem;
