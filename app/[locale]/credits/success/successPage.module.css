@@ -1,0 +1,60 @@
+.page {
+  min-height: calc(100svh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.card {
+  width: min(560px, 100%);
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+  padding: 1.2rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #111827;
+}
+
+.desc {
+  margin: 0.4rem 0 0;
+  color: #4b5563;
+}
+
+.meta {
+  margin: 0.9rem 0 0;
+  color: #6b7280;
+}
+
+.error {
+  margin: 0.9rem 0 0;
+  color: #b91c1c;
+}
+
+.balanceLine {
+  margin: 0.9rem 0 0;
+  color: #111827;
+}
+
+.ctaBtn {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 0.52rem 1.05rem;
+  border-radius: 999px;
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: #111827;
+  background: #4dd0e1;
+}
+
+.ctaBtn:hover {
+  filter: brightness(1.06);
+}

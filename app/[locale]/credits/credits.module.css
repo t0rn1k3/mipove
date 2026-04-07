@@ -1,0 +1,206 @@
+.page {
+  min-height: calc(100svh - 72px);
+  padding: clamp(1rem, 2.5vw, 2rem);
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.balanceCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.balanceLabel {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.balanceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem 1.25rem;
+}
+
+.balanceValue {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 800;
+  color: #0f766e;
+  line-height: 1.1;
+}
+
+.buyMoreBtn {
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #111827;
+  background: #4dd0e1;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s ease;
+}
+
+.buyMoreBtn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.buyMoreBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.historyCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
+  padding: 1rem 0;
+  overflow: hidden;
+}
+
+.historyTitle {
+  margin: 0;
+  padding: 0 1rem 0.75rem;
+  font-size: 1.05rem;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  padding: 0.65rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.table th {
+  font-weight: 700;
+  color: #374151;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.table td {
+  color: #111827;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cellMuted {
+  color: #6b7280;
+}
+
+.amountPlus {
+  font-weight: 700;
+  color: #15803d;
+}
+
+.amountMinus {
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem 0;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 0;
+}
+
+.pagerInfo {
+  font-size: 0.84rem;
+  color: #6b7280;
+  margin-right: auto;
+}
+
+.pagerBtn {
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+}
+
+.pagerBtn:hover:not(:disabled) {
+  border-color: #0f766e;
+  color: #0f766e;
+}
+
+.pagerBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.meta {
+  margin: 0.25rem 1rem;
+  padding: 0 0 0.5rem;
+  color: #6b7280;
+}
+
+.error {
+  margin: 0.25rem 1rem;
+  padding: 0 0 0.5rem;
+  color: #b91c1c;
+}
+
+.empty {
+  margin: 0;
+  padding: 1.25rem 1rem 1.5rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1500;
+  padding: 0.62rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  font-size: 0.84rem;
+}
