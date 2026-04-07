@@ -148,6 +148,37 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
+.userCluster {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.creditBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border: 1px solid rgba(15, 118, 110, 0.2);
+}
+
+.creditIcon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.creditAmount {
+  line-height: 1;
+  min-width: 1.25ch;
+  text-align: center;
+}
+
 .profileLink {
   display: flex;
   align-items: center;

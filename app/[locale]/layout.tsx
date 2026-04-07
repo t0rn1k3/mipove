@@ -1,14 +1,9 @@
-import ConditionalNavbar from "@/components/ConditionalNavbar";
+import LocaleAppShell from "@/components/LocaleAppShell/LocaleAppShell";
 
 export default function LocaleLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <ConditionalNavbar />
-      {children}
-    </>
-  );
+  return <LocaleAppShell>{children}</LocaleAppShell>;
 }

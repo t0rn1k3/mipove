@@ -35,23 +35,7 @@ import type {
   OrderRecord,
 } from "@/lib/types";
 import styles from "../profilePage.module.css";
-
-const DEFAULT_PROFILE: ProfileData = {
-  name: "Elena Martinez",
-  specialty: "Contemporary Painting",
-  location: "Barcelona, Spain",
-  bio: "Award-winning contemporary artist with 15+ years of experience. Specializing in abstract expressionism and mixed media works that explore the intersection of color, emotion, and form.",
-  rating: 0,
-  reviewCount: 0,
-  phone: "+34 612 345 678",
-  email: "elena@example.com",
-  instagram: "elenamartinezart",
-  website: "www.elenamartinez.art",
-  image:
-    "https://images.unsplash.com/photo-1651889512068-f1c588fe6649?w=400&q=80",
-  portfolioImages: [],
-  works: [],
-};
+import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 
 function isImageAttachment(url: string): boolean {
   return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
@@ -82,7 +66,7 @@ export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
   const slug = params?.id as string | undefined;
-  const [profile, setProfile] = useState<ProfileData>(DEFAULT_PROFILE);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -103,6 +87,7 @@ export default function ProfilePage() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isMasterProfile, setIsMasterProfile] = useState(false);
   const [ratedMasters, setRatedMasters] = useState<RatedMasterItem[]>([]);
+  const { balance: creditBalance } = useCreditBalance();
 
   const rateInitialStars =
     slug && slug !== "me"
@@ -131,9 +116,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!slug) {
+      setProfile(null);
       setLoading(false);
       return;
     }
+
+    setProfile(null);
+    setLoading(true);
 
     if (slug === "me") {
       getMe()
@@ -167,7 +156,9 @@ export default function ProfilePage() {
           setRatedMasters(data.ratedMasters ?? []);
           if (data.role === "master") {
             fetchMyPortfolio()
-              .then((list) => setProfile((p) => ({ ...p, portfolioImages: list })))
+              .then((list) =>
+                setProfile((p) => (p ? { ...p, portfolioImages: list } : p)),
+              )
               .catch(() => {});
           }
           setLoading(false);
@@ -211,7 +202,7 @@ export default function ProfilePage() {
     }
 
     const previewUrl = URL.createObjectURL(file);
-    setProfile((p) => ({ ...p, image: previewUrl }));
+    setProfile((p) => (p ? { ...p, image: previewUrl } : p));
     setPhotoUploading(true);
 
     try {
@@ -259,11 +250,15 @@ export default function ProfilePage() {
     if (!slug || slug === "me" || stars < 1) return;
     const res = await rateMaster(slug, stars);
     if (res.data?.rating != null || res.data?.reviewCount != null) {
-      setProfile((prev) => ({
-        ...prev,
-        rating: res.data?.rating ?? prev.rating,
-        reviewCount: res.data?.reviewCount ?? prev.reviewCount,
-      }));
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              rating: res.data?.rating ?? prev.rating,
+              reviewCount: res.data?.reviewCount ?? prev.reviewCount,
+            }
+          : prev,
+      );
     }
     if (res.data?.ratedMasters?.length) {
       setRatedMasters(res.data.ratedMasters);
@@ -286,6 +281,16 @@ export default function ProfilePage() {
     );
   }
 
+  if (!profile) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <p className={styles.portfolioSubtitle}>Profile not found.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <div>
@@ -296,7 +301,11 @@ export default function ProfilePage() {
                 {...profile}
                 rating={profile.rating}
                 reviewCount={profile.reviewCount}
-                credits={125}
+                credits={
+                  isOwnProfile && userRole === "master" && creditBalance !== null
+                    ? creditBalance
+                    : undefined
+                }
                 isOwnProfile={isOwnProfile}
                 onEdit={() => {
                   setEditModalKey((k) => k + 1);
@@ -349,7 +358,7 @@ export default function ProfilePage() {
                       <PortfolioSection
                         portfolioImages={profile.portfolioImages}
                         onPortfolioImagesChange={(list) =>
-                          setProfile((p) => ({ ...p, portfolioImages: list }))
+                          setProfile((p) => (p ? { ...p, portfolioImages: list } : p))
                         }
                         userRole={userRole}
                         isOwnProfile={isOwnProfile}

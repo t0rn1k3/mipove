@@ -6,9 +6,11 @@ import styles from "./navbar.module.css";
 import Logo from "@/components/logo/Logo";
 import LocaleSwitcher from "@/components/LocaleSwitcher/LocaleSwitcher";
 import { useState, useEffect } from "react";
-import { getMe } from "@/lib/api";
+import { Coins } from "lucide-react";
+import { getMe, getImageUrl } from "@/lib/api";
 import { useTranslations } from "next-intl";
 import type { NavbarUserInfo } from "@/lib/types";
+import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 
 function routeKeyFromPathname(pathname: string | undefined): string {
   const raw = pathname ?? "/";
@@ -23,6 +25,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<NavbarUserInfo>(null);
+  const { balance: creditBalance, refresh: refreshCredits } = useCreditBalance();
   const pathname = usePathname();
   const routeKey = routeKeyFromPathname(pathname);
   const isAdminRoute = pathname?.startsWith("/admin");
@@ -36,6 +39,7 @@ export default function Navbar() {
           setIsAdmin(data.role === "admin");
           if (data.role !== "admin") {
             setUser({ name: data.name, image: data.image });
+            if (data.role === "master") void refreshCredits();
           } else {
             setUser(null);
           }
@@ -50,7 +54,7 @@ export default function Navbar() {
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [routeKey]);
+  }, [routeKey, refreshCredits]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -126,29 +130,41 @@ export default function Navbar() {
               {t("admin")}
             </Link>
           ) : user ? (
-            <Link
+            <div className={styles.userCluster}>
+              {creditBalance !== null ? (
+                <span
+                  className={styles.creditBadge}
+                  title={`${t("creditsBalance")}: ${creditBalance}`}
+                  aria-label={`${t("creditsBalance")}: ${creditBalance}`}
+                >
+                  <Coins size={16} className={styles.creditIcon} strokeWidth={2} aria-hidden />
+                  <span className={styles.creditAmount}>{creditBalance}</span>
+                </span>
+              ) : null}
+              <Link
                 href="/profile"
-              className={styles.profileLink}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {user.image ? (
-                <div className={styles.profileAvatar}>
-                  <Image
-                    src={user.image}
-                    alt={user.name}
-                    width={36}
-                    height={36}
-                    className={styles.profileAvatarImg}
-                    unoptimized
-                  />
-                </div>
-              ) : (
-                <div className={styles.profileAvatarPlaceholder}>
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <span className={styles.profileName}>{user.name}</span>
-            </Link>
+                className={styles.profileLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {user.image ? (
+                  <div className={styles.profileAvatar}>
+                    <Image
+                      src={getImageUrl(user.image)}
+                      alt={user.name}
+                      width={36}
+                      height={36}
+                      className={styles.profileAvatarImg}
+                      unoptimized={!/^(https?:)?\/\//i.test(getImageUrl(user.image))}
+                    />
+                  </div>
+                ) : (
+                  <div className={styles.profileAvatarPlaceholder}>
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className={styles.profileName}>{user.name}</span>
+              </Link>
+            </div>
           ) : (
             <Link
                 href="/join"

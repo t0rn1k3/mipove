@@ -32,7 +32,8 @@
     "about": "About",
     "admin": "Admin",
     "joinUs": "Join Us",
-    "languageToggle": "Switch site language"
+    "languageToggle": "Switch site language",
+    "creditsBalance": "Credits"
   },
   "order": {
     "title": "Orders",
