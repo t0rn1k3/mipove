@@ -611,6 +611,22 @@ export async function getCreditPacks(): Promise<CreditPack[]> {
   });
 }
 
+export async function purchaseCredits(packId: string): Promise<{ paymentUrl: string }> {
+  const res = await authFetch(`${api("/credits/purchase")}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ packId }),
+  });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to start purchase"));
+  const inner = (json.data ?? json) as Record<string, unknown>;
+  const paymentUrlRaw = inner.paymentUrl ?? inner.payment_url;
+  const paymentUrl =
+    typeof paymentUrlRaw === "string" && paymentUrlRaw.trim() ? paymentUrlRaw.trim() : "";
+  if (!paymentUrl) throw new Error("No payment URL returned from server");
+  return { paymentUrl };
+}
+
 /* ========== Admin ========== */
 
 function adminFetch(path: string, init?: RequestInit) {
