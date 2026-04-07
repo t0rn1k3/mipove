@@ -85,7 +85,24 @@
     "filterLocationTelavi": "Telavi",
     "filterLocationAkhaltsikhe": "Akhaltsikhe",
     "filterLocationMtskheta": "Mtskheta",
-    "filterLocationOther": "Other"
+    "filterLocationOther": "Other",
+    "loadingOrders": "Loading orders...",
+    "attachmentImage": "Image",
+    "attachmentFile": "File",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "favoriteAdded": "Added to favorites.",
+    "favoriteRemoved": "Removed from favorites.",
+    "favoriteActionFailed": "Could not update favorites.",
+    "orderCreated": "Order created successfully.",
+    "orderUpdated": "Order updated successfully.",
+    "orderDeleted": "Order deleted.",
+    "editOrder": "Edit",
+    "deleteOrder": "Delete",
+    "deletingOrder": "Deleting...",
+    "saveOrderChanges": "Save changes",
+    "deleteOrderConfirm": "Delete this order?",
+    "deleteOrderFailed": "Failed to delete order."
   },
   "orderForm": {
     "pageTitle": "Submit your project",
@@ -142,6 +159,7 @@
     "errorCategory": "Choose a category",
     "errorDescription": "Add a description",
     "errorLocation": "Select a location",
+    "errorFileSize": "Each file must be 50MB or smaller.",
     "errorBudget": "Set a valid min–max range (₾0 – ₾5,000) or mark price negotiable",
     "errorDeadline": "Choose a timeline"
   },

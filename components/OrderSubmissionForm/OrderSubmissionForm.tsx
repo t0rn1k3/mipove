@@ -63,6 +63,7 @@ const REGION_MSG_KEYS: Record<(typeof REGION_VALUES)[number], string> = {
 };
 
 const BUDGET_MAX = 5000;
+const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
 export type OrderFormState = {
   title: string;
@@ -91,15 +92,23 @@ const initialState: OrderFormState = {
 export default function OrderSubmissionForm({
   onSubmit,
   embedded = false,
+  initialValues,
+  submitLabel,
 }: {
   onSubmit?: (data: OrderFormState) => void | Promise<void>;
   embedded?: boolean;
+  initialValues?: Partial<OrderFormState>;
+  submitLabel?: string;
 }) {
   const t = useTranslations("orderForm");
   const formId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<OrderFormState>(initialState);
+  const [form, setForm] = useState<OrderFormState>({
+    ...initialState,
+    ...initialValues,
+    images: initialValues?.images ?? [],
+  });
   const [dragOver, setDragOver] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -148,13 +157,23 @@ export default function OrderSubmissionForm({
   }, []);
 
   const addFiles = useCallback((list: FileList | File[]) => {
-    const incoming = Array.from(list).filter((f) => f.type.startsWith("image/"));
+    const incoming = Array.from(list);
     if (incoming.length === 0) return;
+    const oversized = incoming.find((f) => f.size > MAX_FILE_BYTES);
+    if (oversized) {
+      setErrors((prev) => ({ ...prev, images: t("errorFileSize") }));
+      return;
+    }
     setForm((prev) => ({
       ...prev,
       images: [...prev.images, ...incoming].slice(0, 8),
     }));
-  }, []);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.images;
+      return next;
+    });
+  }, [t]);
 
   const validateStep = (s: number): boolean => {
     const next: Record<string, string> = {};
@@ -317,7 +336,7 @@ export default function OrderSubmissionForm({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip"
               multiple
               className={styles.hiddenInput}
               onChange={(e) => {
@@ -351,6 +370,7 @@ export default function OrderSubmissionForm({
               </div>
             )}
           </div>
+          {errors.images ? <p className={styles.errorText}>{errors.images}</p> : null}
           {form.images.length > 0 ? (
             <button
               type="button"
@@ -528,7 +548,7 @@ export default function OrderSubmissionForm({
           </button>
         ) : (
           <button type="submit" className={styles.btnPrimary} disabled={submitting}>
-            {submitting ? t("submitting") : t("submit")}
+            {submitting ? t("submitting") : (submitLabel ?? t("submit"))}
           </button>
         )}
       </div>

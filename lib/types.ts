@@ -104,6 +104,7 @@ export type MasterListItem = {
 /* ========== Orders page ========== */
 
 export type OrdersPageSessionUser = {
+  id?: string;
   name: string;
   email: string;
   image?: string;
@@ -113,6 +114,7 @@ export type OrdersPageSessionUser = {
 
 /** Shape of `order.dummyOrders` entries in locale messages (and future API rows). */
 export type DummyOrder = {
+  id: string;
   imageSrc: string;
   imageAlt: string;
   title: string;
@@ -128,6 +130,43 @@ export type DummyOrder = {
   publisherName: string;
   publisherPhone: string;
   publisherEmail: string;
+};
+
+export type OrderStatus = "pending" | "active" | "completed" | "cancelled";
+
+export type OrderRecord = {
+  _id: string;
+  title: string;
+  category: string;
+  description: string;
+  location: string;
+  budgetMin: number;
+  budgetMax: number;
+  priceNegotiable: boolean;
+  deadline: string;
+  status: OrderStatus;
+  attachments: string[];
+  expectedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  publisher?: {
+    _id?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
+};
+
+export type OrderUpsertInput = {
+  title: string;
+  category: string;
+  description: string;
+  location: string;
+  budgetMin: number;
+  budgetMax: number;
+  priceNegotiable: boolean;
+  deadline: string;
+  attachments: string[];
 };
 
 /* ========== Profile Update ========== */

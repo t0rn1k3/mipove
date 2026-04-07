@@ -11,7 +11,6 @@ import MasterRatingSection from "@/components/MasterRatingSection/MasterRatingSe
 import PortfolioSection from "@/components/PortfolioSection/PortfolioSection";
 import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
 import {
-  Heart,
   CalendarClock,
   MapPin,
   Banknote,
@@ -25,27 +24,17 @@ import {
   getImageUrl,
   uploadProfileImage,
   rateMaster,
+  getMasterFavoriteOrders,
+  removeMasterFavoriteOrder,
 } from "@/lib/api";
 import type {
   MeProfileApiFields,
   ProfileData,
   RatedMasterItem,
   Work,
+  OrderRecord,
 } from "@/lib/types";
 import styles from "../profilePage.module.css";
-
-type FavoriteOrder = {
-  id: string;
-  imageSrc: string;
-  imageAlt: string;
-  clientName: string;
-  savedAt: string;
-  title: string;
-  description: string;
-  location: string;
-  budgetRange: string;
-  deadline: string;
-};
 
 const DEFAULT_PROFILE: ProfileData = {
   name: "Elena Martinez",
@@ -64,56 +53,9 @@ const DEFAULT_PROFILE: ProfileData = {
   works: [],
 };
 
-const MOCK_FAVORITE_ORDERS: FavoriteOrder[] = [
-  {
-    id: "fav-1",
-    imageSrc: "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=200&q=80",
-    imageAlt: "Ceramic vase project",
-    clientName: "Nino Kvaratskhelia",
-    savedAt: "Saved Apr 1, 2026",
-    title: "Custom stoneware vase set",
-    description: "Three-piece matte vase set in warm earth tones for a dining room centerpiece.",
-    location: "Tbilisi",
-    budgetRange: "₾320 – ₾480",
-    deadline: "1 month",
-  },
-  {
-    id: "fav-2",
-    imageSrc: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=200&q=80",
-    imageAlt: "Oak table project",
-    clientName: "Giorgi Beridze",
-    savedAt: "Saved Mar 28, 2026",
-    title: "Oak dining table (6 seats)",
-    description: "Solid oak farmhouse dining table with oil finish and trestle base.",
-    location: "Kutaisi",
-    budgetRange: "₾2,800 – ₾4,200",
-    deadline: "1 month",
-  },
-  {
-    id: "fav-3",
-    imageSrc: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=200&q=80",
-    imageAlt: "Wrought iron gate project",
-    clientName: "Mariam Gelashvili",
-    savedAt: "Saved Mar 21, 2026",
-    title: "Garden gate and side panels",
-    description: "Powder-coated iron pedestrian gate with matching fixed side panels.",
-    location: "Batumi",
-    budgetRange: "₾1,900 – ₾2,600",
-    deadline: "1 week",
-  },
-  {
-    id: "fav-4",
-    imageSrc: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=200&q=80",
-    imageAlt: "Kitchen shelf project",
-    clientName: "Luka Tsiklauri",
-    savedAt: "Saved Mar 10, 2026",
-    title: "Wall-mounted kitchen shelf set",
-    description: "Custom ash wood shelving with matte black supports and hidden cable channel.",
-    location: "Rustavi",
-    budgetRange: "₾780 – ₾1,050",
-    deadline: "Urgent",
-  },
-];
+function isImageAttachment(url: string): boolean {
+  return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
+}
 
 function mapMeToProfile(data: MeProfileApiFields, role?: string): ProfileData {
   return {
@@ -152,7 +94,11 @@ export default function ProfilePage() {
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
   const [selectedPortfolioIndex, setSelectedPortfolioIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"work" | "favorites">("work");
-  const [favoriteOrders, setFavoriteOrders] = useState<FavoriteOrder[]>(MOCK_FAVORITE_ORDERS);
+  const [favoriteOrders, setFavoriteOrders] = useState<OrderRecord[]>([]);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null);
+  const [favoriteError, setFavoriteError] = useState("");
+  const [toast, setToast] = useState<string>("");
 
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isMasterProfile, setIsMasterProfile] = useState(false);
@@ -165,6 +111,23 @@ export default function ProfilePage() {
         )?.stars ?? null)
       : null;
   const canVoteRole = userRole === "user" || userRole === "master";
+  const canShowFavoritesTab = isOwnProfile && userRole === "master";
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(""), 2400);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  useEffect(() => {
+    if (!canShowFavoritesTab) return;
+    setFavoriteLoading(true);
+    setFavoriteError("");
+    getMasterFavoriteOrders()
+      .then((rows) => setFavoriteOrders(rows))
+      .catch((err) => setFavoriteError(err instanceof Error ? err.message : "Failed to load favorites"))
+      .finally(() => setFavoriteLoading(false));
+  }, [canShowFavoritesTab]);
 
   useEffect(() => {
     if (!slug) {
@@ -359,13 +322,15 @@ export default function ProfilePage() {
                     >
                       My Work
                     </button>
-                    <button
-                      type="button"
-                      className={`${styles.tabBtn} ${activeTab === "favorites" ? styles.tabBtnActive : ""}`}
-                      onClick={() => setActiveTab("favorites")}
-                    >
-                      Favorite Orders
-                    </button>
+                    {canShowFavoritesTab ? (
+                      <button
+                        type="button"
+                        className={`${styles.tabBtn} ${activeTab === "favorites" ? styles.tabBtnActive : ""}`}
+                        onClick={() => setActiveTab("favorites")}
+                      >
+                        Favorite Orders
+                      </button>
+                    ) : null}
                   </div>
 
                   {activeTab === "work" ? (
@@ -393,18 +358,29 @@ export default function ProfilePage() {
                     </>
                   ) : (
                     <section className={styles.favoritesSection} aria-label="Favorite orders">
-                      {favoriteOrders.length === 0 ? (
+                      {favoriteLoading ? (
+                        <div className={styles.favoritesEmpty}>
+                          <p>Loading favorites...</p>
+                        </div>
+                      ) : favoriteError ? (
+                        <div className={styles.favoritesError}>
+                          <p>{favoriteError}</p>
+                        </div>
+                      ) : favoriteOrders.length === 0 ? (
                         <div className={styles.favoritesEmpty}>
                           <p>No saved orders yet.</p>
                         </div>
                       ) : (
                         <div className={styles.favoritesList}>
-                          {favoriteOrders.map((order) => (
-                            <article key={order.id} className={styles.favoriteOrderCard}>
+                          {favoriteOrders.map((order) => {
+                            const rawThumb = order.attachments.find((url) => isImageAttachment(url));
+                            const thumbSrc = rawThumb ? getImageUrl(rawThumb) : "";
+                            return (
+                            <article key={order._id} className={styles.favoriteOrderCard}>
                               <div className={styles.favoriteTop}>
                                 <Image
-                                  src={order.imageSrc}
-                                  alt={order.imageAlt}
+                                  src={thumbSrc || "/images/hero-main.jpg"}
+                                  alt={order.title}
                                   width={90}
                                   height={90}
                                   className={styles.favoriteThumb}
@@ -412,21 +388,9 @@ export default function ProfilePage() {
                                 <div className={styles.favoriteMain}>
                                   <div className={styles.favoriteHeadRow}>
                                     <div>
-                                      <p className={styles.favoriteClient}>{order.clientName}</p>
-                                      <p className={styles.favoriteSavedAt}>{order.savedAt}</p>
+                                      <p className={styles.favoriteClient}>{order.publisher?.name ?? "Client"}</p>
+                                      <p className={styles.favoriteSavedAt}>Saved order</p>
                                     </div>
-                                    <button
-                                      type="button"
-                                      className={styles.favoriteHeartBtn}
-                                      onClick={() =>
-                                        setFavoriteOrders((prev) =>
-                                          prev.filter((item) => item.id !== order.id),
-                                        )
-                                      }
-                                      aria-label="Remove from favorites"
-                                    >
-                                      <Heart size={18} />
-                                    </button>
                                   </div>
                                   <h3 className={styles.favoriteTitle}>{order.title}</h3>
                                   <p className={styles.favoriteDesc}>{order.description}</p>
@@ -435,7 +399,7 @@ export default function ProfilePage() {
                                       <MapPin size={16} /> {order.location}
                                     </span>
                                     <span className={styles.favoriteMetaItem}>
-                                      <Banknote size={16} /> {order.budgetRange}
+                                      <Banknote size={16} /> {order.priceNegotiable ? "Negotiable" : `₾${order.budgetMin} - ₾${order.budgetMax}`}
                                     </span>
                                     <span className={styles.favoriteMetaItem}>
                                       <CalendarClock size={16} /> {order.deadline}
@@ -448,11 +412,31 @@ export default function ProfilePage() {
                                     <button type="button" className={styles.favoriteGhostBtn}>
                                       View Details
                                     </button>
+                                    <button
+                                      type="button"
+                                      className={styles.favoriteRemoveBtn}
+                                      disabled={favoriteBusyId === order._id}
+                                      onClick={async () => {
+                                        setFavoriteBusyId(order._id);
+                                        try {
+                                          await removeMasterFavoriteOrder(order._id);
+                                          setFavoriteOrders((prev) => prev.filter((item) => item._id !== order._id));
+                                          setToast("Removed from favorites");
+                                        } catch (err) {
+                                          setToast(err instanceof Error ? err.message : "Failed to remove favorite");
+                                        } finally {
+                                          setFavoriteBusyId(null);
+                                        }
+                                      }}
+                                    >
+                                      {favoriteBusyId === order._id ? "Removing..." : "Remove"}
+                                    </button>
                                   </div>
                                 </div>
                               </div>
                             </article>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </section>
@@ -499,6 +483,7 @@ export default function ProfilePage() {
         title="Portfolio"
         onClose={() => setSelectedPortfolioIndex(null)}
       />
+      {toast ? <div className={styles.profileToast}>{toast}</div> : null}
     </div>
   );
 }

@@ -11,21 +11,36 @@ import type {
   AdminRegisterInput,
   GeocodeCity,
   Professions,
+  OrderRecord,
+  OrderUpsertInput,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-const IMAGE_BASE = API_URL.replace(/\/api\/?$/, "") || "http://localhost:5000";
+
+/** No trailing slash. Legacy `/uploads/...` paths resolve here + path, or stay root-relative for Next `/uploads` rewrite. */
+const FRONTEND_ORIGIN = (process.env.NEXT_PUBLIC_FRONTEND_URL || "").replace(/\/$/, "");
 
 /** @deprecated Use cookie auth; kept for migration. Returns null when using HTTP-only cookies. */
 export function getStoredToken(): string | null {
   return null;
 }
 
+/**
+ * Resolve `image`, `portfolioImages`, `attachments`, etc.
+ * - Full `http(s)://...` (B2, CDN): use as `src` as-is — do not prefix API origin.
+ * - Legacy `/uploads/...`: `NEXT_PUBLIC_FRONTEND_URL + path`, or root-relative `path` if unset (same-origin + Next rewrite to API).
+ */
 export function getImageUrl(path: string | undefined): string {
   if (!path) return "";
-  if (path.startsWith("http")) return path;
-  if (path.startsWith("/")) return `${IMAGE_BASE}${path}`;
-  return path;
+  const trimmed = path.trim();
+  if (!trimmed) return "";
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  if (trimmed.startsWith("/")) {
+    return FRONTEND_ORIGIN ? `${FRONTEND_ORIGIN}${trimmed}` : trimmed;
+  }
+  return trimmed;
 }
 
 const api = (path: string) =>
@@ -52,6 +67,19 @@ async function authFetch(url: string, initOrFactory: AuthFetchInit): Promise<Res
     res = await fetch(url, { ...init, credentials: "include" as RequestCredentials });
   }
   return res;
+}
+
+async function readJsonSafe(res: Response): Promise<Record<string, unknown>> {
+  try {
+    return (await res.json()) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+function extractMessage(json: Record<string, unknown>, fallback: string): string {
+  const maybeMessage = json.message;
+  return typeof maybeMessage === "string" && maybeMessage.trim() ? maybeMessage : fallback;
 }
 
 export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
@@ -326,6 +354,139 @@ export async function uploadPortfolioImages(files: File[] | FileList): Promise<s
   if (!res.ok) throw new Error(json?.message || "Upload failed");
   const list = json?.data?.portfolioImages;
   return Array.isArray(list) ? list.map((p: string) => getImageUrl(p)) : [];
+}
+
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
+
+export async function uploadFile(file: File): Promise<string> {
+  if (!file) throw new Error("No file selected");
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error("File is too large. Max allowed size is 50MB.");
+  }
+
+  const res = await authFetch(`${api("/upload")}`, () => {
+    const form = new FormData();
+    form.append("file", file);
+    return { method: "POST", body: form };
+  });
+
+  const json = await readJsonSafe(res);
+  if (!res.ok) {
+    if (res.status === 401) throw new Error("Session expired. Please log in again.");
+    if (res.status === 400) {
+      throw new Error(extractMessage(json, "Upload failed. Check file format and size."));
+    }
+    throw new Error(extractMessage(json, "Upload failed"));
+  }
+
+  const url = json.url;
+  if (typeof url !== "string" || !url.trim()) {
+    throw new Error("Upload succeeded but file URL is missing.");
+  }
+  return url;
+}
+
+export async function createOrder(data: OrderUpsertInput): Promise<OrderRecord> {
+  const res = await authFetch(`${api("/orders")}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to create order"));
+  const raw = (json.data ?? json) as OrderRecord;
+  return { ...raw, attachments: Array.isArray(raw.attachments) ? raw.attachments : [] };
+}
+
+export async function getOrders(): Promise<OrderRecord[]> {
+  const res = await authFetch(`${api("/orders")}`, { method: "GET" });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load orders"));
+  const data = (json.data ?? json) as unknown;
+  if (!Array.isArray(data)) return [];
+  return data.map((row) => {
+    const order = row as OrderRecord;
+    return {
+      ...order,
+      attachments: Array.isArray(order.attachments) ? order.attachments : [],
+    };
+  });
+}
+
+export async function getOrderById(orderId: string): Promise<OrderRecord> {
+  const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
+    method: "GET",
+  });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load order"));
+  const order = (json.data ?? json) as OrderRecord;
+  return { ...order, attachments: Array.isArray(order.attachments) ? order.attachments : [] };
+}
+
+export async function updateOrder(orderId: string, data: OrderUpsertInput): Promise<OrderRecord> {
+  const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to update order"));
+  const order = (json.data ?? json) as OrderRecord;
+  return { ...order, attachments: Array.isArray(order.attachments) ? order.attachments : [] };
+}
+
+export async function deleteOrder(orderId: string): Promise<void> {
+  const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
+    method: "DELETE",
+  });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to delete order"));
+}
+
+export async function getMasterFavoriteOrders(): Promise<OrderRecord[]> {
+  const res = await authFetch(`${api("/masters/me/favorite-orders")}`, { method: "GET" });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load favorite orders"));
+  const data = (json.data ?? json) as unknown;
+  if (!Array.isArray(data)) return [];
+  return data.map((row) => {
+    const order = row as OrderRecord;
+    return {
+      ...order,
+      attachments: Array.isArray(order.attachments) ? order.attachments : [],
+    };
+  });
+}
+
+export async function addMasterFavoriteOrder(orderId: string): Promise<void> {
+  const res = await authFetch(`${api("/masters/me/favorite-orders")}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId }),
+  });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to save favorite order"));
+}
+
+export async function removeMasterFavoriteOrder(orderId: string): Promise<void> {
+  const encoded = encodeURIComponent(orderId);
+  const byPath = await authFetch(`${api(`/masters/me/favorite-orders/${encoded}`)}`, {
+    method: "DELETE",
+  });
+  if (byPath.ok) return;
+
+  const jsonPath = await readJsonSafe(byPath);
+  const byBody = await authFetch(`${api("/masters/me/favorite-orders")}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId }),
+  });
+  if (byBody.ok) return;
+
+  const jsonBody = await readJsonSafe(byBody);
+  throw new Error(
+    extractMessage(jsonBody, extractMessage(jsonPath, "Failed to remove favorite order")),
+  );
 }
 
 /* ========== Admin ========== */

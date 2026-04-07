@@ -6,6 +6,7 @@ import type { DummyOrder } from "@/lib/types";
  */
 export const MOCK_ORDERS: DummyOrder[] = [
   {
+    id: "ord-1",
     imageSrc: "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=200&q=80",
     imageAlt: "Handmade ceramic vase",
     title: "Custom stoneware vase set",
@@ -23,6 +24,7 @@ export const MOCK_ORDERS: DummyOrder[] = [
     publisherEmail: "nino.k@example.ge",
   },
   {
+    id: "ord-2",
     imageSrc: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=200&q=80",
     imageAlt: "Oak dining table",
     title: "Oak dining table (6 seats)",
@@ -40,6 +42,7 @@ export const MOCK_ORDERS: DummyOrder[] = [
     publisherEmail: "giorgi.b@example.ge",
   },
   {
+    id: "ord-3",
     imageSrc: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=200&q=80",
     imageAlt: "Wrought iron gate",
     title: "Garden gate & side panels",

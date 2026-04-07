@@ -34,6 +34,19 @@ function apiHostImagePattern(): {
 
 const apiPattern = apiHostImagePattern();
 
+const EXTRA_REMOTE_HOSTS = (process.env.NEXT_PUBLIC_IMAGE_REMOTE_HOSTS ?? "")
+  .split(",")
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean);
+
+function extraRemotePatterns() {
+  return EXTRA_REMOTE_HOSTS.map((hostname) => ({
+    protocol: "https" as const,
+    hostname,
+    pathname: "/**" as const,
+  }));
+}
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -60,6 +73,7 @@ const nextConfig: NextConfig = {
       )
         ? [apiPattern]
         : []),
+      ...extraRemotePatterns(),
     ],
     // Next/Image blocks private/reserved IPs by default (SSRF protection).
     // Our dev backend serves uploads from localhost:5000, so allow it in development.

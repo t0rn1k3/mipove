@@ -85,7 +85,24 @@
     "filterLocationTelavi": "თელავი",
     "filterLocationAkhaltsikhe": "ახალციხე",
     "filterLocationMtskheta": "მცხეთა",
-    "filterLocationOther": "სხვა"
+    "filterLocationOther": "სხვა",
+    "loadingOrders": "შეკვეთები იტვირთება...",
+    "attachmentImage": "სურათი",
+    "attachmentFile": "ფაილი",
+    "addToFavorites": "ფავორიტებში დამატება",
+    "removeFromFavorites": "ფავორიტებიდან წაშლა",
+    "favoriteAdded": "დაემატა ფავორიტებში.",
+    "favoriteRemoved": "წაიშალა ფავორიტებიდან.",
+    "favoriteActionFailed": "ფავორიტების განახლება ვერ მოხერხდა.",
+    "orderCreated": "შეკვეთა წარმატებით შეიქმნა.",
+    "orderUpdated": "შეკვეთა წარმატებით განახლდა.",
+    "orderDeleted": "შეკვეთა წაიშალა.",
+    "editOrder": "რედაქტირება",
+    "deleteOrder": "წაშლა",
+    "deletingOrder": "იშლება...",
+    "saveOrderChanges": "ცვლილებების შენახვა",
+    "deleteOrderConfirm": "წავშალოთ ეს შეკვეთა?",
+    "deleteOrderFailed": "შეკვეთის წაშლა ვერ მოხერხდა."
   },
   "orderForm": {
     "pageTitle": "პროექტის გაგზავნა",
@@ -142,6 +159,7 @@
     "errorCategory": "აირჩიეთ კატეგორია",
     "errorDescription": "დაამატეთ აღწერა",
     "errorLocation": "აირჩიეთ მდებარეობა",
+    "errorFileSize": "თითო ფაილის ზომა უნდა იყოს მაქსიმუმ 50MB.",
     "errorBudget": "მიუთითეთ სწორი მინ–მაქს (₾0 – ₾5,000) ან მონიშნეთ შეთანხმებით",
     "errorDeadline": "აირჩიეთ ვადა"
   },

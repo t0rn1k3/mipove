@@ -4,8 +4,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { getMe, getImageUrl } from "@/lib/api";
-import type { DummyOrder, OrdersPageSessionUser } from "@/lib/types";
+import {
+  getMe,
+  getImageUrl,
+  getOrders,
+  createOrder,
+  updateOrder,
+  deleteOrder,
+  uploadFile,
+  addMasterFavoriteOrder,
+  removeMasterFavoriteOrder,
+  getMasterFavoriteOrders,
+} from "@/lib/api";
+import type { OrdersPageSessionUser, OrderRecord } from "@/lib/types";
 import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
 import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
 import OrdersSmartFilter, {
@@ -13,8 +24,7 @@ import OrdersSmartFilter, {
   FILTER_LOCATION_VALUES,
   type OrderFilterState,
 } from "@/components/OrdersSmartFilter/OrdersSmartFilter";
-import { MOCK_ORDERS } from "@/lib/mockOrders";
-import { Banknote, MapPin, CalendarClock, User, Phone } from "lucide-react";
+import { Banknote, MapPin, CalendarClock, User, Phone, Heart } from "lucide-react";
 import styles from "./orderPage.module.css";
 
 const ORDER_CARD_DELAY = [
@@ -66,6 +76,10 @@ function normalizeLocation(raw: string): string {
   return LOCATION_ALIASES[key] ?? key;
 }
 
+function isImageAttachment(url: string): boolean {
+  return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
+}
+
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -92,8 +106,15 @@ export default function OrderPage() {
   const tCommon = useTranslations("common");
   const [sessionUser, setSessionUser] = useState<OrdersPageSessionUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState("");
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
+  const [favoriteOrderIds, setFavoriteOrderIds] = useState<string[]>([]);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<OrderRecord | null>(null);
   const [filterState, setFilterState] = useState<OrderFilterState>(INITIAL_FILTER_STATE);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [toolbarRef, toolbarVisible] = useScrollReveal();
@@ -108,12 +129,40 @@ export default function OrderPage() {
   }, [filterState.search]);
 
   useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 2600);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setOrdersLoading(true);
+    setOrdersError("");
+    getOrders()
+      .then((rows) => {
+        if (cancelled) return;
+        setOrders(rows);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setOrdersError(err instanceof Error ? err.message : "Failed to load orders");
+      })
+      .finally(() => {
+        if (!cancelled) setOrdersLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     getMe()
       .then(({ data }) => {
         if (cancelled) return;
         if (data.role === "admin") {
           setSessionUser({
+            id: data._id,
             name: data.name,
             email: data.email,
             image: data.image,
@@ -121,13 +170,22 @@ export default function OrderPage() {
           });
           return;
         }
-        setSessionUser({
+        const nextUser: OrdersPageSessionUser = {
+          id: data._id,
           name: data.name,
           email: data.email,
           image: data.image,
           role: data.role,
           slug: data.slug,
-        });
+        };
+        setSessionUser(nextUser);
+        if (data.role === "master") {
+          getMasterFavoriteOrders()
+            .then((rows) => {
+              if (!cancelled) setFavoriteOrderIds(rows.map((item) => item._id));
+            })
+            .catch(() => {});
+        }
       })
       .catch(() => {
         if (!cancelled) setSessionUser(null);
@@ -153,6 +211,7 @@ export default function OrderPage() {
       : sessionUser?.role === "master"
         ? t("roleMaster")
         : t("roleClient");
+  const canCreateOrder = sessionUser?.role === "user";
 
   const avatarSrc = sessionUser
     ? (() => {
@@ -164,7 +223,7 @@ export default function OrderPage() {
 
   const filteredOrders = useMemo(() => {
     const query = debouncedSearch;
-    return MOCK_ORDERS.filter((order) => {
+    return orders.filter((order) => {
       if (query) {
         const haystack = `${order.title} ${order.description}`.toLowerCase();
         if (!haystack.includes(query)) return false;
@@ -192,7 +251,118 @@ export default function OrderPage() {
 
       return true;
     });
-  }, [debouncedSearch, filterState]);
+  }, [debouncedSearch, filterState, orders]);
+
+  const uploadAttachments = async (files: File[]) => {
+    if (!files.length) return [] as string[];
+    return Promise.all(files.map((file) => uploadFile(file)));
+  };
+
+  const handleCreateOrder = async (form: {
+    title: string;
+    category: string;
+    description: string;
+    location: string;
+    budgetMin: number;
+    budgetMax: number;
+    priceNegotiable: boolean;
+    deadline: string;
+    images: File[];
+  }) => {
+    const title = form.title.trim();
+    if (!title) throw new Error("Title is required");
+    if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error("Price must be zero or greater");
+
+    const attachmentUrls = await uploadAttachments(form.images);
+    const created = await createOrder({
+      title,
+      category: form.category,
+      description: form.description.trim(),
+      location: form.location,
+      budgetMin: form.budgetMin,
+      budgetMax: form.budgetMax,
+      priceNegotiable: form.priceNegotiable,
+      deadline: form.deadline,
+      attachments: attachmentUrls,
+    });
+    setOrders((prev) => [created, ...prev]);
+    setToast({ type: "success", message: t("orderCreated") });
+  };
+
+  const handleUpdateOrder = async (form: {
+    title: string;
+    category: string;
+    description: string;
+    location: string;
+    budgetMin: number;
+    budgetMax: number;
+    priceNegotiable: boolean;
+    deadline: string;
+    images: File[];
+  }) => {
+    if (!editingOrder) return;
+    const title = form.title.trim();
+    if (!title) throw new Error("Title is required");
+    if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error("Price must be zero or greater");
+
+    const attachmentUrls = await uploadAttachments(form.images);
+    const updated = await updateOrder(editingOrder._id, {
+      title,
+      category: form.category,
+      description: form.description.trim(),
+      location: form.location,
+      budgetMin: form.budgetMin,
+      budgetMax: form.budgetMax,
+      priceNegotiable: form.priceNegotiable,
+      deadline: form.deadline,
+      attachments: [...(editingOrder.attachments ?? []), ...attachmentUrls],
+    });
+    setOrders((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
+    setEditingOrder(null);
+    setToast({ type: "success", message: t("orderUpdated") });
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    const confirmed = window.confirm(t("deleteOrderConfirm"));
+    if (!confirmed) return;
+    setBusyKey(`delete:${orderId}`);
+    try {
+      await deleteOrder(orderId);
+      setOrders((prev) => prev.filter((item) => item._id !== orderId));
+      setToast({ type: "success", message: t("orderDeleted") });
+    } catch (err) {
+      setToast({
+        type: "error",
+        message: err instanceof Error ? err.message : t("deleteOrderFailed"),
+      });
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  const handleToggleFavorite = async (orderId: string) => {
+    if (sessionUser?.role !== "master") return;
+    const active = favoriteOrderIds.includes(orderId);
+    setBusyKey(`favorite:${orderId}`);
+    try {
+      if (active) {
+        await removeMasterFavoriteOrder(orderId);
+        setFavoriteOrderIds((prev) => prev.filter((id) => id !== orderId));
+        setToast({ type: "success", message: t("favoriteRemoved") });
+      } else {
+        await addMasterFavoriteOrder(orderId);
+        setFavoriteOrderIds((prev) => [...prev, orderId]);
+        setToast({ type: "success", message: t("favoriteAdded") });
+      }
+    } catch (err) {
+      setToast({
+        type: "error",
+        message: err instanceof Error ? err.message : t("favoriteActionFailed"),
+      });
+    } finally {
+      setBusyKey(null);
+    }
+  };
 
   return (
     <main className={styles.page}>
@@ -207,7 +377,14 @@ export default function OrderPage() {
           <button
             type="button"
             className={`${styles.addOrderBtn} ${styles.scrollReveal}`}
-            onClick={() => setFormModalOpen(true)}
+            onClick={() => {
+              if (!canCreateOrder) {
+                setToast({ type: "error", message: t("loginRequired") });
+                return;
+              }
+              setFormModalOpen(true);
+            }}
+            disabled={busyKey === "create"}
           >
             {t("addYourOrder")}
           </button>
@@ -244,11 +421,26 @@ export default function OrderPage() {
             ref={ordersRef}
             className={`${styles.ordersBody} ${ordersVisible ? styles.revealVisible : ""}`}
           >
-            {filteredOrders.map((order: DummyOrder, index) => {
-              const cardKey = `${order.title}-${order.expectedBy}`;
+            {ordersLoading ? <p className={styles.noOrdersMatch}>{t("loadingOrders")}</p> : null}
+            {!ordersLoading && ordersError ? <p className={styles.errorBanner}>{ordersError}</p> : null}
+            {!ordersLoading && !ordersError ? filteredOrders.map((order, index) => {
+              const cardKey = order._id;
               const contactPanelId = `order-contact-${index}`;
-              const telHref = `tel:${order.publisherPhone.replace(/\s/g, "")}`;
+              const phone = order.publisher?.phone ?? "";
+              const telHref = phone ? `tel:${phone.replace(/\s/g, "")}` : "";
               const contactOpen = expandedContactKey === cardKey;
+              const isFavorite = favoriteOrderIds.includes(order._id);
+              const isMaster = sessionUser?.role === "master";
+              const isOwner =
+                sessionUser?.role === "user" &&
+                Boolean(sessionUser.id) &&
+                order.publisher?._id === sessionUser.id;
+              const canEditPending = isOwner && order.status === "pending";
+              const rawFirstImage = (order.attachments ?? []).find((url) => isImageAttachment(url));
+              const firstImageSrc = rawFirstImage ? getImageUrl(rawFirstImage) : "";
+              const attachments = order.attachments ?? [];
+              const deleting = busyKey === `delete:${order._id}`;
+              const favoriteBusy = busyKey === `favorite:${order._id}`;
               return (
                 <article
                   key={cardKey}
@@ -257,8 +449,8 @@ export default function OrderPage() {
                   <div className={styles.orderTop}>
                     <div className={styles.orderThumb}>
                       <Image
-                        src={order.imageSrc}
-                        alt={order.imageAlt}
+                        src={firstImageSrc || "/images/hero-main.jpg"}
+                        alt={order.title}
                         width={88}
                         height={88}
                         className={styles.orderThumbImg}
@@ -267,14 +459,33 @@ export default function OrderPage() {
                     <div className={styles.orderMain}>
                       <h3 className={styles.orderTitle}>{order.title}</h3>
                       <p className={styles.orderDescription}>{order.description}</p>
+                      {attachments.length > 0 ? (
+                        <div className={styles.attachmentsWrap}>
+                          {attachments.slice(0, 4).map((url) => (
+                            <a
+                              key={url}
+                              href={getImageUrl(url)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={styles.attachmentLink}
+                            >
+                              {isImageAttachment(url) ? t("attachmentImage") : t("attachmentFile")}
+                            </a>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                     <div className={styles.orderMeta}>
                       <div
                         className={styles.orderMetaRow}
-                        aria-label={`${t("metaPriceRange")}: ${order.priceRange}`}
+                        aria-label={`${t("metaPriceRange")}: ₾${order.budgetMin} - ₾${order.budgetMax}`}
                       >
                         <Banknote size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>{order.priceRange}</span>
+                        <span className={styles.orderMetaValue}>
+                          {order.priceNegotiable
+                            ? t("filterNegotiableOnly")
+                            : `₾${order.budgetMin.toLocaleString()} - ₾${order.budgetMax.toLocaleString()}`}
+                        </span>
                       </div>
                       <div
                         className={styles.orderMetaRow}
@@ -285,14 +496,45 @@ export default function OrderPage() {
                       </div>
                       <div
                         className={styles.orderMetaRow}
-                        aria-label={`${t("metaExpectedBy")}: ${order.expectedBy}`}
+                        aria-label={`${t("metaExpectedBy")}: ${order.deadline}`}
                       >
                         <CalendarClock size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>{order.expectedBy}</span>
+                        <span className={styles.orderMetaValue}>{order.deadline}</span>
                       </div>
                     </div>
                   </div>
                   <div className={styles.orderFooter}>
+                    {isMaster ? (
+                      <button
+                        type="button"
+                        className={`${styles.favoriteBtn} ${isFavorite ? styles.favoriteBtnActive : ""}`}
+                        onClick={() => handleToggleFavorite(order._id)}
+                        aria-label={isFavorite ? t("removeFromFavorites") : t("addToFavorites")}
+                        disabled={favoriteBusy}
+                      >
+                        <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
+                      </button>
+                    ) : null}
+                    {canEditPending ? (
+                      <button
+                        type="button"
+                        className={styles.secondaryBtn}
+                        onClick={() => setEditingOrder(order)}
+                        disabled={deleting}
+                      >
+                        {t("editOrder")}
+                      </button>
+                    ) : null}
+                    {canEditPending ? (
+                      <button
+                        type="button"
+                        className={styles.dangerBtn}
+                        onClick={() => void handleDeleteOrder(order._id)}
+                        disabled={deleting}
+                      >
+                        {deleting ? t("deletingOrder") : t("deleteOrder")}
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       className={styles.contactInfoBtn}
@@ -319,28 +561,30 @@ export default function OrderPage() {
                         <div className={styles.contactNamePhoneRow}>
                           <div
                             className={styles.contactInlineGroup}
-                            aria-label={`${tCommon("name")}: ${order.publisherName}`}
+                            aria-label={`${tCommon("name")}: ${order.publisher?.name ?? "—"}`}
                           >
                             <User size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
-                            <span className={styles.contactExtraValue}>{order.publisherName}</span>
+                            <span className={styles.contactExtraValue}>{order.publisher?.name ?? "—"}</span>
                           </div>
-                          <div
-                            className={styles.contactInlineGroup}
-                            aria-label={`${tCommon("phone")}: ${order.publisherPhone}`}
-                          >
-                            <Phone size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
-                            <a href={telHref} className={styles.contactExtraLink}>
-                              {order.publisherPhone}
-                            </a>
-                          </div>
+                          {phone ? (
+                            <div
+                              className={styles.contactInlineGroup}
+                              aria-label={`${tCommon("phone")}: ${phone}`}
+                            >
+                              <Phone size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
+                              <a href={telHref} className={styles.contactExtraLink}>
+                                {phone}
+                              </a>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     </div>
                   </div>
                 </article>
               );
-            })}
-            {filteredOrders.length === 0 ? (
+            }) : null}
+            {!ordersLoading && !ordersError && filteredOrders.length === 0 ? (
               <p className={styles.noOrdersMatch}>{t("noOrdersMatch")}</p>
             ) : null}
           </div>
@@ -383,7 +627,37 @@ export default function OrderPage() {
         </div>
       </div>
 
-      <OrderFormModal open={formModalOpen} onClose={() => setFormModalOpen(false)} />
+      <OrderFormModal
+        open={formModalOpen}
+        onClose={() => setFormModalOpen(false)}
+        onSubmit={handleCreateOrder}
+      />
+      <OrderFormModal
+        open={Boolean(editingOrder)}
+        onClose={() => setEditingOrder(null)}
+        onSubmit={handleUpdateOrder}
+        submitLabel={t("saveOrderChanges")}
+        initialValues={
+          editingOrder
+            ? {
+                title: editingOrder.title,
+                category: editingOrder.category,
+                description: editingOrder.description,
+                location: editingOrder.location,
+                budgetMin: editingOrder.budgetMin,
+                budgetMax: editingOrder.budgetMax,
+                priceNegotiable: editingOrder.priceNegotiable,
+                deadline: (editingOrder.deadline as "urgent" | "week" | "month") ?? "",
+                images: [],
+              }
+            : undefined
+        }
+      />
+      {toast ? (
+        <div className={`${styles.toast} ${toast.type === "error" ? styles.toastError : styles.toastSuccess}`}>
+          {toast.message}
+        </div>
+      ) : null}
     </main>
   );
 }

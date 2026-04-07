@@ -11,6 +11,8 @@ export type OrderFormModalProps = {
   open: boolean;
   onClose: () => void;
   onSubmit?: (data: OrderFormState) => void | Promise<void>;
+  initialValues?: Partial<OrderFormState>;
+  submitLabel?: string;
 };
 
 const TITLE_ID = "order-form-modal-title";
@@ -18,7 +20,13 @@ const TITLE_ID = "order-form-modal-title";
 /** Match `transition` on `.content` in CSS (exit unmount delay). */
 const PANEL_TRANSITION_MS = 480;
 
-export default function OrderFormModal({ open, onClose, onSubmit }: OrderFormModalProps) {
+export default function OrderFormModal({
+  open,
+  onClose,
+  onSubmit,
+  initialValues,
+  submitLabel,
+}: OrderFormModalProps) {
   const tForm = useTranslations("orderForm");
   const [formKey, setFormKey] = useState(0);
   const prevOpen = useRef(false);
@@ -93,6 +101,8 @@ export default function OrderFormModal({ open, onClose, onSubmit }: OrderFormMod
         <OrderSubmissionForm
           key={formKey}
           embedded
+          initialValues={initialValues}
+          submitLabel={submitLabel}
           onSubmit={async (data) => {
             await onSubmit?.(data);
             onClose();

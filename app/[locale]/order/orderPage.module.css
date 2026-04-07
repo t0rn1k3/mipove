@@ -131,6 +131,11 @@
   outline-offset: 3px;
 }
 
+.addOrderBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .layout {
   margin: 0 auto;
   display: grid;
@@ -178,6 +183,16 @@
   font-size: 0.9rem;
 }
 
+.errorBanner {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
 .orderCard {
   padding: 1.25rem 1.35rem;
   background: #f5f2eb;
@@ -203,6 +218,31 @@
   margin-top: 1rem;
 }
 
+.favoriteBtn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #6b7280;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.favoriteBtn:hover {
+  border-color: #ef4444;
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.favoriteBtnActive {
+  border-color: #ef4444;
+  color: #dc2626;
+  background: #fee2e2;
+}
+
 .contactInfoBtn {
   flex-shrink: 0;
   padding: 0.5rem 1rem;
@@ -223,6 +263,40 @@
 .contactInfoBtn:focus-visible {
   outline: 2px solid #0f766e;
   outline-offset: 2px;
+}
+
+.secondaryBtn,
+.dangerBtn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover:not(:disabled) {
+  border-color: #0f766e;
+  color: #0f766e;
+}
+
+.dangerBtn {
+  border-color: #fecaca;
+  color: #b91c1c;
+  background: #fff5f5;
+}
+
+.dangerBtn:hover:not(:disabled) {
+  border-color: #f87171;
+}
+
+.secondaryBtn:disabled,
+.dangerBtn:disabled,
+.favoriteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .contactReveal {
@@ -332,6 +406,31 @@
   font-size: 0.9rem;
   line-height: 1.5;
   color: #5c5c68;
+}
+
+.attachmentsWrap {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.attachmentLink {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.28rem 0.6rem;
+  text-decoration: none;
+}
+
+.attachmentLink:hover {
+  border-color: #0f766e;
+  color: #0f766e;
 }
 
 .orderMeta {
@@ -468,6 +567,30 @@
   line-height: 1.55;
   color: #e5e7eb;
   text-align: center;
+}
+
+.toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1200;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.toastSuccess {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.toastError {
+  background: #fff1f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
 }
 
 @media (max-width: 1024px) {
