@@ -15,8 +15,13 @@ import {
   addMasterFavoriteOrder,
   removeMasterFavoriteOrder,
   getMasterFavoriteOrders,
+  spendCredits,
+  getUnlockedIds,
+  getCreditPacks,
+  purchaseCredits,
 } from "@/lib/api";
-import type { OrdersPageSessionUser, OrderRecord } from "@/lib/types";
+import type { OrdersPageSessionUser, OrderRecord, CreditPack } from "@/lib/types";
+import { InsufficientCreditsError } from "@/lib/types";
 import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
 import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
 import OrdersSmartFilter, {
@@ -24,6 +29,7 @@ import OrdersSmartFilter, {
   FILTER_LOCATION_VALUES,
   type OrderFilterState,
 } from "@/components/OrdersSmartFilter/OrdersSmartFilter";
+import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 import { Banknote, MapPin, CalendarClock, User, Phone, Heart } from "lucide-react";
 import styles from "./orderPage.module.css";
 
@@ -104,15 +110,22 @@ export default function OrderPage() {
   const t = useTranslations("order");
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
+  const tCredits = useTranslations("credits");
+  const { setBalance: setCreditBalance } = useCreditBalance();
   const [sessionUser, setSessionUser] = useState<OrdersPageSessionUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState("");
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
+  const [unlockedContactIds, setUnlockedContactIds] = useState<Set<string>>(new Set());
   const [favoriteOrderIds, setFavoriteOrderIds] = useState<string[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [creditPacks, setCreditPacks] = useState<CreditPack[]>([]);
+  const [creditPacksLoading, setCreditPacksLoading] = useState(false);
+  const [creditPacksError, setCreditPacksError] = useState("");
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OrderRecord | null>(null);
   const [filterState, setFilterState] = useState<OrderFilterState>(INITIAL_FILTER_STATE);
@@ -180,9 +193,11 @@ export default function OrderPage() {
         };
         setSessionUser(nextUser);
         if (data.role === "master") {
-          getMasterFavoriteOrders()
-            .then((rows) => {
-              if (!cancelled) setFavoriteOrderIds(rows.map((item) => item._id));
+          Promise.all([getMasterFavoriteOrders(), getUnlockedIds("view_contact")])
+            .then(([favoriteRows, unlockedIds]) => {
+              if (cancelled) return;
+              setFavoriteOrderIds(favoriteRows.map((item) => item._id));
+              setUnlockedContactIds(new Set(unlockedIds));
             })
             .catch(() => {});
         }
@@ -364,6 +379,55 @@ export default function OrderPage() {
     }
   };
 
+  const openBuyCreditsModal = async () => {
+    setBuyCreditsOpen(true);
+    if (creditPacks.length > 0 || creditPacksLoading) return;
+    setCreditPacksLoading(true);
+    setCreditPacksError("");
+    try {
+      const packs = await getCreditPacks();
+      setCreditPacks(packs);
+    } catch (err) {
+      setCreditPacksError(err instanceof Error ? err.message : "Failed to load credit packs");
+    } finally {
+      setCreditPacksLoading(false);
+    }
+  };
+
+  const handleUnlockContact = async (orderId: string) => {
+    if (sessionUser?.role !== "master") return;
+    setBusyKey(`unlock:${orderId}`);
+    try {
+      const result = await spendCredits("view_contact", orderId);
+      setUnlockedContactIds((prev) => {
+        const next = new Set(prev);
+        next.add(orderId);
+        return next;
+      });
+      setCreditBalance(result.remaining);
+      setExpandedContactKey(orderId);
+      setToast({ type: "success", message: tCredits("contactUnlocked") });
+    } catch (err) {
+      if (err instanceof InsufficientCreditsError) {
+        setToast({
+          type: "error",
+          message: tCredits("insufficientDesc", {
+            required: err.required,
+            balance: err.balance,
+          }),
+        });
+        await openBuyCreditsModal();
+        return;
+      }
+      setToast({
+        type: "error",
+        message: err instanceof Error ? err.message : t("favoriteActionFailed"),
+      });
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
   return (
     <main className={styles.page}>
       <BackgroundImage />
@@ -428,9 +492,10 @@ export default function OrderPage() {
               const contactPanelId = `order-contact-${index}`;
               const phone = order.publisher?.phone ?? "";
               const telHref = phone ? `tel:${phone.replace(/\s/g, "")}` : "";
-              const contactOpen = expandedContactKey === cardKey;
               const isFavorite = favoriteOrderIds.includes(order._id);
               const isMaster = sessionUser?.role === "master";
+              const isUnlockedForMaster = isMaster && unlockedContactIds.has(order._id);
+              const contactOpen = isMaster ? isUnlockedForMaster : expandedContactKey === cardKey;
               const isOwner =
                 sessionUser?.role === "user" &&
                 Boolean(sessionUser.id) &&
@@ -441,6 +506,7 @@ export default function OrderPage() {
               const attachments = order.attachments ?? [];
               const deleting = busyKey === `delete:${order._id}`;
               const favoriteBusy = busyKey === `favorite:${order._id}`;
+              const unlockBusy = busyKey === `unlock:${order._id}`;
               return (
                 <article
                   key={cardKey}
@@ -535,17 +601,29 @@ export default function OrderPage() {
                         {deleting ? t("deletingOrder") : t("deleteOrder")}
                       </button>
                     ) : null}
-                    <button
-                      type="button"
-                      className={styles.contactInfoBtn}
-                      aria-expanded={contactOpen}
-                      aria-controls={contactPanelId}
-                      onClick={() =>
-                        setExpandedContactKey(contactOpen ? null : cardKey)
-                      }
-                    >
-                      {contactOpen ? t("hideContactInformation") : t("seeContactInformation")}
-                    </button>
+                    {isMaster && !isUnlockedForMaster ? (
+                      <button
+                        type="button"
+                        className={styles.contactInfoBtn}
+                        onClick={() => void handleUnlockContact(order._id)}
+                        disabled={unlockBusy}
+                      >
+                        {unlockBusy ? tCommon("loading") : tCredits("unlockContact")}
+                      </button>
+                    ) : null}
+                    {!isMaster ? (
+                      <button
+                        type="button"
+                        className={styles.contactInfoBtn}
+                        aria-expanded={contactOpen}
+                        aria-controls={contactPanelId}
+                        onClick={() =>
+                          setExpandedContactKey(contactOpen ? null : cardKey)
+                        }
+                      >
+                        {contactOpen ? t("hideContactInformation") : t("seeContactInformation")}
+                      </button>
+                    ) : null}
                   </div>
                   <div
                     className={`${styles.contactReveal} ${contactOpen ? styles.contactRevealOpen : ""}`}
@@ -656,6 +734,55 @@ export default function OrderPage() {
       {toast ? (
         <div className={`${styles.toast} ${toast.type === "error" ? styles.toastError : styles.toastSuccess}`}>
           {toast.message}
+        </div>
+      ) : null}
+      {buyCreditsOpen ? (
+        <div className={styles.modalOverlay} onClick={() => setBuyCreditsOpen(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal>
+            <h3 className={styles.modalTitle}>{tCredits("insufficientTitle")}</h3>
+            <p className={styles.modalDesc}>{tCredits("buy")}</p>
+            {creditPacksLoading ? (
+              <p className={styles.modalMeta}>{tCommon("loading")}...</p>
+            ) : null}
+            {creditPacksError ? (
+              <p className={styles.modalError}>{creditPacksError}</p>
+            ) : null}
+            {!creditPacksLoading && !creditPacksError ? (
+              <div className={styles.packsList}>
+                {creditPacks.map((pack) => (
+                  <button
+                    key={pack._id}
+                    type="button"
+                    className={styles.packBtn}
+                    onClick={async () => {
+                      setBusyKey(`pack:${pack._id}`);
+                      try {
+                        const { paymentUrl } = await purchaseCredits(pack._id);
+                        window.location.href = paymentUrl;
+                      } catch (err) {
+                        setToast({
+                          type: "error",
+                          message: err instanceof Error ? err.message : tCredits("buy"),
+                        });
+                      } finally {
+                        setBusyKey(null);
+                      }
+                    }}
+                    disabled={busyKey === `pack:${pack._id}`}
+                  >
+                    {pack.name} · {pack.credits + pack.bonusCredits} · ₾{pack.priceGel}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <button
+              type="button"
+              className={styles.modalCloseBtn}
+              onClick={() => setBuyCreditsOpen(false)}
+            >
+              {tCommon("close")}
+            </button>
+          </div>
         </div>
       ) : null}
     </main>
