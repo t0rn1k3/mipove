@@ -169,6 +169,32 @@ export type OrderUpsertInput = {
   attachments: string[];
 };
 
+/* ========== Credits ========== */
+
+export type CreditTransactionType =
+  | "grant"
+  | "purchase"
+  | "spend"
+  | "refund"
+  | "admin_adjust";
+
+export type CreditTransaction = {
+  _id: string;
+  type: CreditTransactionType;
+  amount: number;
+  balanceAfter: number;
+  action: string;
+  metadata?: { orderId?: string; packId?: string; paymentId?: string; note?: string };
+  createdAt: string;
+};
+
+export type CreditHistoryResult = {
+  transactions: CreditTransaction[];
+  total: number;
+  page: number;
+  pages: number;
+};
+
 /* ========== Profile Update ========== */
 
 export type UpdateProfileInput = {

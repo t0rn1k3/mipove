@@ -13,6 +13,8 @@ import type {
   Professions,
   OrderRecord,
   OrderUpsertInput,
+  CreditHistoryResult,
+  CreditTransaction,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -487,6 +489,46 @@ export async function removeMasterFavoriteOrder(orderId: string): Promise<void> 
   throw new Error(
     extractMessage(jsonBody, extractMessage(jsonPath, "Failed to remove favorite order")),
   );
+}
+
+/* ========== Credits ========== */
+
+export async function getCreditBalance(): Promise<{ balance: number }> {
+  const res = await authFetch(`${api("/credits/balance")}`, { method: "GET" });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load credit balance"));
+  const inner = (json.data ?? json) as Record<string, unknown>;
+  const balance =
+    typeof inner.balance === "number" && Number.isFinite(inner.balance)
+      ? inner.balance
+      : 0;
+  return { balance };
+}
+
+export async function getCreditHistory(
+  page = 1,
+  limit = 20,
+): Promise<CreditHistoryResult> {
+  const q = new URLSearchParams();
+  q.set("page", String(page));
+  q.set("limit", String(limit));
+  const res = await authFetch(`${api(`/credits/history?${q.toString()}`)}`, { method: "GET" });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load credit history"));
+  const inner = (json.data ?? json) as Record<string, unknown>;
+  const transactionsRaw = inner.transactions;
+  const transactions = Array.isArray(transactionsRaw)
+    ? (transactionsRaw as CreditTransaction[])
+    : [];
+  const total =
+    typeof inner.total === "number" && Number.isFinite(inner.total)
+      ? inner.total
+      : transactions.length;
+  const pageNum =
+    typeof inner.page === "number" && Number.isFinite(inner.page) ? inner.page : page;
+  const pages =
+    typeof inner.pages === "number" && Number.isFinite(inner.pages) ? inner.pages : Math.max(1, Math.ceil(total / limit));
+  return { transactions, total, page: pageNum, pages };
 }
 
 /* ========== Admin ========== */
