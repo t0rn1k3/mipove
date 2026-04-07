@@ -195,6 +195,14 @@ export type CreditHistoryResult = {
   pages: number;
 };
 
+export type CreditPack = {
+  _id: string;
+  name: string;
+  credits: number;
+  bonusCredits: number;
+  priceGel: number;
+};
+
 export type SpendCreditsResult = {
   success: boolean;
   remaining: number;

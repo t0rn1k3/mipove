@@ -16,6 +16,7 @@ import type {
   CreditHistoryResult,
   CreditTransaction,
   SpendCreditsResult,
+  CreditPack,
 } from "./types";
 import { InsufficientCreditsError } from "./types";
 
@@ -581,6 +582,33 @@ export async function getUnlockedIds(action: string): Promise<string[]> {
   const raw = (inner as Record<string, unknown>).unlocks;
   if (!Array.isArray(raw)) return [];
   return raw.filter((id): id is string => typeof id === "string");
+}
+
+export async function getCreditPacks(): Promise<CreditPack[]> {
+  const res = await fetch(`${api("/credits/packs")}`);
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load credit packs"));
+  const inner = json.data ?? json;
+  const raw =
+    inner != null && typeof inner === "object" && !Array.isArray(inner) && "packs" in inner
+      ? (inner as { packs: unknown }).packs
+      : inner;
+  if (!Array.isArray(raw)) return [];
+  return raw.map((row): CreditPack => {
+    const o = row as Record<string, unknown>;
+    const id = typeof o._id === "string" ? o._id : typeof o.id === "string" ? o.id : "";
+    const name = typeof o.name === "string" ? o.name : "";
+    const credits = typeof o.credits === "number" && Number.isFinite(o.credits) ? o.credits : 0;
+    const bonusCredits =
+      typeof o.bonusCredits === "number" && Number.isFinite(o.bonusCredits) ? o.bonusCredits : 0;
+    const priceGel =
+      typeof o.priceGel === "number" && Number.isFinite(o.priceGel)
+        ? o.priceGel
+        : typeof o.price_gel === "number" && Number.isFinite(o.price_gel)
+          ? o.price_gel
+          : 0;
+    return { _id: id, name, credits, bonusCredits, priceGel };
+  });
 }
 
 /* ========== Admin ========== */
