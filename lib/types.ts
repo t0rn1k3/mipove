@@ -171,20 +171,13 @@ export type OrderUpsertInput = {
 
 /* ========== Credits ========== */
 
-export type CreditTransactionType =
-  | "grant"
-  | "purchase"
-  | "spend"
-  | "refund"
-  | "admin_adjust";
-
 export type CreditTransaction = {
   _id: string;
-  type: CreditTransactionType;
+  type: "grant" | "purchase" | "spend" | "refund" | "admin_adjust";
   amount: number;
   balanceAfter: number;
   action: string;
-  metadata?: { orderId?: string; packId?: string; paymentId?: string; note?: string };
+  metadata?: { orderId?: string; packId?: string; note?: string };
   createdAt: string;
 };
 
@@ -214,10 +207,8 @@ export class InsufficientCreditsError extends Error {
   balance: number;
   constructor(message: string, required: number, balance: number) {
     super(message);
-    this.name = "InsufficientCreditsError";
     this.required = required;
     this.balance = balance;
-    Object.setPrototypeOf(this, InsufficientCreditsError.prototype);
   }
 }
 
