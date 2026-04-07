@@ -35,6 +35,23 @@
     "languageToggle": "Switch site language",
     "creditsBalance": "Credits"
   },
+  "credits": {
+    "balance": "Credits",
+    "buy": "Buy credits",
+    "history": "Credit history",
+    "insufficientTitle": "Not enough credits",
+    "insufficientDesc": "You need {required} credit(s) but have {balance}.",
+    "unlockContact": "Unlock contact (1 credit)",
+    "contactUnlocked": "Contact unlocked",
+    "purchaseSuccess": "Credits added to your account!",
+    "transaction": {
+      "grant": "Bonus",
+      "purchase": "Purchase",
+      "spend": "Spent",
+      "refund": "Refund",
+      "admin_adjust": "Adjustment"
+    }
+  },
   "order": {
     "title": "Orders",
     "description": "Your orders will appear here.",
