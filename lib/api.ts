@@ -568,6 +568,21 @@ export async function spendCredits(
   return { success, remaining, data };
 }
 
+export async function getUnlockedIds(action: string): Promise<string[]> {
+  const q = new URLSearchParams();
+  q.set("action", action);
+  const res = await authFetch(`${api(`/credits/unlocks?${q.toString()}`)}`, { method: "GET" });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load credit unlocks"));
+  const inner = (json.data ?? json) as Record<string, unknown> | unknown[];
+  if (Array.isArray(inner)) {
+    return inner.filter((id): id is string => typeof id === "string");
+  }
+  const raw = (inner as Record<string, unknown>).unlocks;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((id): id is string => typeof id === "string");
+}
+
 /* ========== Admin ========== */
 
 function adminFetch(path: string, init?: RequestInit) {
