@@ -17,12 +17,13 @@
 
 .stepDotContainer {
   display: flex;
-  width: 10rem ;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 11rem;
   align-items: center;
   background-color: rgba(185, 185, 185, 0.35);
-  padding: 0.5rem;
+  padding: 0.45rem 0.35rem;
   border-radius: 999px;
-  
   color: #374151;
 }
 
@@ -84,6 +85,45 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+}
+
+.categoryHint {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.categoryPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.categoryPill {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.categoryPill:hover {
+  border-color: #0f766e;
+  color: #0f766e;
+}
+
+.categoryPillActive {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
 }
 
 .stepTitle {

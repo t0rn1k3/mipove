@@ -385,7 +385,12 @@ export type MasterCardProps = {
   onRate?: (masterSlug: string, stars: number) => Promise<void>;
 };
 
-export type NavbarUserInfo = { name: string; image?: string } | null;
+export type NavbarUserInfo = {
+  name: string;
+  image?: string;
+  role: string;
+  slug?: string;
+} | null;
 
 export type AppLocale = "en" | "ka";
 

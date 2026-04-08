@@ -55,6 +55,8 @@ const REGION_MSG_KEYS: Record<(typeof REGION_VALUES)[number], string> = {
 const BUDGET_MAX = 5000;
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
+const TOTAL_STEPS = 4;
+
 export type OrderFormState = {
   title: string;
   category: string;
@@ -116,14 +118,6 @@ export default function OrderSubmissionForm({
     return () => URL.revokeObjectURL(url);
   }, [form.images]);
 
-  const categorySelectOptions: SelectOption[] = useMemo(
-    () => [
-      { value: "", label: t("categoryPlaceholder") },
-      ...categoryOptions.map((c) => ({ value: c.id, label: c.label })),
-    ],
-    [t, categoryOptions],
-  );
-
   const regionOptions: SelectOption[] = useMemo(
     () => [
       { value: "", label: t("locationPlaceholder") },
@@ -131,6 +125,16 @@ export default function OrderSubmissionForm({
         value: v,
         label: t(REGION_MSG_KEYS[v] as "regionTbilisi"),
       })),
+    ],
+    [t],
+  );
+
+  const stepNavItems = useMemo(
+    () => [
+      { number: 1 as const, title: t("stepNavBasics") },
+      { number: 2 as const, title: t("stepNavCategory") },
+      { number: 3 as const, title: t("stepNavMedia") },
+      { number: 4 as const, title: t("stepNavBudget") },
     ],
     [t],
   );
@@ -168,13 +172,19 @@ export default function OrderSubmissionForm({
     const next: Record<string, string> = {};
     if (s === 1) {
       if (!form.title.trim()) next.title = t("errorTitle");
-      if (!form.category) next.category = t("errorCategory");
       if (!form.description.trim()) next.description = t("errorDescription");
     }
     if (s === 2) {
-      if (!form.location) next.location = t("errorLocation");
+      if (categoryOptions.length === 0) {
+        next.category = t("noCategoriesAvailable");
+      } else if (!form.category) {
+        next.category = t("errorCategory");
+      }
     }
     if (s === 3) {
+      if (!form.location) next.location = t("errorLocation");
+    }
+    if (s === 4) {
       if (!form.priceNegotiable) {
         const { budgetMin: lo, budgetMax: hi } = form;
         if (
@@ -195,7 +205,7 @@ export default function OrderSubmissionForm({
 
   const goNext = () => {
     if (!validateStep(step)) return;
-    setStep((x) => Math.min(3, x + 1));
+    setStep((x) => Math.min(TOTAL_STEPS, x + 1));
   };
 
   const goBack = () => {
@@ -205,7 +215,7 @@ export default function OrderSubmissionForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateStep(3)) return;
+    if (!validateStep(TOTAL_STEPS)) return;
     setSubmitting(true);
     try {
       await onSubmit?.(form);
@@ -213,11 +223,6 @@ export default function OrderSubmissionForm({
       setSubmitting(false);
     }
   };
-  const steps = [
-    { number: 1, title: "აღწერა" },
-    { number: 2, title: "სურათები" },
-    { number: 3, title: "ფასი" },
-  ];
 
   return (
     <form
@@ -226,8 +231,11 @@ export default function OrderSubmissionForm({
       noValidate
     >
       <div className={styles.steps} aria-label={t("stepsAria")}>
-        {steps.map((stepItem) => (
-          <div key={stepItem.number} className={`${styles.stepDotContainer} ${stepItem.number <= step ? styles.stepDotContainerActive : ""}`}>
+        {stepNavItems.map((stepItem) => (
+          <div
+            key={stepItem.number}
+            className={`${styles.stepDotContainer} ${stepItem.number <= step ? styles.stepDotContainerActive : ""}`}
+          >
             <span
               className={`${styles.stepDot} ${stepItem.number <= step ? styles.stepDotActive : ""} ${
                 stepItem.number === step ? styles.stepDotCurrent : ""
@@ -239,44 +247,23 @@ export default function OrderSubmissionForm({
           </div>
         ))}
       </div>
-    
 
       {step === 1 ? (
         <div className={styles.stepCard}>
-          <div className={styles.stepCardHeader}>
-            <div>
-              <label className={styles.label} htmlFor={`${formId}-title`}>
-              {t("projectTitle")}
-            </label>
-            <input
-              id={`${formId}-title`}
-              className={`${styles.input} ${errors.title ? styles.fieldError : ""}`}
-              type="text"
-              value={form.title}
-              onChange={(e) => setField("title", e.target.value)}
-              placeholder={t("projectTitlePlaceholder")}
-              autoComplete="off"
-            />
-          {errors.title ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.title}</p> : null}
-            </div>
-          <div>
-          <span className={styles.label}>{t("category")}</span>
-          <CustomSelect
-            id={`${formId}-category`}
-            options={categorySelectOptions}
-            value={form.category}
-            onChange={(v) => setField("category", v)}
-            placeholder={t("categoryPlaceholder")}
-            aria-label={t("category")}
-            className={`${errors.category ? styles.selectError : ""} ${styles.select}`}
+          <h2 className={styles.stepTitle}>{t("step1Heading")}</h2>
+          <label className={styles.label} htmlFor={`${formId}-title`}>
+            {t("projectTitle")}
+          </label>
+          <input
+            id={`${formId}-title`}
+            className={`${styles.input} ${errors.title ? styles.fieldError : ""}`}
+            type="text"
+            value={form.title}
+            onChange={(e) => setField("title", e.target.value)}
+            placeholder={t("projectTitlePlaceholder")}
+            autoComplete="off"
           />
-          {errors.category ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.category}</p> : null}
-          </div>
-       
-
-          </div>
-
-          
+          {errors.title ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.title}</p> : null}
 
           <label className={styles.label} htmlFor={`${formId}-desc`}>
             {t("description")}
@@ -289,11 +276,38 @@ export default function OrderSubmissionForm({
             placeholder={t("descriptionPlaceholder")}
             rows={6}
           />
-          {errors.description ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.description}</p> : null}
+          {errors.description ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.description}</p>
+          ) : null}
         </div>
       ) : null}
 
       {step === 2 ? (
+        <div className={styles.stepCard}>
+          <h2 className={styles.stepTitle}>{t("stepCategoryHeading")}</h2>
+          <p className={styles.categoryHint}>{t("stepCategoryHint")}</p>
+          <p className={styles.label}>{t("category")}</p>
+          {categoryOptions.length > 0 ? (
+            <div className={styles.categoryPills} role="group" aria-label={t("category")}>
+              {categoryOptions.map(({ id, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`${styles.categoryPill} ${form.category === id ? styles.categoryPillActive : ""}`}
+                  onClick={() => setField("category", id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {errors.category ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.category}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {step === 3 ? (
         <div className={styles.stepCard}>
           <h2 className={styles.stepTitle}>{t("step2Heading")}</h2>
           <p className={styles.fieldHint}>{t("visualsHeading")}</p>
@@ -383,11 +397,13 @@ export default function OrderSubmissionForm({
             aria-label={t("location")}
             className={errors.location ? styles.selectError : ""}
           />
-          {errors.location ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.location}</p> : null}
+          {errors.location ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.location}</p>
+          ) : null}
         </div>
       ) : null}
 
-      {step === 3 ? (
+      {step === 4 ? (
         <div className={styles.stepCard}>
           <h2 className={styles.stepTitle}>{t("step3Heading")}</h2>
           <p className={styles.fieldHint}>{t("budgetHeading")}</p>
@@ -519,7 +535,9 @@ export default function OrderSubmissionForm({
               </button>
             ))}
           </div>
-          {errors.deadline ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.deadline}</p> : null}
+          {errors.deadline ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.deadline}</p>
+          ) : null}
         </div>
       ) : null}
 
@@ -531,7 +549,7 @@ export default function OrderSubmissionForm({
         ) : (
           <span />
         )}
-        {step < 3 ? (
+        {step < TOTAL_STEPS ? (
           <button type="button" className={styles.btnPrimary} onClick={goNext}>
             {t("next")}
           </button>

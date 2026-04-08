@@ -134,10 +134,6 @@ export default function ProfilePage() {
             router.replace("/admin");
             return;
           }
-          if (data.role === "master" && data.slug) {
-            router.replace(`/profile/${data.slug}`);
-            return;
-          }
           setProfile(mapMeToProfile(data, data.role));
           setIsOwnProfile(true);
           setIsMasterProfile(data.role === "master");

@@ -38,7 +38,12 @@ export default function Navbar() {
           if (cancelled) return;
           setIsAdmin(data.role === "admin");
           if (data.role !== "admin") {
-            setUser({ name: data.name, image: data.image });
+            setUser({
+              name: data.name,
+              image: data.image,
+              role: data.role,
+              slug: data.slug,
+            });
             if (data.role === "master") void refreshCredits();
           } else {
             setUser(null);
@@ -141,7 +146,11 @@ export default function Navbar() {
                 </span>
               ) : null}
               <Link
-                href="/profile"
+                href={
+                  user.role === "master" && user.slug
+                    ? `/profile/${user.slug}`
+                    : "/profile/me"
+                }
                 className={styles.profileLink}
                 onClick={() => setIsMenuOpen(false)}
               >
