@@ -53,7 +53,7 @@ export default function AdminDashboard() {
         <h1 className={styles.pageTitle}>Dashboard</h1>
       </div>
 
-      {error && <p className={styles.errorMsg}>{error}</p>}
+      {error && <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>}
 
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>

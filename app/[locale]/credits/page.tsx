@@ -130,7 +130,9 @@ export default function CreditsPage() {
         <section className={styles.historyCard}>
           <h2 className={styles.historyTitle}>{tCredits("history")}</h2>
           {loading ? <p className={styles.meta}>{tCommon("loading")}...</p> : null}
-          {!loading && error ? <p className={styles.error}>{error}</p> : null}
+          {!loading && error ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>
+          ) : null}
           {!loading && !error && transactions.length === 0 ? (
             <p className={styles.empty}>{tCredits("emptyTransactions")}</p>
           ) : null}
@@ -192,7 +194,11 @@ export default function CreditsPage() {
         </section>
       </div>
 
-      {toast ? <div className={styles.toast}>{toast}</div> : null}
+      {toast ? (
+        <div className={styles.toast}>
+          <p className="mipoveGuestText mipoveGuestText--errorLight mipoveGuestText--inToast">{toast}</p>
+        </div>
+      ) : null}
       <BuyCreditsModal
         open={buyCreditsOpen}
         onClose={() => setBuyCreditsOpen(false)}

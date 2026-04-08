@@ -112,26 +112,6 @@ export type OrdersPageSessionUser = {
   slug?: string;
 };
 
-/** Shape of `order.dummyOrders` entries in locale messages (and future API rows). */
-export type DummyOrder = {
-  id: string;
-  imageSrc: string;
-  imageAlt: string;
-  title: string;
-  description: string;
-  category: string;
-  priceRange: string;
-  budgetMin: number;
-  budgetMax: number;
-  priceNegotiable: boolean;
-  location: string;
-  deadline: string;
-  expectedBy: string;
-  publisherName: string;
-  publisherPhone: string;
-  publisherEmail: string;
-};
-
 export type OrderStatus = "pending" | "active" | "completed" | "cancelled";
 
 export type OrderRecord = {
@@ -157,9 +137,16 @@ export type OrderRecord = {
   };
 };
 
+/** Public list from GET /orders/categories */
+export type OrderCategoryOption = {
+  id: string;
+  label: string;
+};
+
 export type OrderUpsertInput = {
   title: string;
-  category: string;
+  /** Canonical category id from GET /orders/categories; omit, empty string, or null to clear (PATCH). */
+  category?: string | null;
   description: string;
   location: string;
   budgetMin: number;

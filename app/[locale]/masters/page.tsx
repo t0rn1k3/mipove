@@ -277,7 +277,7 @@ export default function MastersPage() {
       <div className={styles.container}>
         {filtersEl}
         <div className={styles.error}>
-          <p>{error}</p>
+          <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>
         </div>
       </div>
     );

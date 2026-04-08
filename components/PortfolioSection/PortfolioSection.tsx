@@ -159,7 +159,9 @@ export default function PortfolioSection({
 
       {selectedPortfolioPreviews.length > 0 && (
         <div className={styles.portfolioPending}>
-          {portfolioError && <p className={styles.errorText}>{portfolioError}</p>}
+          {portfolioError && (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{portfolioError}</p>
+          )}
           <p className={styles.portfolioPendingLabel}>
             Ready to upload ({selectedPortfolioPreviews.length})
           </p>

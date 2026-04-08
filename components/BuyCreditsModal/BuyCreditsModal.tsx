@@ -73,7 +73,9 @@ export default function BuyCreditsModal({
         </h3>
         <p className={styles.desc}>{tCredits("buy")}</p>
         {packsLoading ? <p className={styles.meta}>{tCommon("loading")}...</p> : null}
-        {packsError ? <p className={styles.error}>{packsError}</p> : null}
+        {packsError ? (
+          <p className="mipoveGuestText mipoveGuestText--errorLight">{packsError}</p>
+        ) : null}
         {!packsLoading && !packsError ? (
           <div className={styles.packsList}>
             {packs.map((pack) => (

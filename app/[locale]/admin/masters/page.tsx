@@ -178,7 +178,7 @@ export default function AdminMastersPage() {
         <h1 className={styles.pageTitle}>Masters</h1>
       </div>
 
-      {error && <p className={styles.errorMsg}>{error}</p>}
+      {error && <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>}
 
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
@@ -363,7 +363,9 @@ export default function AdminMastersPage() {
           </div>
 
           {creditsLoading ? <p className={styles.emptyState}>Loading...</p> : null}
-          {creditsError ? <p className={styles.errorMsg}>{creditsError}</p> : null}
+          {creditsError ? (
+          <p className="mipoveGuestText mipoveGuestText--errorLight">{creditsError}</p>
+        ) : null}
 
           {!creditsLoading ? (
             <div className={styles.creditSummary}>

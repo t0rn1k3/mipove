@@ -17,6 +17,12 @@
   color: #4b5563;
 }
 
+.categoriesHint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
 .searchWrap {
   position: relative;
   display: block;

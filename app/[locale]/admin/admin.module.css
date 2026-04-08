@@ -332,12 +332,6 @@
   background: #4d8589;
 }
 
-.errorMsg {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-}
-
 /* Admin Masters create form */
 .tableHeaderActions {
   display: flex;

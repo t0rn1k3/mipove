@@ -143,7 +143,9 @@ export default function MasterRatingSection({
             {rateSuccess && (
               <p className={styles.rateSuccess}>{tProfile("ratingSaved")}</p>
             )}
-            {rateError && <p className={styles.rateError}>{rateError}</p>}
+            {rateError && (
+              <p className="mipoveGuestText mipoveGuestText--errorLight">{rateError}</p>
+            )}
           </div>
         )
       )}

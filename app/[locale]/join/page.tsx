@@ -413,7 +413,7 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {error && <p className={styles.errorMessage}>{error}</p>}
+              {error && <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>}
               <button
                 type="submit"
                 className={styles.submitBtn}
@@ -489,7 +489,7 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {error && <p className={styles.errorMessage}>{error}</p>}
+              {error && <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>}
               <button
                 type="submit"
                 className={styles.submitBtn}

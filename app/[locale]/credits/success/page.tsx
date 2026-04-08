@@ -1,5 +1,7 @@
 "use client";
 
+/** Post-checkout landing: configure PAYMENT_RETURN_URL on the payment backend to this route (e.g. /credits/success). */
+
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -54,7 +56,9 @@ export default function CreditsSuccessPage() {
         </p>
 
         {!failed && loading ? <p className={styles.meta}>{tCommon("loading")}...</p> : null}
-        {!failed && error ? <p className={styles.error}>{error}</p> : null}
+        {!failed && error ? (
+          <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>
+        ) : null}
         {!failed && !loading && !error && balance !== null ? (
           <p className={styles.balanceLine}>
             {tCredits("balance")}: <strong>{balance}</strong>

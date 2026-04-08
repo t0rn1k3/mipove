@@ -28,6 +28,30 @@ body {
   background: var(--cream);
 }
 
+/**
+ * Shared copy/typography (matches order page aside `.guestText` in `orderPage.module.css`).
+ * Pair with a tone modifier for surface contrast.
+ */
+.mipoveGuestText {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.mipoveGuestText--onDark {
+  color: #e5e7eb;
+}
+
+.mipoveGuestText--errorLight {
+  color: #b91c1c;
+}
+
+/** Paragraph inside floating toast/snackbar — drop block margin */
+.mipoveGuestText--inToast {
+  margin: 0;
+}
+
 /* Fonts */
 @font-face {
   font-family: "Sharpe PERSONAL";

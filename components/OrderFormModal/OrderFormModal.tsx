@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import OrderSubmissionForm, {
   type OrderFormState,
 } from "@/components/OrderSubmissionForm/OrderSubmissionForm";
+import type { OrderCategoryOption } from "@/lib/types";
 import styles from "./OrderFormModal.module.css";
 
 export type OrderFormModalProps = {
@@ -13,6 +14,7 @@ export type OrderFormModalProps = {
   onSubmit?: (data: OrderFormState) => void | Promise<void>;
   initialValues?: Partial<OrderFormState>;
   submitLabel?: string;
+  categoryOptions: OrderCategoryOption[];
 };
 
 const TITLE_ID = "order-form-modal-title";
@@ -26,6 +28,7 @@ export default function OrderFormModal({
   onSubmit,
   initialValues,
   submitLabel,
+  categoryOptions,
 }: OrderFormModalProps) {
   const tForm = useTranslations("orderForm");
   const [formKey, setFormKey] = useState(0);
@@ -101,6 +104,7 @@ export default function OrderFormModal({
         <OrderSubmissionForm
           key={formKey}
           embedded
+          categoryOptions={categoryOptions}
           initialValues={initialValues}
           submitLabel={submitLabel}
           onSubmit={async (data) => {

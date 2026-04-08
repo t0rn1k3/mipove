@@ -88,12 +88,6 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.errorText {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin: 0;
-}
-
 .portfolioPendingLabel {
   margin: 0;
   color: #374151;

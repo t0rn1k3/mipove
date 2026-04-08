@@ -13,18 +13,8 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Hammer, Wrench } from "lucide-react";
 import CustomSelect from "@/components/CustomSelect/CustomSelect";
-import type { SelectOption } from "@/lib/types";
+import type { OrderCategoryOption, SelectOption } from "@/lib/types";
 import styles from "./OrderSubmissionForm.module.css";
-
-const CATEGORY_VALUES = ["wood", "clay", "metal", "textiles", "restoration"] as const;
-
-const CATEGORY_MSG_KEYS: Record<(typeof CATEGORY_VALUES)[number], string> = {
-  wood: "categoryWood",
-  clay: "categoryClay",
-  metal: "categoryMetal",
-  textiles: "categoryTextiles",
-  restoration: "categoryRestoration",
-};
 
 const REGION_VALUES = [
   "tbilisi",
@@ -94,11 +84,13 @@ export default function OrderSubmissionForm({
   embedded = false,
   initialValues,
   submitLabel,
+  categoryOptions,
 }: {
   onSubmit?: (data: OrderFormState) => void | Promise<void>;
   embedded?: boolean;
   initialValues?: Partial<OrderFormState>;
   submitLabel?: string;
+  categoryOptions: OrderCategoryOption[];
 }) {
   const t = useTranslations("orderForm");
   const formId = useId();
@@ -124,15 +116,12 @@ export default function OrderSubmissionForm({
     return () => URL.revokeObjectURL(url);
   }, [form.images]);
 
-  const categoryOptions: SelectOption[] = useMemo(
+  const categorySelectOptions: SelectOption[] = useMemo(
     () => [
       { value: "", label: t("categoryPlaceholder") },
-      ...CATEGORY_VALUES.map((v) => ({
-        value: v,
-        label: t(CATEGORY_MSG_KEYS[v] as "categoryWood"),
-      })),
+      ...categoryOptions.map((c) => ({ value: c.id, label: c.label })),
     ],
-    [t],
+    [t, categoryOptions],
   );
 
   const regionOptions: SelectOption[] = useMemo(
@@ -268,20 +257,20 @@ export default function OrderSubmissionForm({
               placeholder={t("projectTitlePlaceholder")}
               autoComplete="off"
             />
-          {errors.title ? <p className={styles.errorText}>{errors.title}</p> : null}
+          {errors.title ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.title}</p> : null}
             </div>
           <div>
           <span className={styles.label}>{t("category")}</span>
           <CustomSelect
             id={`${formId}-category`}
-            options={categoryOptions}
+            options={categorySelectOptions}
             value={form.category}
             onChange={(v) => setField("category", v)}
             placeholder={t("categoryPlaceholder")}
             aria-label={t("category")}
             className={`${errors.category ? styles.selectError : ""} ${styles.select}`}
           />
-          {errors.category ? <p className={styles.errorText}>{errors.category}</p> : null}
+          {errors.category ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.category}</p> : null}
           </div>
        
 
@@ -300,7 +289,7 @@ export default function OrderSubmissionForm({
             placeholder={t("descriptionPlaceholder")}
             rows={6}
           />
-          {errors.description ? <p className={styles.errorText}>{errors.description}</p> : null}
+          {errors.description ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.description}</p> : null}
         </div>
       ) : null}
 
@@ -370,7 +359,7 @@ export default function OrderSubmissionForm({
               </div>
             )}
           </div>
-          {errors.images ? <p className={styles.errorText}>{errors.images}</p> : null}
+          {errors.images ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.images}</p> : null}
           {form.images.length > 0 ? (
             <button
               type="button"
@@ -394,7 +383,7 @@ export default function OrderSubmissionForm({
             aria-label={t("location")}
             className={errors.location ? styles.selectError : ""}
           />
-          {errors.location ? <p className={styles.errorText}>{errors.location}</p> : null}
+          {errors.location ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.location}</p> : null}
         </div>
       ) : null}
 
@@ -513,7 +502,7 @@ export default function OrderSubmissionForm({
               </span>
             </div>
           </div>
-          {errors.budget ? <p className={styles.errorText}>{errors.budget}</p> : null}
+          {errors.budget ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.budget}</p> : null}
 
           <p className={`${styles.fieldHint} ${styles.deadlineHint}`}>{t("deadlineHeading")}</p>
           <div className={styles.deadlineGroup} role="group" aria-label={t("deadlineHeading")}>
@@ -530,7 +519,7 @@ export default function OrderSubmissionForm({
               </button>
             ))}
           </div>
-          {errors.deadline ? <p className={styles.errorText}>{errors.deadline}</p> : null}
+          {errors.deadline ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.deadline}</p> : null}
         </div>
       ) : null}
 

@@ -8,6 +8,7 @@ import {
   getMe,
   getImageUrl,
   getOrders,
+  getOrderCategories,
   createOrder,
   updateOrder,
   deleteOrder,
@@ -18,7 +19,7 @@ import {
   spendCredits,
   getUnlockedIds,
 } from "@/lib/api";
-import type { OrdersPageSessionUser, OrderRecord } from "@/lib/types";
+import type { OrderCategoryOption, OrdersPageSessionUser, OrderRecord } from "@/lib/types";
 import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
 import { InsufficientCreditsError } from "@/lib/types";
 import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
@@ -30,6 +31,7 @@ import OrdersSmartFilter, {
 } from "@/components/OrdersSmartFilter/OrdersSmartFilter";
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 import { Banknote, MapPin, CalendarClock, User, Phone, Heart, Lock, Loader2 } from "lucide-react";
+import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
 import styles from "./orderPage.module.css";
 
 const ORDER_CARD_DELAY = [
@@ -125,6 +127,9 @@ export default function OrderPage() {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OrderRecord | null>(null);
   const [filterState, setFilterState] = useState<OrderFilterState>(INITIAL_FILTER_STATE);
+  const [orderCategories, setOrderCategories] = useState<OrderCategoryOption[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [toolbarRef, toolbarVisible] = useScrollReveal();
   const [layoutRef, layoutVisible] = useScrollReveal();
@@ -145,9 +150,33 @@ export default function OrderPage() {
 
   useEffect(() => {
     let cancelled = false;
+    setCategoriesLoading(true);
+    setCategoriesError("");
+    getOrderCategories()
+      .then((rows) => {
+        if (!cancelled) setOrderCategories(rows);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setCategoriesError(err instanceof Error ? err.message : "Failed to load categories");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setCategoriesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const ordersCategoryParam =
+    filterState.categories.length === 1 ? filterState.categories[0] : undefined;
+
+  useEffect(() => {
+    let cancelled = false;
     setOrdersLoading(true);
     setOrdersError("");
-    getOrders()
+    getOrders(ordersCategoryParam ? { category: ordersCategoryParam } : undefined)
       .then((rows) => {
         if (cancelled) return;
         setOrders(rows);
@@ -162,7 +191,7 @@ export default function OrderPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [ordersCategoryParam]);
 
   useEffect(() => {
     let cancelled = false;
@@ -224,6 +253,11 @@ export default function OrderPage() {
         : t("roleClient");
   const canCreateOrder = sessionUser?.role === "user";
 
+  const orderCategoriesForUi = useMemo(
+    () => mapOrderCategoriesWithLabels(orderCategories, t),
+    [orderCategories, t],
+  );
+
   const avatarSrc = sessionUser
     ? (() => {
         const raw = sessionUser.image?.trim();
@@ -284,17 +318,16 @@ export default function OrderPage() {
     if (!title) throw new Error("Title is required");
     if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error("Price must be zero or greater");
 
-    const attachmentUrls = await uploadAttachments(form.images);
     const created = await createOrder({
       title,
-      category: form.category,
+      category: form.category.trim() === "" ? null : form.category.trim(),
       description: form.description.trim(),
       location: form.location,
       budgetMin: form.budgetMin,
       budgetMax: form.budgetMax,
       priceNegotiable: form.priceNegotiable,
       deadline: form.deadline,
-      attachments: attachmentUrls,
+      files: form.images,
     });
     setOrders((prev) => [created, ...prev]);
     setToast({ type: "success", message: t("orderCreated") });
@@ -319,7 +352,7 @@ export default function OrderPage() {
     const attachmentUrls = await uploadAttachments(form.images);
     const updated = await updateOrder(editingOrder._id, {
       title,
-      category: form.category,
+      category: form.category.trim() === "" ? null : form.category.trim(),
       description: form.description.trim(),
       location: form.location,
       budgetMin: form.budgetMin,
@@ -414,27 +447,23 @@ export default function OrderPage() {
       <BackgroundImage />
      
 
-      <div
-        ref={toolbarRef}
-        className={`${styles.toolbarReveal} ${toolbarVisible ? styles.revealVisible : ""}`}
-      >
-        <div className={styles.toolbar}>
-          <button
-            type="button"
-            className={`${styles.addOrderBtn} ${styles.scrollReveal}`}
-            onClick={() => {
-              if (!canCreateOrder) {
-                setToast({ type: "error", message: t("loginRequired") });
-                return;
-              }
-              setFormModalOpen(true);
-            }}
-            disabled={busyKey === "create"}
-          >
-            {t("addYourOrder")}
-          </button>
+      {canCreateOrder ? (
+        <div
+          ref={toolbarRef}
+          className={`${styles.toolbarReveal} ${toolbarVisible ? styles.revealVisible : ""}`}
+        >
+          <div className={styles.toolbar}>
+            <button
+              type="button"
+              className={`${styles.addOrderBtn} ${styles.scrollReveal}`}
+              onClick={() => setFormModalOpen(true)}
+              disabled={busyKey === "create"}
+            >
+              {t("addYourOrder")}
+            </button>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       <div
         ref={layoutRef}
@@ -451,6 +480,9 @@ export default function OrderPage() {
               value={filterState}
               onChange={setFilterState}
               onClear={() => setFilterState(INITIAL_FILTER_STATE)}
+              categoryOptions={orderCategoriesForUi}
+              categoriesLoading={categoriesLoading}
+              categoriesError={categoriesError || undefined}
             />
           </div>
         </aside>
@@ -467,7 +499,9 @@ export default function OrderPage() {
             className={`${styles.ordersBody} ${ordersVisible ? styles.revealVisible : ""}`}
           >
             {ordersLoading ? <p className={styles.noOrdersMatch}>{t("loadingOrders")}</p> : null}
-            {!ordersLoading && ordersError ? <p className={styles.errorBanner}>{ordersError}</p> : null}
+            {!ordersLoading && ordersError ? (
+              <p className="mipoveGuestText mipoveGuestText--errorLight">{ordersError}</p>
+            ) : null}
             {!ordersLoading && !ordersError ? filteredOrders.map((order, index) => {
               const cardKey = order._id;
               const contactPanelId = `order-contact-${index}`;
@@ -684,7 +718,7 @@ export default function OrderPage() {
             </>
           ) : (
             <>
-              <p className={styles.guestText}>{t("loginRequired")}</p>
+              <p className="mipoveGuestText mipoveGuestText--onDark">{t("loginRequired")}</p>
               <Link href="/join" className={styles.asideBtnPrimary}>
                 {tNav("joinUs")}
               </Link>
@@ -698,12 +732,14 @@ export default function OrderPage() {
         open={formModalOpen}
         onClose={() => setFormModalOpen(false)}
         onSubmit={handleCreateOrder}
+        categoryOptions={orderCategoriesForUi}
       />
       <OrderFormModal
         open={Boolean(editingOrder)}
         onClose={() => setEditingOrder(null)}
         onSubmit={handleUpdateOrder}
         submitLabel={t("saveOrderChanges")}
+        categoryOptions={orderCategoriesForUi}
         initialValues={
           editingOrder
             ? {
@@ -722,7 +758,13 @@ export default function OrderPage() {
       />
       {toast ? (
         <div className={`${styles.toast} ${toast.type === "error" ? styles.toastError : styles.toastSuccess}`}>
-          {toast.message}
+          {toast.type === "error" ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight mipoveGuestText--inToast">
+              {toast.message}
+            </p>
+          ) : (
+            toast.message
+          )}
         </div>
       ) : null}
       <BuyCreditsModal

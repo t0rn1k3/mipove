@@ -13,6 +13,7 @@ import type {
   Professions,
   OrderRecord,
   OrderUpsertInput,
+  OrderCategoryOption,
   CreditHistoryResult,
   CreditTransaction,
   SpendCreditsResult,
@@ -120,6 +121,23 @@ function extractMessage(json: Record<string, unknown>, fallback: string): string
     return "Server is temporarily unavailable. Please try again in a moment.";
   }
   return message;
+}
+
+export async function getOrderCategories(): Promise<OrderCategoryOption[]> {
+  const res = await fetch(`${api("/orders/categories")}`);
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load categories"));
+  const raw = json.categories;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((row): OrderCategoryOption | null => {
+      const o = row as Record<string, unknown>;
+      const id = typeof o.id === "string" ? o.id : "";
+      const label = typeof o.label === "string" ? o.label : "";
+      if (!id || !label) return null;
+      return { id, label };
+    })
+    .filter((x): x is OrderCategoryOption => x != null);
 }
 
 export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
@@ -459,20 +477,41 @@ export async function uploadFile(file: File): Promise<string> {
   return url;
 }
 
-export async function createOrder(data: OrderUpsertInput): Promise<OrderRecord> {
-  const res = await authFetch(`${api("/orders")}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+function appendOrderFormFields(form: FormData, data: Omit<OrderUpsertInput, "attachments">) {
+  form.append("title", data.title);
+  form.append(
+    "category",
+    data.category != null && String(data.category).trim() !== "" ? String(data.category).trim() : "",
+  );
+  form.append("description", data.description);
+  form.append("location", data.location);
+  form.append("budgetMin", String(data.budgetMin));
+  form.append("budgetMax", String(data.budgetMax));
+  form.append("priceNegotiable", String(data.priceNegotiable));
+  form.append("deadline", data.deadline);
+}
+
+/** Create order: POST multipart with scalar fields + file attachments. */
+export async function createOrder(
+  data: Omit<OrderUpsertInput, "attachments"> & { files: File[] },
+): Promise<OrderRecord> {
+  const form = new FormData();
+  appendOrderFormFields(form, data);
+  for (const file of data.files) {
+    form.append("attachments", file);
+  }
+  const res = await authFetch(`${api("/orders")}`, () => ({ method: "POST", body: form }));
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to create order"));
   const raw = (json.data ?? json) as OrderRecord;
   return { ...raw, attachments: Array.isArray(raw.attachments) ? raw.attachments : [] };
 }
 
-export async function getOrders(): Promise<OrderRecord[]> {
-  const res = await authFetch(`${api("/orders")}`, { method: "GET" });
+export async function getOrders(options?: { category?: string }): Promise<OrderRecord[]> {
+  const q = new URLSearchParams();
+  if (options?.category && options.category.trim()) q.set("category", options.category.trim());
+  const path = q.toString() ? `/orders?${q.toString()}` : "/orders";
+  const res = await authFetch(`${api(path)}`, { method: "GET" });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load orders"));
   const data = (json.data ?? json) as unknown;
@@ -500,7 +539,11 @@ export async function updateOrder(orderId: string, data: OrderUpsertInput): Prom
   const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      category:
+        data.category == null || String(data.category).trim() === "" ? null : String(data.category).trim(),
+    }),
   });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to update order"));
@@ -618,11 +661,10 @@ export async function spendCredits(
       typeof inner.required === "number" && Number.isFinite(inner.required) ? inner.required : 1;
     const balance =
       typeof inner.balance === "number" && Number.isFinite(inner.balance) ? inner.balance : 0;
-    throw new InsufficientCreditsError(
-      extractMessage(json, "Insufficient credits"),
-      required,
-      balance,
-    );
+    throw new InsufficientCreditsError("Insufficient credits", required, balance);
+  }
+  if (res.status === 429) {
+    throw new Error(extractMessage(json, "Too many requests. Please wait and try again."));
   }
   if (!res.ok) throw new Error(extractMessage(json, "Failed to spend credits"));
   const inner = (json.data ?? json) as Record<string, unknown>;
@@ -656,11 +698,15 @@ export async function getCreditPacks(): Promise<CreditPack[]> {
   const res = await fetch(`${api("/credits/packs")}`);
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load credit packs"));
-  const inner = json.data ?? json;
-  const raw =
-    inner != null && typeof inner === "object" && !Array.isArray(inner) && "packs" in inner
-      ? (inner as { packs: unknown }).packs
-      : inner;
+  const packsTop = json.packs;
+  const root = json.data ?? json;
+  const raw = Array.isArray(packsTop)
+    ? packsTop
+    : Array.isArray(root)
+      ? root
+      : root != null && typeof root === "object" && !Array.isArray(root) && "packs" in root
+        ? (root as { packs: unknown }).packs
+        : null;
   if (!Array.isArray(raw)) return [];
   return raw.map((row): CreditPack => {
     const o = row as Record<string, unknown>;
@@ -686,9 +732,13 @@ export async function purchaseCredits(packId: string): Promise<{ paymentUrl: str
     body: JSON.stringify({ packId }),
   });
   const json = await readJsonSafe(res);
+  if (res.status === 429) {
+    throw new Error(extractMessage(json, "Too many requests. Please wait and try again."));
+  }
   if (!res.ok) throw new Error(extractMessage(json, "Failed to start purchase"));
   const inner = (json.data ?? json) as Record<string, unknown>;
-  const paymentUrlRaw = inner.paymentUrl ?? inner.payment_url;
+  const paymentUrlRaw =
+    inner.paymentUrl ?? inner.payment_url ?? json.paymentUrl ?? json.payment_url;
   const paymentUrl =
     typeof paymentUrlRaw === "string" && paymentUrlRaw.trim() ? paymentUrlRaw.trim() : "";
   if (!paymentUrl) throw new Error("No payment URL returned from server");

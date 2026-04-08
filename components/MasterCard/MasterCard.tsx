@@ -152,7 +152,9 @@ export default function MasterCard({
                 ({master.reviewCount ?? 0} {t("reviews")})
               </span>
               {rateSuccess && <p className={styles.rateSuccess}>{t("ratingSaved")}</p>}
-              {rateError && <p className={styles.rateError}>{rateError}</p>}
+              {rateError && (
+                <p className="mipoveGuestText mipoveGuestText--errorLight">{rateError}</p>
+              )}
             </div>
 
             <p className={styles.locationRow}>

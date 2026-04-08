@@ -97,12 +97,6 @@
   min-height: 100px;
 }
 
-.editError {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin: 0;
-}
-
 .modalActions {
   display: flex;
   gap: 1rem;

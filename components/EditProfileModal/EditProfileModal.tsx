@@ -66,7 +66,9 @@ export default function EditProfileModal({
           </button>
         </div>
         <form onSubmit={onSubmit} className={styles.editForm}>
-          {editError && <p className={styles.editError}>{editError}</p>}
+          {editError && (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{editError}</p>
+          )}
           <div className={styles.formRow}>
             <div className={styles.formField}>
               <label htmlFor="edit-name">Name</label>

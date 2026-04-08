@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
         <h1 className={styles.pageTitle}>Users</h1>
       </div>
 
-      {error && <p className={styles.errorMsg}>{error}</p>}
+      {error && <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>}
 
       <div className={styles.filterTabs}>
         {(["all", "active", "blocked", "new"] as const).map((f) => (

@@ -320,7 +320,9 @@ export default function ProfilePage() {
                   isOwnProfile && userRole === "master" ? () => setBuyCreditsOpen(true) : undefined
                 }
               />
-              {photoError && <p className={styles.emptyRated}>{photoError}</p>}
+              {photoError && (
+                <p className="mipoveGuestText mipoveGuestText--errorLight">{photoError}</p>
+              )}
             </div>
 
             <div className={styles.main}>
@@ -377,9 +379,7 @@ export default function ProfilePage() {
                           <p>Loading favorites...</p>
                         </div>
                       ) : favoriteError ? (
-                        <div className={styles.favoritesError}>
-                          <p>{favoriteError}</p>
-                        </div>
+                        <p className="mipoveGuestText mipoveGuestText--errorLight">{favoriteError}</p>
                       ) : favoriteOrders.length === 0 ? (
                         <div className={styles.favoritesEmpty}>
                           <p>No saved orders yet.</p>

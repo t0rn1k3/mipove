@@ -183,16 +183,6 @@
   font-size: 0.9rem;
 }
 
-.errorBanner {
-  margin: 0;
-  padding: 0.9rem 1rem;
-  border-radius: 12px;
-  border: 1px solid #fecaca;
-  background: #fff1f2;
-  color: #b91c1c;
-  font-size: 0.9rem;
-}
-
 .orderCard {
   padding: 1.25rem 1.35rem;
   background: #f5f2eb;
@@ -591,14 +581,6 @@
 
 .asideBtnOutline:hover {
   background: rgba(77, 208, 225, 0.12);
-}
-
-.guestText {
-  margin: 0 0 1.25rem;
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: #e5e7eb;
-  text-align: center;
 }
 
 .toast {

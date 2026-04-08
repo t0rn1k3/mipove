@@ -4,12 +4,11 @@ import { type CSSProperties } from "react";
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import CustomSelect from "@/components/CustomSelect/CustomSelect";
-import type { SelectOption } from "@/lib/types";
+import type { OrderCategoryOption, SelectOption } from "@/lib/types";
 import styles from "./ordersSmartFilter.module.css";
 
 export const FILTER_BUDGET_MAX = 5000;
 
-export const FILTER_CATEGORY_VALUES = ["wood", "clay", "metal", "textiles", "restoration"] as const;
 export const FILTER_DEADLINE_VALUES = ["urgent", "week", "month"] as const;
 export const FILTER_LOCATION_VALUES = [
   "tbilisi",
@@ -24,14 +23,6 @@ export const FILTER_LOCATION_VALUES = [
   "mtskheta",
   "other",
 ] as const;
-
-const CATEGORY_MSG_KEYS: Record<(typeof FILTER_CATEGORY_VALUES)[number], string> = {
-  wood: "filterCategoryWood",
-  clay: "filterCategoryClay",
-  metal: "filterCategoryMetal",
-  textiles: "filterCategoryTextiles",
-  restoration: "filterCategoryRestoration",
-};
 
 const DEADLINE_MSG_KEYS: Record<(typeof FILTER_DEADLINE_VALUES)[number], string> = {
   urgent: "filterDeadlineUrgent",
@@ -67,10 +58,22 @@ type OrdersSmartFilterProps = {
   value: OrderFilterState;
   onChange: (next: OrderFilterState) => void;
   onClear: () => void;
+  /** From GET /orders/categories */
+  categoryOptions: OrderCategoryOption[];
+  categoriesLoading?: boolean;
+  categoriesError?: string;
 };
 
-export default function OrdersSmartFilter({ value, onChange, onClear }: OrdersSmartFilterProps) {
+export default function OrdersSmartFilter({
+  value,
+  onChange,
+  onClear,
+  categoryOptions,
+  categoriesLoading = false,
+  categoriesError,
+}: OrdersSmartFilterProps) {
   const t = useTranslations("order");
+  const tCommon = useTranslations("common");
 
   const locationOptions: SelectOption[] = [
     { value: "", label: t("allLocations") },
@@ -82,10 +85,10 @@ export default function OrdersSmartFilter({ value, onChange, onClear }: OrdersSm
 
   const setSearch = (search: string) => onChange({ ...value, search });
 
-  const toggleCategory = (category: string) => {
-    const categories = value.categories.includes(category)
-      ? value.categories.filter((c) => c !== category)
-      : [...value.categories, category];
+  const toggleCategory = (categoryId: string) => {
+    const categories = value.categories.includes(categoryId)
+      ? value.categories.filter((c) => c !== categoryId)
+      : [...value.categories, categoryId];
     onChange({ ...value, categories });
   };
 
@@ -117,25 +120,31 @@ export default function OrdersSmartFilter({ value, onChange, onClear }: OrdersSm
 
       <div className={styles.group}>
         <p className={styles.groupLabel}>{t("filterCategory")}</p>
-        <div className={styles.pills}>
-          <button
-            type="button"
-            className={`${styles.pill} ${value.categories.length === 0 ? styles.pillActive : ""}`}
-            onClick={() => onChange({ ...value, categories: [] })}
-          >
-            {t("allCategories")}
-          </button>
-          {FILTER_CATEGORY_VALUES.map((category) => (
+        {categoriesError ? (
+          <p className="mipoveGuestText mipoveGuestText--errorLight">{categoriesError}</p>
+        ) : categoriesLoading ? (
+          <p className={styles.categoriesHint}>{tCommon("loading")}…</p>
+        ) : (
+          <div className={styles.pills}>
             <button
-              key={category}
               type="button"
-              className={`${styles.pill} ${value.categories.includes(category) ? styles.pillActive : ""}`}
-              onClick={() => toggleCategory(category)}
+              className={`${styles.pill} ${value.categories.length === 0 ? styles.pillActive : ""}`}
+              onClick={() => onChange({ ...value, categories: [] })}
             >
-              {t(CATEGORY_MSG_KEYS[category] as "filterCategoryWood")}
+              {t("allCategories")}
             </button>
-          ))}
-        </div>
+            {categoryOptions.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                className={`${styles.pill} ${value.categories.includes(id) ? styles.pillActive : ""}`}
+                onClick={() => toggleCategory(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.group}>
