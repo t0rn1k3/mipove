@@ -197,6 +197,38 @@
   overflow: hidden;
 }
 
+.portfolioDeleteBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 3;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.72);
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.portfolioDeleteBtn:hover:not(:disabled) {
+  background: rgba(185, 28, 28, 0.92);
+  transform: scale(1.05);
+}
+
+.portfolioDeleteBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .workImage {
   width: 100%;
   height: auto;

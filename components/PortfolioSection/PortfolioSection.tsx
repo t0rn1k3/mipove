@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import {
+  deletePortfolioImages,
   fetchMyPortfolio,
   uploadPortfolioImages,
 } from "@/lib/api";
@@ -24,6 +25,7 @@ export default function PortfolioSection({
   >([]);
   const [portfolioUploading, setPortfolioUploading] = useState(false);
   const [portfolioError, setPortfolioError] = useState("");
+  const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const urls = selectedPortfolioPreviews;
@@ -105,6 +107,29 @@ export default function PortfolioSection({
       }
     } finally {
       setPortfolioUploading(false);
+    }
+  };
+
+  const handleDeletePortfolioImage = async (url: string, e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPortfolioError("");
+    setDeletingUrl(url);
+    try {
+      const list = await deletePortfolioImages({ url });
+      onPortfolioImagesChange(list);
+    } catch (err) {
+      setPortfolioError(err instanceof Error ? err.message : "Delete failed");
+      if (userRole === "master" && isOwnProfile) {
+        try {
+          const list = await fetchMyPortfolio();
+          onPortfolioImagesChange(list);
+        } catch {
+          /* keep prior list */
+        }
+      }
+    } finally {
+      setDeletingUrl(null);
     }
   };
 
@@ -190,6 +215,18 @@ export default function PortfolioSection({
               }}
             >
               <div className={styles.workImageWrapper}>
+                {userRole === "master" && isOwnProfile ? (
+                  <button
+                    type="button"
+                    className={styles.portfolioDeleteBtn}
+                    aria-label="Remove photo from portfolio"
+                    title="Remove photo"
+                    disabled={Boolean(deletingUrl) || portfolioUploading}
+                    onClick={(e) => void handleDeletePortfolioImage(src, e)}
+                  >
+                    {deletingUrl === src ? "…" : "×"}
+                  </button>
+                ) : null}
                 <Image
                   src={src}
                   alt="Portfolio image"

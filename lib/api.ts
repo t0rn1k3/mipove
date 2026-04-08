@@ -22,6 +22,9 @@ import { InsufficientCreditsError } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+/** Origin hosting the API (no `/api` suffix), e.g. `http://localhost:5000`. */
+const API_ORIGIN = API_URL.replace(/\/api\/?$/, "").replace(/\/$/, "");
+
 /** No trailing slash. Legacy `/uploads/...` paths resolve here + path, or stay root-relative for Next `/uploads` rewrite. */
 const FRONTEND_ORIGIN = (process.env.NEXT_PUBLIC_FRONTEND_URL || "").replace(/\/$/, "");
 
@@ -46,6 +49,28 @@ export function getImageUrl(path: string | undefined): string {
     return FRONTEND_ORIGIN ? `${FRONTEND_ORIGIN}${trimmed}` : trimmed;
   }
   return trimmed;
+}
+
+/**
+ * Portfolio DELETE must use URLs as stored on the master (`portfolioImages`).
+ * Strip known public/API origins and query/hash so <img> / Next Image src matches DB.
+ */
+function normalizePortfolioDeleteUrl(resolved: string): string {
+  let s = resolved.trim();
+  if (!s) return s;
+  if (API_ORIGIN && s.startsWith(API_ORIGIN)) {
+    s = s.slice(API_ORIGIN.length);
+    if (!s.startsWith("/")) s = `/${s}`;
+  }
+  if (FRONTEND_ORIGIN && s.startsWith(FRONTEND_ORIGIN)) {
+    s = s.slice(FRONTEND_ORIGIN.length);
+    if (!s.startsWith("/")) s = `/${s}`;
+  }
+  const q = s.indexOf("?");
+  if (q !== -1) s = s.slice(0, q);
+  const h = s.indexOf("#");
+  if (h !== -1) s = s.slice(0, h);
+  return s;
 }
 
 const api = (path: string) =>
@@ -359,6 +384,39 @@ export async function uploadPortfolioImages(files: File[] | FileList): Promise<s
   if (!res.ok) throw new Error(json?.message || "Upload failed");
   const list = json?.data?.portfolioImages;
   return Array.isArray(list) ? list.map((p: string) => getImageUrl(p)) : [];
+}
+
+export async function deletePortfolioImages(
+  payload: { url: string } | { urls: string[] },
+): Promise<string[]> {
+  const rawList =
+    "url" in payload
+      ? [normalizePortfolioDeleteUrl(payload.url)]
+      : payload.urls.map((u) => normalizePortfolioDeleteUrl(u));
+  const filtered = rawList.filter((u) => u.length > 0);
+  if (filtered.length === 0) throw new Error("No valid URLs to delete");
+
+  const deleteInit = (body: Record<string, unknown>): RequestInit => ({
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  let body: Record<string, unknown> =
+    filtered.length === 1 ? { url: filtered[0] } : { urls: filtered };
+  let res = await authFetch(`${api("/masters/me/portfolio")}`, deleteInit(body));
+  let json = await readJsonSafe(res);
+
+  if (!res.ok && res.status === 400 && filtered.length === 1 && "url" in body) {
+    body = { urls: filtered };
+    res = await authFetch(`${api("/masters/me/portfolio")}`, deleteInit(body));
+    json = await readJsonSafe(res);
+  }
+
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to delete portfolio images"));
+  const inner = (json.data ?? json) as Record<string, unknown>;
+  const list = inner.portfolioImages;
+  return Array.isArray(list) ? list.map((p: string) => getImageUrl(String(p))) : [];
 }
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;

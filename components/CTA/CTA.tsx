@@ -11,7 +11,7 @@ export default function CTA() {
       <div className={styles.container}>
         <h2 className={styles.title}>{t("title")}</h2>
         <div className={styles.buttons}>
-          <Link href="/gallery" className={styles.buttonPrimary}>
+          <Link href="/masters" className={styles.buttonPrimary}>
             {t("exploreGallery")}
           </Link>
           <Link href="/join" className={styles.buttonSecondary}>
