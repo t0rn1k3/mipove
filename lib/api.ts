@@ -109,7 +109,17 @@ async function readJsonSafe(res: Response): Promise<Record<string, unknown>> {
 
 function extractMessage(json: Record<string, unknown>, fallback: string): string {
   const maybeMessage = json.message;
-  return typeof maybeMessage === "string" && maybeMessage.trim() ? maybeMessage : fallback;
+  if (typeof maybeMessage !== "string" || !maybeMessage.trim()) return fallback;
+  const message = maybeMessage.trim();
+  // Hide infra-level backend errors from users (DB/network outages, DNS, etc.).
+  if (
+    /ETIMEDOUT|ECONNREFUSED|ENOTFOUND|EHOSTUNREACH|Mongo(Network|Server)?Error|failed to connect/i.test(
+      message,
+    )
+  ) {
+    return "Server is temporarily unavailable. Please try again in a moment.";
+  }
+  return message;
 }
 
 export async function registerUser(data: RegisterInput): Promise<AuthResponse> {
