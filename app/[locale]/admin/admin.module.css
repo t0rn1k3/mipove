@@ -245,6 +245,12 @@
   border: 1px solid #bbf7d0;
 }
 
+.actionBtnCredits {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
 .searchInput {
   padding: 0.5rem 1rem;
   border: 1px solid #e5e7eb;
@@ -372,4 +378,89 @@
 .viewLink {
   margin-right: 0.5rem;
   padding: 0.25rem 0.5rem;
+}
+
+.creditPanel {
+  margin-top: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 1rem 1.25rem;
+}
+
+.creditPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.creditPanelClose {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #111827;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.creditSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.creditSummaryLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.creditSummaryValue {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.creditAdjustForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.creditHistoryWrap {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 0.75rem;
+}
+
+.creditHistoryTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.creditAmountPlus {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.creditAmountMinus {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.creditPager {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.creditPagerInfo {
+  color: #6b7280;
+  font-size: 0.85rem;
 }

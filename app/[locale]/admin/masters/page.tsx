@@ -7,12 +7,16 @@ import {
   blockAdminMaster,
   unblockAdminMaster,
   createAdminMaster,
+  getAdminMasterCreditBalance,
+  getAdminMasterCreditHistory,
+  adjustAdminMasterCredits,
 } from "@/lib/api";
-import type { AdminMaster } from "@/lib/types";
+import type { AdminMaster, CreditTransaction } from "@/lib/types";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import styles from "../admin.module.css";
 
 export default function AdminMastersPage() {
+  const CREDIT_HISTORY_PAGE_SIZE = 10;
   const [masters, setMasters] = useState<AdminMaster[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -28,6 +32,16 @@ export default function AdminMastersPage() {
     location: "",
   });
   const [createLoading, setCreateLoading] = useState(false);
+  const [selectedMaster, setSelectedMaster] = useState<AdminMaster | null>(null);
+  const [creditsLoading, setCreditsLoading] = useState(false);
+  const [creditsError, setCreditsError] = useState("");
+  const [creditsBalance, setCreditsBalance] = useState<number | null>(null);
+  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
+  const [creditPage, setCreditPage] = useState(1);
+  const [creditPages, setCreditPages] = useState(1);
+  const [adjustAmount, setAdjustAmount] = useState("");
+  const [adjustNote, setAdjustNote] = useState("");
+  const [adjustLoading, setAdjustLoading] = useState(false);
 
   const loadMasters = async () => {
     setLoading(true);
@@ -91,6 +105,62 @@ export default function AdminMastersPage() {
       setError(err instanceof Error ? err.message : "Failed to create master");
     } finally {
       setCreateLoading(false);
+    }
+  };
+
+  const loadMasterCredits = async (masterId: string, page = 1) => {
+    setCreditsLoading(true);
+    setCreditsError("");
+    try {
+      const [balanceRes, historyRes] = await Promise.all([
+        getAdminMasterCreditBalance(masterId),
+        getAdminMasterCreditHistory(masterId, page, CREDIT_HISTORY_PAGE_SIZE),
+      ]);
+      setCreditsBalance(balanceRes.balance);
+      setCreditTransactions(historyRes.transactions);
+      setCreditPage(historyRes.page);
+      setCreditPages(Math.max(1, historyRes.pages));
+    } catch (err) {
+      setCreditsError(err instanceof Error ? err.message : "Failed to load credits data");
+      setCreditsBalance(null);
+      setCreditTransactions([]);
+      setCreditPages(1);
+    } finally {
+      setCreditsLoading(false);
+    }
+  };
+
+  const handleOpenCredits = async (master: AdminMaster) => {
+    setSelectedMaster(master);
+    setAdjustAmount("");
+    setAdjustNote("");
+    await loadMasterCredits(master._id, 1);
+  };
+
+  const handleAdjustCredits = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedMaster) return;
+    const amount = Number(adjustAmount);
+    if (!Number.isFinite(amount) || amount === 0) {
+      setCreditsError("Enter a non-zero amount");
+      return;
+    }
+    setAdjustLoading(true);
+    setCreditsError("");
+    try {
+      await adjustAdminMasterCredits({
+        masterId: selectedMaster._id,
+        amount,
+        note: adjustNote,
+      });
+      await loadMasterCredits(selectedMaster._id, 1);
+      await loadMasters();
+      setAdjustAmount("");
+      setAdjustNote("");
+    } catch (err) {
+      setCreditsError(err instanceof Error ? err.message : "Failed to adjust credits");
+    } finally {
+      setAdjustLoading(false);
     }
   };
 
@@ -242,6 +312,14 @@ export default function AdminMastersPage() {
                     >
                       View
                     </Link>
+                    <button
+                      type="button"
+                      className={styles.actionBtn + " " + styles.actionBtnCredits}
+                      onClick={() => void handleOpenCredits(m)}
+                      disabled={creditsLoading && selectedMaster?._id === m._id}
+                    >
+                      Credits
+                    </button>
                     {m.blocked ? (
                       <button
                         type="button"
@@ -268,6 +346,123 @@ export default function AdminMastersPage() {
           </table>
         )}
       </div>
+
+      {selectedMaster ? (
+        <section className={styles.creditPanel}>
+          <div className={styles.creditPanelHeader}>
+            <h2 className={styles.tableTitle}>
+              {selectedMaster.name} - Credits
+            </h2>
+            <button
+              type="button"
+              className={styles.creditPanelClose}
+              onClick={() => setSelectedMaster(null)}
+            >
+              Close
+            </button>
+          </div>
+
+          {creditsLoading ? <p className={styles.emptyState}>Loading...</p> : null}
+          {creditsError ? <p className={styles.errorMsg}>{creditsError}</p> : null}
+
+          {!creditsLoading ? (
+            <div className={styles.creditSummary}>
+              <span className={styles.creditSummaryLabel}>Current Balance</span>
+              <strong className={styles.creditSummaryValue}>
+                {creditsBalance ?? "—"}
+              </strong>
+            </div>
+          ) : null}
+
+          <form className={styles.creditAdjustForm} onSubmit={handleAdjustCredits}>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Amount (+/-)</label>
+              <input
+                type="number"
+                step="1"
+                required
+                value={adjustAmount}
+                onChange={(e) => setAdjustAmount(e.target.value)}
+                className={`${styles.searchInput} ${styles.createFormInput}`}
+                placeholder="e.g. 20 or -5"
+              />
+            </div>
+            <div className={styles.createFormField}>
+              <label className={styles.createFormLabel}>Note</label>
+              <input
+                type="text"
+                value={adjustNote}
+                onChange={(e) => setAdjustNote(e.target.value)}
+                className={`${styles.searchInput} ${styles.createFormInput}`}
+                placeholder="Reason for adjustment"
+              />
+            </div>
+            <div className={styles.createFormActions}>
+              <button type="submit" className={styles.createBtn} disabled={adjustLoading || !selectedMaster}>
+                {adjustLoading ? "Saving..." : "Adjust credits"}
+              </button>
+            </div>
+          </form>
+
+          <div className={styles.creditHistoryWrap}>
+            <h3 className={styles.creditHistoryTitle}>Transaction history</h3>
+            {creditTransactions.length === 0 && !creditsLoading ? (
+              <p className={styles.emptyState}>No credit transactions found.</p>
+            ) : (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Action</th>
+                    <th>Amount</th>
+                    <th>Balance</th>
+                    <th>Note</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {creditTransactions.map((tx) => (
+                    <tr key={tx._id}>
+                      <td>{new Date(tx.createdAt).toLocaleString()}</td>
+                      <td>{tx.type}</td>
+                      <td>{tx.action || "—"}</td>
+                      <td className={tx.amount >= 0 ? styles.creditAmountPlus : styles.creditAmountMinus}>
+                        {tx.amount >= 0 ? "+" : ""}
+                        {tx.amount}
+                      </td>
+                      <td>{tx.balanceAfter}</td>
+                      <td>{tx.metadata?.note ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {creditPages > 1 ? (
+              <div className={styles.creditPager}>
+                <button
+                  type="button"
+                  className={styles.actionBtn}
+                  disabled={creditPage <= 1 || creditsLoading}
+                  onClick={() => selectedMaster && void loadMasterCredits(selectedMaster._id, creditPage - 1)}
+                >
+                  Previous
+                </button>
+                <span className={styles.creditPagerInfo}>
+                  Page {creditPage} of {creditPages}
+                </span>
+                <button
+                  type="button"
+                  className={styles.actionBtn}
+                  disabled={creditPage >= creditPages || creditsLoading}
+                  onClick={() => selectedMaster && void loadMasterCredits(selectedMaster._id, creditPage + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

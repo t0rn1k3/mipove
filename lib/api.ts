@@ -722,6 +722,64 @@ export async function unblockAdminMaster(id: string): Promise<void> {
   if (!res.ok) throw new Error(json.message || "Failed to unblock master");
 }
 
+export async function getAdminMasterCreditBalance(masterId: string): Promise<{ balance: number }> {
+  const q = new URLSearchParams();
+  q.set("masterId", masterId);
+  const res = await adminFetch(`/admin/credits/balance?${q.toString()}`, { method: "GET" });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load master credit balance"));
+  const inner = (json.data ?? json) as Record<string, unknown>;
+  const raw = inner.balance ?? inner.currentBalance;
+  const balance = typeof raw === "number" && Number.isFinite(raw) ? raw : 0;
+  return { balance };
+}
+
+export async function getAdminMasterCreditHistory(
+  masterId: string,
+  page = 1,
+  limit = 20,
+): Promise<CreditHistoryResult> {
+  const q = new URLSearchParams();
+  q.set("masterId", masterId);
+  q.set("page", String(page));
+  q.set("limit", String(limit));
+  const res = await adminFetch(`/admin/credits/history?${q.toString()}`, { method: "GET" });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to load master credit history"));
+  const inner = (json.data ?? json) as Record<string, unknown>;
+  const transactionsRaw = inner.transactions;
+  const transactions = Array.isArray(transactionsRaw)
+    ? (transactionsRaw as CreditTransaction[])
+    : [];
+  const total =
+    typeof inner.total === "number" && Number.isFinite(inner.total)
+      ? inner.total
+      : transactions.length;
+  const pageNum = typeof inner.page === "number" && Number.isFinite(inner.page) ? inner.page : page;
+  const pages =
+    typeof inner.pages === "number" && Number.isFinite(inner.pages)
+      ? inner.pages
+      : Math.max(1, Math.ceil(total / limit));
+  return { transactions, total, page: pageNum, pages };
+}
+
+export async function adjustAdminMasterCredits(input: {
+  masterId: string;
+  amount: number;
+  note?: string;
+}): Promise<void> {
+  const res = await adminFetch("/admin/credits/adjust", {
+    method: "POST",
+    body: JSON.stringify({
+      masterId: input.masterId,
+      amount: input.amount,
+      note: input.note?.trim() || undefined,
+    }),
+  });
+  const json = await readJsonSafe(res);
+  if (!res.ok) throw new Error(extractMessage(json, "Failed to adjust credits"));
+}
+
 export async function registerAdmin(
   data: AdminRegisterInput,
 ): Promise<AuthResponse> {
