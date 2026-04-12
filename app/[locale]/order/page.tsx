@@ -32,7 +32,11 @@ import OrdersSmartFilter, {
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 import { Banknote, MapPin, CalendarClock, User, Phone, Heart, Lock, Loader2 } from "lucide-react";
 import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
-import { mergeOrderCategoriesFromForm, mergeOrderPublisherFromForm } from "@/lib/mergeOrderFromForm";
+import {
+  mergeOrderCategoriesFromForm,
+  mergeOrderMetaFromForm,
+  mergeOrderPublisherFromForm,
+} from "@/lib/mergeOrderFromForm";
 import styles from "./orderPage.module.css";
 
 const ORDER_CARD_DELAY = [
@@ -80,8 +84,43 @@ const LOCATION_ALIASES: Record<string, (typeof FILTER_LOCATION_VALUES)[number]> 
 };
 
 function normalizeLocation(raw: string): string {
-  const key = raw.trim().toLowerCase();
-  return LOCATION_ALIASES[key] ?? key;
+  const full = raw.trim().toLowerCase();
+  if (LOCATION_ALIASES[full]) return LOCATION_ALIASES[full];
+  const city = full.split(",")[0].trim();
+  return LOCATION_ALIASES[city] ?? city;
+}
+
+function formatDeadline(deadline: string, t: ReturnType<typeof useTranslations<"order">>) {
+  if (deadline === "urgent") return t("filterDeadlineUrgent");
+  if (deadline === "week") return t("filterDeadlineWeek");
+  if (deadline === "month") return t("filterDeadlineMonth");
+  return deadline;
+}
+
+function formatScheduledLabel(raw: string | undefined, t: ReturnType<typeof useTranslations<"order">>) {
+  const value = String(raw ?? "").trim();
+  if (!value) return "—";
+  if (value === "urgent" || value === "week" || value === "month") {
+    return formatDeadline(value, t);
+  }
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString();
+}
+
+function formatBudgetLabel(order: OrderRecord, t: ReturnType<typeof useTranslations<"order">>) {
+  if (order.priceNegotiable) return t("filterNegotiableOnly");
+  const minRaw = order.budget?.min ?? order.budgetMin;
+  const maxRaw = order.budget?.max ?? order.budgetMax;
+  const currency = order.budget?.currency || "GEL";
+  const min = Number(minRaw);
+  const max = Number(maxRaw);
+  const hasMin = Number.isFinite(min) && min > 0;
+  const hasMax = Number.isFinite(max) && max > 0;
+  if (hasMin && hasMax) return `${min.toLocaleString()} - ${max.toLocaleString()} ${currency}`;
+  if (hasMin) return `${min.toLocaleString()} ${currency}`;
+  if (hasMax) return `${max.toLocaleString()} ${currency}`;
+  return `0 ${currency}`;
 }
 
 function isImageAttachment(url: string): boolean {
@@ -334,7 +373,9 @@ export default function OrderPage() {
       }
 
       if (filterState.location) {
-        if (normalizeLocation(order.location) !== filterState.location) return false;
+        const rawLocation =
+          order.locationData?.city || order.locationData?.addressText || order.location;
+        if (normalizeLocation(String(rawLocation ?? "")) !== filterState.location) return false;
       }
 
       if (filterState.negotiableOnly && !order.priceNegotiable) return false;
@@ -346,7 +387,8 @@ export default function OrderPage() {
         if (!overlaps) return false;
       }
 
-      if (filterState.deadlines.length > 0 && !filterState.deadlines.includes(order.deadline)) {
+      const deadlineToken = String(order.scheduledAt ?? order.deadline ?? "");
+      if (filterState.deadlines.length > 0 && !filterState.deadlines.includes(deadlineToken)) {
         return false;
       }
 
@@ -365,10 +407,15 @@ export default function OrderPage() {
     description: string;
     contactName: string;
     contactPhone: string;
-    location: string;
+    locationCity: string;
+    locationAddressText: string;
+    locationLat?: number;
+    locationLng?: number;
     budgetMin: number;
     budgetMax: number;
+    budgetCurrency: string;
     priceNegotiable: boolean;
+    scheduledAt: string;
     deadline: string;
     images: File[];
   }) => {
@@ -379,20 +426,41 @@ export default function OrderPage() {
     const created = await createOrder({
       title,
       categories: form.categories.length > 0 ? form.categories : null,
-      contactName: form.contactName.trim(),
-      contactPhone: form.contactPhone.trim(),
+      customerNameSnapshot: form.contactName.trim(),
+      customerPhoneSnapshot: form.contactPhone.trim(),
       description: form.description.trim(),
-      location: form.location,
-      budgetMin: form.budgetMin,
-      budgetMax: form.budgetMax,
-      priceNegotiable: form.priceNegotiable,
-      deadline: form.deadline,
+      location: {
+        city: form.locationCity || undefined,
+        addressText: form.locationAddressText || undefined,
+        lat: typeof form.locationLat === "number" ? form.locationLat : undefined,
+        lng: typeof form.locationLng === "number" ? form.locationLng : undefined,
+      },
+      budget: {
+        min: form.budgetMin,
+        max: form.budgetMax,
+        currency: form.budgetCurrency || "GEL",
+      },
+      scheduledAt: form.scheduledAt || null,
       files: form.images,
     });
-    const merged = mergeOrderPublisherFromForm(
-      mergeOrderCategoriesFromForm(created, form.categories),
-      form.contactName,
-      form.contactPhone,
+    const merged = mergeOrderMetaFromForm(
+      mergeOrderPublisherFromForm(
+        mergeOrderCategoriesFromForm(created, form.categories),
+        form.contactName,
+        form.contactPhone,
+      ),
+      {
+        locationCity: form.locationCity,
+        locationAddressText: form.locationAddressText,
+        locationLat: form.locationLat,
+        locationLng: form.locationLng,
+        budgetMin: form.budgetMin,
+        budgetMax: form.budgetMax,
+        budgetCurrency: form.budgetCurrency,
+        priceNegotiable: form.priceNegotiable,
+        scheduledAt: form.scheduledAt,
+        deadline: form.scheduledAt || form.deadline,
+      },
     );
     if (merged._id) pendingLocalOrderIdsRef.current.add(merged._id);
     setOrders((prev) => {
@@ -408,10 +476,15 @@ export default function OrderPage() {
     description: string;
     contactName: string;
     contactPhone: string;
-    location: string;
+    locationCity: string;
+    locationAddressText: string;
+    locationLat?: number;
+    locationLng?: number;
     budgetMin: number;
     budgetMax: number;
+    budgetCurrency: string;
     priceNegotiable: boolean;
+    scheduledAt: string;
     deadline: string;
     images: File[];
   }) => {
@@ -424,20 +497,41 @@ export default function OrderPage() {
     const updated = await updateOrder(editingOrder._id, {
       title,
       categories: form.categories.length > 0 ? form.categories : null,
-      contactName: form.contactName.trim(),
-      contactPhone: form.contactPhone.trim(),
+      customerNameSnapshot: form.contactName.trim(),
+      customerPhoneSnapshot: form.contactPhone.trim(),
       description: form.description.trim(),
-      location: form.location,
-      budgetMin: form.budgetMin,
-      budgetMax: form.budgetMax,
-      priceNegotiable: form.priceNegotiable,
-      deadline: form.deadline,
+      location: {
+        city: form.locationCity || undefined,
+        addressText: form.locationAddressText || undefined,
+        lat: typeof form.locationLat === "number" ? form.locationLat : undefined,
+        lng: typeof form.locationLng === "number" ? form.locationLng : undefined,
+      },
+      budget: {
+        min: form.budgetMin,
+        max: form.budgetMax,
+        currency: form.budgetCurrency || "GEL",
+      },
+      scheduledAt: form.scheduledAt || null,
       attachments: [...(editingOrder.attachments ?? []), ...attachmentUrls],
     });
-    const mergedUpdate = mergeOrderPublisherFromForm(
-      mergeOrderCategoriesFromForm(updated, form.categories),
-      form.contactName,
-      form.contactPhone,
+    const mergedUpdate = mergeOrderMetaFromForm(
+      mergeOrderPublisherFromForm(
+        mergeOrderCategoriesFromForm(updated, form.categories),
+        form.contactName,
+        form.contactPhone,
+      ),
+      {
+        locationCity: form.locationCity,
+        locationAddressText: form.locationAddressText,
+        locationLat: form.locationLat,
+        locationLng: form.locationLng,
+        budgetMin: form.budgetMin,
+        budgetMax: form.budgetMax,
+        budgetCurrency: form.budgetCurrency,
+        priceNegotiable: form.priceNegotiable,
+        scheduledAt: form.scheduledAt,
+        deadline: form.scheduledAt || form.deadline,
+      },
     );
     setOrders((prev) => prev.map((item) => (item._id === mergedUpdate._id ? mergedUpdate : item)));
     setEditingOrder(null);
@@ -584,8 +678,29 @@ export default function OrderPage() {
             {!ordersLoading && !ordersError ? filteredOrders.map((order, index) => {
               const cardKey = order._id;
               const contactPanelId = `order-contact-${index}`;
-              const phone = order.publisher?.phone ?? "";
-              const telHref = phone ? `tel:${phone.replace(/\s/g, "")}` : "";
+              const deadlineLabel = formatScheduledLabel(order.scheduledAt || order.deadline, t);
+              const locationLabel =
+                String(order.locationData?.city ?? order.locationData?.addressText ?? order.location ?? "").trim() || "—";
+              const budgetLabel = formatBudgetLabel(order, t);
+              const customerName =
+                String(
+                  order.customerNameSnapshot ??
+                    order.publisher?.name ??
+                    order.user?.name ??
+                    order.orderingMaster?.name ??
+                    "",
+                ).trim() || "—";
+              const customerPhone = String(
+                order.customerPhoneSnapshot ??
+                  order.publisher?.phone ??
+                  order.user?.phone ??
+                  order.orderingMaster?.phone ??
+                  "",
+              ).trim();
+              const telHrefFinal = customerPhone ? `tel:${customerPhone.replace(/\s/g, "")}` : "";
+              const categoryLabels = (order.categories ?? [])
+                .map((id) => orderCategoriesForUi.find((c) => c.id === id)?.label ?? id)
+                .filter(Boolean);
               const isFavorite = favoriteOrderIds.includes(order._id);
               const isMaster = sessionUser?.role === "master";
               const isUnlockedForMaster = isMaster && unlockedContactIds.has(order._id);
@@ -619,6 +734,15 @@ export default function OrderPage() {
                     <div className={styles.orderMain}>
                       <h3 className={styles.orderTitle}>{order.title}</h3>
                       <p className={styles.orderDescription}>{order.description}</p>
+                      {categoryLabels.length > 0 ? (
+                        <div className={styles.attachmentsWrap}>
+                          {categoryLabels.map((label) => (
+                            <span key={label} className={styles.attachmentLink}>
+                              {label}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                       {attachments.length > 0 ? (
                         <div className={styles.attachmentsWrap}>
                           {attachments.slice(0, 4).map((url) => (
@@ -638,28 +762,24 @@ export default function OrderPage() {
                     <div className={styles.orderMeta}>
                       <div
                         className={styles.orderMetaRow}
-                        aria-label={`${t("metaPriceRange")}: ₾${order.budgetMin} - ₾${order.budgetMax}`}
+                        aria-label={`${t("metaPriceRange")}: ${budgetLabel}`}
                       >
                         <Banknote size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>
-                          {order.priceNegotiable
-                            ? t("filterNegotiableOnly")
-                            : `₾${order.budgetMin.toLocaleString()} - ₾${order.budgetMax.toLocaleString()}`}
-                        </span>
+                        <span className={styles.orderMetaValue}>{budgetLabel}</span>
                       </div>
                       <div
                         className={styles.orderMetaRow}
-                        aria-label={`${tCommon("location")}: ${order.location}`}
+                        aria-label={`${tCommon("location")}: ${locationLabel}`}
                       >
                         <MapPin size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>{order.location}</span>
+                        <span className={styles.orderMetaValue}>{locationLabel}</span>
                       </div>
                       <div
                         className={styles.orderMetaRow}
-                        aria-label={`${t("metaExpectedBy")}: ${order.deadline}`}
+                        aria-label={`${t("metaExpectedBy")}: ${deadlineLabel}`}
                       >
                         <CalendarClock size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>{order.deadline}</span>
+                        <span className={styles.orderMetaValue}>{deadlineLabel}</span>
                       </div>
                     </div>
                   </div>
@@ -739,21 +859,18 @@ export default function OrderPage() {
                         inert={contactOpen ? undefined : true}
                       >
                         <div className={styles.contactNamePhoneRow}>
-                          <div
-                            className={styles.contactInlineGroup}
-                            aria-label={`${tCommon("name")}: ${order.publisher?.name ?? "—"}`}
-                          >
+                          <div className={styles.contactInlineGroup} aria-label={`${tCommon("name")}: ${customerName}`}>
                             <User size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
-                            <span className={styles.contactExtraValue}>{order.publisher?.name ?? "—"}</span>
+                            <span className={styles.contactExtraValue}>{customerName}</span>
                           </div>
-                          {phone ? (
+                          {customerPhone ? (
                             <div
                               className={styles.contactInlineGroup}
-                              aria-label={`${tCommon("phone")}: ${phone}`}
+                              aria-label={`${tCommon("phone")}: ${customerPhone}`}
                             >
                               <Phone size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
-                              <a href={telHref} className={styles.contactExtraLink}>
-                                {phone}
+                              <a href={telHrefFinal} className={styles.contactExtraLink}>
+                                {customerPhone}
                               </a>
                             </div>
                           ) : null}
@@ -837,10 +954,19 @@ export default function OrderPage() {
                 description: editingOrder.description,
                 contactName: editingOrder.publisher?.name ?? "",
                 contactPhone: editingOrder.publisher?.phone ?? "",
-                location: editingOrder.location,
+                locationCity: editingOrder.locationData?.city ?? "",
+                locationAddressText:
+                  editingOrder.locationData?.addressText ?? editingOrder.location ?? "",
+                locationLat: editingOrder.locationData?.lat,
+                locationLng: editingOrder.locationData?.lng,
                 budgetMin: editingOrder.budgetMin,
                 budgetMax: editingOrder.budgetMax,
+                budgetCurrency: editingOrder.budget?.currency ?? "GEL",
                 priceNegotiable: editingOrder.priceNegotiable,
+                scheduledAt:
+                  typeof editingOrder.scheduledAt === "string"
+                    ? editingOrder.scheduledAt.slice(0, 10)
+                    : "",
                 deadline: (editingOrder.deadline as "urgent" | "week" | "month") ?? "",
                 images: [],
               }

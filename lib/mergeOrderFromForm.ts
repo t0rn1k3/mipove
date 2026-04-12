@@ -36,3 +36,70 @@ export function mergeOrderPublisherFromForm(
     },
   };
 }
+
+/**
+ * After create/update, fill in any meta the API response omitted so the card
+ * immediately reflects the values the user typed.
+ */
+export function mergeOrderMetaFromForm(
+  order: OrderRecord,
+  form: {
+    locationCity?: string;
+    locationAddressText?: string;
+    locationLat?: number;
+    locationLng?: number;
+    budgetMin: number;
+    budgetMax: number;
+    budgetCurrency?: string;
+    priceNegotiable: boolean;
+    scheduledAt?: string;
+    deadline: string;
+  },
+): OrderRecord {
+  const orderLocation = String(order.location ?? "").trim();
+  const formLocation = String(form.locationAddressText ?? form.locationCity ?? "").trim();
+  const location = orderLocation || formLocation;
+  const locationData = order.locationData ?? {
+    city: form.locationCity,
+    addressText: form.locationAddressText,
+    lat: form.locationLat,
+    lng: form.locationLng,
+  };
+
+  const orderDeadline = String(order.deadline ?? "").trim();
+  const orderScheduledAt = String(order.scheduledAt ?? "").trim();
+  const scheduledAt = orderScheduledAt || String(form.scheduledAt ?? "").trim();
+  const deadline = orderDeadline || String(form.deadline ?? "").trim();
+
+  const budgetMin =
+    order.budgetMin != null && Number.isFinite(order.budgetMin)
+      ? order.budgetMin
+      : form.budgetMin;
+  const budgetMax =
+    order.budgetMax != null && Number.isFinite(order.budgetMax)
+      ? order.budgetMax
+      : form.budgetMax;
+
+  const priceNegotiable =
+    typeof order.priceNegotiable === "boolean"
+      ? order.priceNegotiable
+      : form.priceNegotiable;
+
+  const budget = order.budget ?? {
+    min: form.budgetMin,
+    max: form.budgetMax,
+    currency: form.budgetCurrency || "GEL",
+  };
+
+  return {
+    ...order,
+    location,
+    locationData,
+    deadline,
+    scheduledAt: scheduledAt || undefined,
+    priceNegotiable,
+    budgetMin,
+    budgetMax,
+    budget,
+  };
+}

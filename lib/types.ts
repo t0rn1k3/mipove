@@ -122,16 +122,48 @@ export type OrderRecord = {
   /** First category id for backward compatibility; prefer `categories`. */
   category: string;
   description: string;
+  /** Legacy flat location label retained for backward compatibility in UI code. */
   location: string;
+  /** Canonical location object from API contract. */
+  locationData?: {
+    city?: string;
+    addressText?: string;
+    lat?: number;
+    lng?: number;
+  };
+  /** Legacy flat budget fields retained for backward compatibility in UI code. */
   budgetMin: number;
   budgetMax: number;
+  /** Canonical budget object from API contract. */
+  budget?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  };
   priceNegotiable: boolean;
+  /** Legacy timeline token retained for backward compatibility in UI code. */
   deadline: string;
+  /** Canonical scheduled date/time from API contract. */
+  scheduledAt?: string;
   status: OrderStatus;
   attachments: string[];
   expectedBy?: string;
   createdAt?: string;
   updatedAt?: string;
+  customerNameSnapshot?: string;
+  customerPhoneSnapshot?: string;
+  user?: {
+    _id?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
+  orderingMaster?: {
+    _id?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
   publisher?: {
     _id?: string;
     name?: string;
@@ -150,15 +182,22 @@ export type OrderUpsertInput = {
   title: string;
   /** Canonical category ids from GET /orders/categories; empty array or null clears (PATCH). */
   categories?: string[] | null;
-  /** Contact shown on the order card (multipart POST / JSON PATCH field names: contactName, contactPhone). */
-  contactName?: string | null;
-  contactPhone?: string | null;
   description: string;
-  location: string;
-  budgetMin: number;
-  budgetMax: number;
-  priceNegotiable: boolean;
-  deadline: string;
+  location?: {
+    city?: string;
+    addressText?: string;
+    lat?: number;
+    lng?: number;
+  } | null;
+  budget?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  } | null;
+  scheduledAt?: string | null;
+  /** Optional snapshots when backend accepts explicit values. */
+  customerNameSnapshot?: string | null;
+  customerPhoneSnapshot?: string | null;
   attachments: string[];
 };
 

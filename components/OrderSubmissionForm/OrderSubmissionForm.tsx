@@ -12,23 +12,9 @@ import {
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Hammer, Wrench } from "lucide-react";
-import CustomSelect from "@/components/CustomSelect/CustomSelect";
-import type { OrderCategoryOption, SelectOption } from "@/lib/types";
+import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import type { OrderCategoryOption } from "@/lib/types";
 import styles from "./OrderSubmissionForm.module.css";
-
-const REGION_VALUES = [
-  "tbilisi",
-  "batumi",
-  "kutaisi",
-  "rustavi",
-  "zugdidi",
-  "gori",
-  "poti",
-  "telavi",
-  "akhaltsikhe",
-  "mtskheta",
-  "other",
-] as const;
 
 const DEADLINE_VALUES = ["urgent", "week", "month"] as const;
 
@@ -36,20 +22,6 @@ const DEADLINE_MSG_KEYS: Record<(typeof DEADLINE_VALUES)[number], string> = {
   urgent: "deadlineUrgent",
   week: "deadlineWeek",
   month: "deadlineMonth",
-};
-
-const REGION_MSG_KEYS: Record<(typeof REGION_VALUES)[number], string> = {
-  tbilisi: "regionTbilisi",
-  batumi: "regionBatumi",
-  kutaisi: "regionKutaisi",
-  rustavi: "regionRustavi",
-  zugdidi: "regionZugdidi",
-  gori: "regionGori",
-  poti: "regionPoti",
-  telavi: "regionTelavi",
-  akhaltsikhe: "regionAkhaltsikhe",
-  mtskheta: "regionMtskheta",
-  other: "regionOther",
 };
 
 const BUDGET_MAX = 5000;
@@ -64,10 +36,15 @@ export type OrderFormState = {
   contactName: string;
   contactPhone: string;
   images: File[];
-  location: string;
+  locationCity: string;
+  locationAddressText: string;
+  locationLat?: number;
+  locationLng?: number;
   budgetMin: number;
   budgetMax: number;
+  budgetCurrency: string;
   priceNegotiable: boolean;
+  scheduledAt: string;
   deadline: (typeof DEADLINE_VALUES)[number] | "";
 };
 
@@ -78,10 +55,15 @@ const initialState: OrderFormState = {
   contactName: "",
   contactPhone: "",
   images: [],
-  location: "",
+  locationCity: "",
+  locationAddressText: "",
+  locationLat: undefined,
+  locationLng: undefined,
   budgetMin: 0,
   budgetMax: BUDGET_MAX,
+  budgetCurrency: "GEL",
   priceNegotiable: false,
+  scheduledAt: "",
   deadline: "",
 };
 
@@ -110,6 +92,8 @@ export default function OrderSubmissionForm({
     contactPhone: initialValues?.contactPhone ?? initialState.contactPhone,
     images: initialValues?.images ?? [],
   });
+
+  const locationInputValue = form.locationAddressText || form.locationCity;
   const [dragOver, setDragOver] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -124,17 +108,6 @@ export default function OrderSubmissionForm({
     setPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [form.images]);
-
-  const regionOptions: SelectOption[] = useMemo(
-    () => [
-      { value: "", label: t("locationPlaceholder") },
-      ...REGION_VALUES.map((v) => ({
-        value: v,
-        label: t(REGION_MSG_KEYS[v] as "regionTbilisi"),
-      })),
-    ],
-    [t],
-  );
 
   const stepNavItems = useMemo(
     () => [
@@ -204,7 +177,7 @@ export default function OrderSubmissionForm({
       }
     }
     if (s === 3) {
-      if (!form.location) next.location = t("errorLocation");
+      if (!locationInputValue.trim()) next.location = t("errorLocation");
     }
     if (s === 4) {
       if (!form.priceNegotiable) {
@@ -219,7 +192,7 @@ export default function OrderSubmissionForm({
           next.budget = t("errorBudget");
         }
       }
-      if (!form.deadline) next.deadline = t("errorDeadline");
+      if (!form.scheduledAt.trim()) next.deadline = t("errorDeadline");
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -443,18 +416,40 @@ export default function OrderSubmissionForm({
           ) : null}
 
           <span className={styles.label}>{t("location")}</span>
-          <CustomSelect
+          <CityAutocomplete
             id={`${formId}-location`}
-            options={regionOptions}
-            value={form.location}
-            onChange={(v) => setField("location", v)}
+            value={locationInputValue}
+            onChange={(v) => {
+              setField("locationAddressText", v);
+              if (!v.trim()) {
+                setField("locationCity", "");
+                setField("locationLat", undefined);
+                setField("locationLng", undefined);
+              }
+            }}
+            onSelect={(value, city) => {
+              setField("locationAddressText", value);
+              setField("locationCity", city.name);
+              setField("locationLat", city.latitude);
+              setField("locationLng", city.longitude);
+            }}
             placeholder={t("locationPlaceholder")}
-            aria-label={t("location")}
             className={errors.location ? styles.selectError : ""}
           />
           {errors.location ? (
             <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.location}</p>
           ) : null}
+          <label className={styles.label} htmlFor={`${formId}-location-address`}>
+            {t("locationAddress")}
+          </label>
+          <input
+            id={`${formId}-location-address`}
+            className={styles.input}
+            type="text"
+            value={form.locationAddressText}
+            onChange={(e) => setField("locationAddressText", e.target.value)}
+            placeholder={t("locationAddressPlaceholder")}
+          />
         </div>
       ) : null}
 
@@ -574,7 +569,29 @@ export default function OrderSubmissionForm({
             </div>
           </div>
           {errors.budget ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.budget}</p> : null}
+          <label className={styles.label} htmlFor={`${formId}-budget-currency`}>
+            {t("budgetCurrency")}
+          </label>
+          <input
+            id={`${formId}-budget-currency`}
+            className={styles.input}
+            type="text"
+            value={form.budgetCurrency}
+            onChange={(e) => setField("budgetCurrency", e.target.value.toUpperCase())}
+            placeholder="GEL"
+            maxLength={8}
+          />
 
+          <label className={styles.label} htmlFor={`${formId}-scheduled-at`}>
+            {t("scheduledAt")}
+          </label>
+          <input
+            id={`${formId}-scheduled-at`}
+            className={`${styles.input} ${errors.deadline ? styles.fieldError : ""}`}
+            type="date"
+            value={form.scheduledAt}
+            onChange={(e) => setField("scheduledAt", e.target.value)}
+          />
           <p className={`${styles.fieldHint} ${styles.deadlineHint}`}>{t("deadlineHeading")}</p>
           <div className={styles.deadlineGroup} role="group" aria-label={t("deadlineHeading")}>
             {DEADLINE_VALUES.map((value) => (

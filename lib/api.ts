@@ -558,19 +558,114 @@ function extractPublisher(row: Record<string, unknown>): OrderRecord["publisher"
   return undefined;
 }
 
+function extractLocationData(
+  row: Record<string, unknown>,
+): OrderRecord["locationData"] | undefined {
+  const raw = row.location;
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const o = raw as Record<string, unknown>;
+    return {
+      city: typeof o.city === "string" ? o.city : undefined,
+      addressText: typeof o.addressText === "string" ? o.addressText : undefined,
+      lat: typeof o.lat === "number" && Number.isFinite(o.lat) ? o.lat : undefined,
+      lng: typeof o.lng === "number" && Number.isFinite(o.lng) ? o.lng : undefined,
+    };
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return { addressText: raw.trim() };
+  }
+  return undefined;
+}
+
+function extractBudgetData(row: Record<string, unknown>): OrderRecord["budget"] | undefined {
+  const raw = row.budget;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const o = raw as Record<string, unknown>;
+  return {
+    min: typeof o.min === "number" && Number.isFinite(o.min) ? o.min : undefined,
+    max: typeof o.max === "number" && Number.isFinite(o.max) ? o.max : undefined,
+    currency: typeof o.currency === "string" ? o.currency : undefined,
+  };
+}
+
+function extractCustomerSnapshot(
+  row: Record<string, unknown>,
+): Pick<OrderRecord, "customerNameSnapshot" | "customerPhoneSnapshot" | "user" | "orderingMaster"> {
+  const userRaw = row.user;
+  const masterRaw = row.orderingMaster;
+  const toContact = (value: unknown) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+    const o = value as Record<string, unknown>;
+    return {
+      _id: typeof o._id === "string" ? o._id : undefined,
+      name: typeof o.name === "string" ? o.name : undefined,
+      phone: typeof o.phone === "string" ? o.phone : undefined,
+      email: typeof o.email === "string" ? o.email : undefined,
+    };
+  };
+  return {
+    customerNameSnapshot:
+      typeof row.customerNameSnapshot === "string" ? row.customerNameSnapshot : undefined,
+    customerPhoneSnapshot:
+      typeof row.customerPhoneSnapshot === "string" ? row.customerPhoneSnapshot : undefined,
+    user: toContact(userRaw),
+    orderingMaster: toContact(masterRaw),
+  };
+}
+
 function normalizeOrderRecord(row: Record<string, unknown>): OrderRecord {
   const base = row as OrderRecord;
   const categories = normalizeOrderCategoriesFromRow(row);
   const publisher = extractPublisher(row) ?? base.publisher;
+  const locationData = extractLocationData(row);
+  const budget = extractBudgetData(row);
+  const snapshot = extractCustomerSnapshot(row);
+  const rawMin = Number(row.budgetMin ?? budget?.min);
+  const rawMax = Number(row.budgetMax ?? budget?.max);
+  const locationLabel =
+    locationData?.city ||
+    locationData?.addressText ||
+    (typeof row.location === "string" ? row.location : "");
+  const scheduledAt =
+    typeof row.scheduledAt === "string"
+      ? row.scheduledAt
+      : typeof row.deadline === "string"
+        ? row.deadline
+        : undefined;
+  const fallbackName =
+    snapshot.customerNameSnapshot?.trim() ||
+    snapshot.user?.name?.trim() ||
+    snapshot.orderingMaster?.name?.trim();
+  const fallbackPhone =
+    snapshot.customerPhoneSnapshot?.trim() ||
+    snapshot.user?.phone?.trim() ||
+    snapshot.orderingMaster?.phone?.trim();
+  const mergedPublisher =
+    publisher || fallbackName || fallbackPhone
+      ? {
+          ...publisher,
+          name: publisher?.name?.trim() || fallbackName || publisher?.name,
+          phone: publisher?.phone?.trim() || fallbackPhone || publisher?.phone,
+        }
+      : publisher;
   return {
     ...base,
     categories,
     category: categories[0] ?? "",
-    budgetMin: Number(base.budgetMin) || 0,
-    budgetMax: Number(base.budgetMax) || 0,
+    budgetMin: Number.isFinite(rawMin) ? rawMin : 0,
+    budgetMax: Number.isFinite(rawMax) ? rawMax : 0,
     priceNegotiable: base.priceNegotiable === true || base.priceNegotiable === "true" as unknown,
     attachments: Array.isArray(base.attachments) ? base.attachments : [],
-    publisher,
+    location: locationLabel,
+    locationData,
+    budget,
+    deadline: typeof row.deadline === "string" ? row.deadline : "",
+    scheduledAt,
+    customerNameSnapshot: snapshot.customerNameSnapshot,
+    customerPhoneSnapshot: snapshot.customerPhoneSnapshot,
+    user: snapshot.user,
+    orderingMaster: snapshot.orderingMaster,
+    publisher: mergedPublisher,
   };
 }
 
@@ -580,19 +675,23 @@ function appendOrderFormFields(form: FormData, data: Omit<OrderUpsertInput, "att
     data.categories == null
       ? []
       : data.categories.map((c) => String(c).trim()).filter(Boolean);
-  for (const c of cats) {
-    form.append("category", c);
+  if (cats.length > 0) {
+    const csv = cats.join(",");
+    // Backend accepts string[] or comma-separated string; multipart parsers often
+    // coerce to strings, so send canonical CSV for maximum compatibility.
+    form.append("categories", csv);
+    form.append("category", csv);
   }
   form.append("description", data.description);
-  form.append("location", data.location);
-  form.append("budgetMin", String(data.budgetMin));
-  form.append("budgetMax", String(data.budgetMax));
-  form.append("priceNegotiable", String(data.priceNegotiable));
-  form.append("deadline", data.deadline);
-  const cn = data.contactName != null ? String(data.contactName).trim() : "";
-  const cp = data.contactPhone != null ? String(data.contactPhone).trim() : "";
-  if (cn) form.append("contactName", cn);
-  if (cp) form.append("contactPhone", cp);
+  if (data.location) form.append("location", JSON.stringify(data.location));
+  if (data.budget) form.append("budget", JSON.stringify(data.budget));
+  if (data.scheduledAt) form.append("scheduledAt", data.scheduledAt);
+  const cn =
+    data.customerNameSnapshot != null ? String(data.customerNameSnapshot).trim() : "";
+  const cp =
+    data.customerPhoneSnapshot != null ? String(data.customerPhoneSnapshot).trim() : "";
+  if (cn) form.append("customerNameSnapshot", cn);
+  if (cp) form.append("customerPhoneSnapshot", cp);
 }
 
 /** Create order: POST multipart with scalar fields + file attachments. */
@@ -614,9 +713,7 @@ export async function createOrder(
 export async function getOrders(options?: { categories?: string[] }): Promise<OrderRecord[]> {
   const q = new URLSearchParams();
   const cats = options?.categories?.map((c) => c.trim()).filter(Boolean) ?? [];
-  for (const c of cats) {
-    q.append("category", c);
-  }
+  if (cats.length > 0) q.set("categories", cats.join(","));
   const path = q.toString() ? `/orders?${q.toString()}` : "/orders";
   const res = await authFetch(`${api(path)}`, { method: "GET" });
   const json = await readJsonSafe(res);
@@ -644,8 +741,10 @@ export async function updateOrder(orderId: string, data: OrderUpsertInput): Prom
     categoriesInput == null
       ? []
       : categoriesInput.map((c) => String(c).trim()).filter(Boolean);
-  const cn = rest.contactName != null ? String(rest.contactName).trim() : "";
-  const cp = rest.contactPhone != null ? String(rest.contactPhone).trim() : "";
+  const cn =
+    rest.customerNameSnapshot != null ? String(rest.customerNameSnapshot).trim() : "";
+  const cp =
+    rest.customerPhoneSnapshot != null ? String(rest.customerPhoneSnapshot).trim() : "";
   const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -653,8 +752,8 @@ export async function updateOrder(orderId: string, data: OrderUpsertInput): Prom
       ...rest,
       categories: cats.length > 0 ? cats : null,
       category: cats.length > 0 ? cats[0] : null,
-      contactName: cn || null,
-      contactPhone: cp || null,
+      customerNameSnapshot: cn || null,
+      customerPhoneSnapshot: cp || null,
     }),
   });
   const json = await readJsonSafe(res);
