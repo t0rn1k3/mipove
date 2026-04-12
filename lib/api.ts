@@ -580,8 +580,8 @@ function appendOrderFormFields(form: FormData, data: Omit<OrderUpsertInput, "att
     data.categories == null
       ? []
       : data.categories.map((c) => String(c).trim()).filter(Boolean);
-  if (cats.length > 0) {
-    form.append("category", cats[0]);
+  for (const c of cats) {
+    form.append("category", c);
   }
   form.append("description", data.description);
   form.append("location", data.location);
@@ -639,11 +639,11 @@ export async function getOrderById(orderId: string): Promise<OrderRecord> {
 }
 
 export async function updateOrder(orderId: string, data: OrderUpsertInput): Promise<OrderRecord> {
+  const { categories: categoriesInput, ...rest } = data;
   const cats =
-    data.categories == null
+    categoriesInput == null
       ? []
-      : data.categories.map((c) => String(c).trim()).filter(Boolean);
-  const { categories: _categories, ...rest } = data;
+      : categoriesInput.map((c) => String(c).trim()).filter(Boolean);
   const cn = rest.contactName != null ? String(rest.contactName).trim() : "";
   const cp = rest.contactPhone != null ? String(rest.contactPhone).trim() : "";
   const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
@@ -651,6 +651,7 @@ export async function updateOrder(orderId: string, data: OrderUpsertInput): Prom
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       ...rest,
+      categories: cats.length > 0 ? cats : null,
       category: cats.length > 0 ? cats[0] : null,
       contactName: cn || null,
       contactPhone: cp || null,

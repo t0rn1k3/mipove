@@ -329,7 +329,7 @@ export default function OrderPage() {
       if (filterState.categories.length > 0) {
         const orderCats =
           order.categories.length > 0 ? order.categories : order.category ? [order.category] : [];
-        const matches = filterState.categories.some((id) => orderCats.includes(id));
+        const matches = filterState.categories.every((id) => orderCats.includes(id));
         if (!matches) return false;
       }
 

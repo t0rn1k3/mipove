@@ -12,7 +12,7 @@ export function mergeOrderCategoriesFromForm(
       : order.category && String(order.category).trim()
         ? [String(order.category).trim()]
         : [];
-  const categories = apiCats.length > 0 ? apiCats : formCats;
+  const categories = [...new Set([...apiCats, ...formCats])].filter(Boolean);
   const category = categories[0] ?? "";
   return { ...order, categories, category };
 }
