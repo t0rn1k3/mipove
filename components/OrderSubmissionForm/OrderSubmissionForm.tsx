@@ -59,7 +59,7 @@ const TOTAL_STEPS = 4;
 
 export type OrderFormState = {
   title: string;
-  category: string;
+  categories: string[];
   description: string;
   images: File[];
   location: string;
@@ -71,7 +71,7 @@ export type OrderFormState = {
 
 const initialState: OrderFormState = {
   title: "",
-  category: "",
+  categories: [],
   description: "",
   images: [],
   location: "",
@@ -101,6 +101,7 @@ export default function OrderSubmissionForm({
   const [form, setForm] = useState<OrderFormState>({
     ...initialState,
     ...initialValues,
+    categories: initialValues?.categories ?? initialState.categories,
     images: initialValues?.images ?? [],
   });
   const [dragOver, setDragOver] = useState(false);
@@ -149,6 +150,19 @@ export default function OrderSubmissionForm({
     });
   }, []);
 
+  const toggleCategory = useCallback((id: string) => {
+    setForm((prev) => {
+      const has = prev.categories.includes(id);
+      const categories = has ? prev.categories.filter((c) => c !== id) : [...prev.categories, id];
+      return { ...prev, categories };
+    });
+    setErrors((e) => {
+      const next = { ...e };
+      delete next.categories;
+      return next;
+    });
+  }, []);
+
   const addFiles = useCallback((list: FileList | File[]) => {
     const incoming = Array.from(list);
     if (incoming.length === 0) return;
@@ -176,9 +190,9 @@ export default function OrderSubmissionForm({
     }
     if (s === 2) {
       if (categoryOptions.length === 0) {
-        next.category = t("noCategoriesAvailable");
-      } else if (!form.category) {
-        next.category = t("errorCategory");
+        next.categories = t("noCategoriesAvailable");
+      } else if (form.categories.length === 0) {
+        next.categories = t("errorCategory");
       }
     }
     if (s === 3) {
@@ -293,16 +307,16 @@ export default function OrderSubmissionForm({
                 <button
                   key={id}
                   type="button"
-                  className={`${styles.categoryPill} ${form.category === id ? styles.categoryPillActive : ""}`}
-                  onClick={() => setField("category", id)}
+                  className={`${styles.categoryPill} ${form.categories.includes(id) ? styles.categoryPillActive : ""}`}
+                  onClick={() => toggleCategory(id)}
                 >
                   {label}
                 </button>
               ))}
             </div>
           ) : null}
-          {errors.category ? (
-            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.category}</p>
+          {errors.categories ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.categories}</p>
           ) : null}
         </div>
       ) : null}

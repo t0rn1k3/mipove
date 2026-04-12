@@ -29,9 +29,10 @@ const API_ORIGIN = API_URL.replace(/\/api\/?$/, "").replace(/\/$/, "");
 /** No trailing slash. Legacy `/uploads/...` paths resolve here + path, or stay root-relative for Next `/uploads` rewrite. */
 const FRONTEND_ORIGIN = (process.env.NEXT_PUBLIC_FRONTEND_URL || "").replace(/\/$/, "");
 
-/** @deprecated Use cookie auth; kept for migration. Returns null when using HTTP-only cookies. */
-export function getStoredToken(): string | null {
-  return null;
+/** Purge any leftover localStorage tokens from older builds. Auth is cookie-only. */
+if (typeof window !== "undefined") {
+  localStorage.removeItem("mipove_token");
+  localStorage.removeItem("mipove_access_token_v1");
 }
 
 /**
@@ -90,12 +91,12 @@ type AuthFetchInit = RequestInit | (() => RequestInit);
 async function authFetch(url: string, initOrFactory: AuthFetchInit): Promise<Response> {
   const getInit = typeof initOrFactory === "function" ? initOrFactory : () => initOrFactory;
   let init = getInit();
-  let res = await fetch(url, { ...init, credentials: "include" as RequestCredentials });
+  let res = await fetch(url, { ...init, credentials: "include" });
   if (res.status === 401) {
     const refreshed = await refreshAccessToken();
     if (!refreshed) throw new Error("Session expired. Please log in again.");
     init = getInit();
-    res = await fetch(url, { ...init, credentials: "include" as RequestCredentials });
+    res = await fetch(url, { ...init, credentials: "include" });
   }
   return res;
 }
@@ -124,7 +125,7 @@ function extractMessage(json: Record<string, unknown>, fallback: string): string
 }
 
 export async function getOrderCategories(): Promise<OrderCategoryOption[]> {
-  const res = await fetch(`${api("/orders/categories")}`);
+  const res = await fetch(`${api("/orders/categories")}`, { credentials: "include" });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load categories"));
   const raw = json.categories;
@@ -179,14 +180,10 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
 }
 
 export async function logout(): Promise<void> {
-  try {
-    await fetch(`${api("/auth/logout")}`, {
-      method: "POST",
-      credentials: "include",
-    });
-  } finally {
-    if (typeof window !== "undefined") localStorage.removeItem("mipove_token");
-  }
+  await fetch(`${api("/auth/logout")}`, {
+    method: "POST",
+    credentials: "include",
+  });
 }
 
 export function getAuthRedirectPath(json: {
@@ -242,7 +239,7 @@ export async function getProfile(): Promise<Awaited<ReturnType<typeof getMe>>> {
 }
 
 export async function getProfessions(): Promise<Professions[]> {
-  const res = await fetch(`${api("/masters/professions")}`);
+  const res = await fetch(`${api("/masters/professions")}`, { credentials: "include" });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failet to get professions");
   return json.data ?? json as Professions[];
@@ -251,7 +248,7 @@ export async function searchCities(query: string, count = 10): Promise<GeocodeCi
   if (!query || query.trim().length < 2) return [];
   const q = encodeURIComponent(query.trim());
   const url = `${api("/geocode/search")}?q=${q}&count=${count}`;
-  const res = await fetch(url);
+  const res = await fetch(url, { credentials: "include" });
   const json = await res.json();
   if (!res.ok) {
     if (typeof window !== "undefined") {
@@ -273,7 +270,7 @@ export async function getMasters(params?: {
   if (params?.specialty) searchParams.set("specialty", params.specialty);
   if (params?.search) searchParams.set("search", params.search);
   const q = searchParams.toString() ? `?${searchParams}` : "";
-  const res = await fetch(api(`/masters${q}`));
+  const res = await fetch(api(`/masters${q}`), { credentials: "include" });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to fetch masters");
   const data = json.data ?? json;
@@ -300,7 +297,7 @@ export async function getProfileBySlug(slug: string): Promise<{
     image: string;
   }>;
 }> {
-  const res = await fetch(`${api(`/masters/${slug}`)}`);
+  const res = await fetch(`${api(`/masters/${slug}`)}`, { credentials: "include" });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Profile not found");
   const data = json.data ?? json;
@@ -477,12 +474,91 @@ export async function uploadFile(file: File): Promise<string> {
   return url;
 }
 
+function normalizeOrderCategoriesFromRow(row: Record<string, unknown>): string[] {
+  const raw = row.categories;
+  if (Array.isArray(raw)) {
+    return raw.map((c) => String(c).trim()).filter(Boolean);
+  }
+  const single = row.category;
+  if (single != null && String(single).trim() !== "") return [String(single).trim()];
+  return [];
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return null;
+}
+
+function extractOrderRecordPayload(json: unknown): Record<string, unknown> {
+  const root = asRecord(json);
+  const data = asRecord(root?.data);
+  const nested =
+    asRecord(data?.order) ??
+    asRecord(data?.item) ??
+    asRecord(root?.order) ??
+    asRecord(root?.item);
+  return nested ?? data ?? root ?? {};
+}
+
+function extractOrderListPayload(json: unknown): unknown[] {
+  if (Array.isArray(json)) return json;
+
+  const root = asRecord(json);
+  if (!root) return [];
+
+  const dataRaw = root.data;
+  if (Array.isArray(dataRaw)) return dataRaw;
+
+  const data = asRecord(dataRaw);
+  if (data) {
+    for (const key of ["orders", "items", "results", "list", "rows"] as const) {
+      const val = data[key];
+      if (Array.isArray(val)) return val;
+    }
+  }
+
+  for (const key of ["orders", "items", "results", "list", "rows"] as const) {
+    const val = root[key];
+    if (Array.isArray(val)) return val;
+  }
+
+  // Last resort: find the first array value in root or root.data
+  for (const val of Object.values(data ?? root)) {
+    if (Array.isArray(val) && val.length > 0 && typeof val[0] === "object") return val;
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.warn("[extractOrderListPayload] could not find order array in:", JSON.stringify(json).slice(0, 500));
+  }
+
+  return [];
+}
+
+function normalizeOrderRecord(row: Record<string, unknown>): OrderRecord {
+  const base = row as OrderRecord;
+  const categories = normalizeOrderCategoriesFromRow(row);
+  return {
+    ...base,
+    categories,
+    category: categories[0] ?? "",
+    budgetMin: Number(base.budgetMin) || 0,
+    budgetMax: Number(base.budgetMax) || 0,
+    priceNegotiable: base.priceNegotiable === true || base.priceNegotiable === "true" as unknown,
+    attachments: Array.isArray(base.attachments) ? base.attachments : [],
+  };
+}
+
 function appendOrderFormFields(form: FormData, data: Omit<OrderUpsertInput, "attachments">) {
   form.append("title", data.title);
-  form.append(
-    "category",
-    data.category != null && String(data.category).trim() !== "" ? String(data.category).trim() : "",
-  );
+  const cats =
+    data.categories == null
+      ? []
+      : data.categories.map((c) => String(c).trim()).filter(Boolean);
+  if (cats.length > 0) {
+    form.append("category", cats[0]);
+  }
   form.append("description", data.description);
   form.append("location", data.location);
   form.append("budgetMin", String(data.budgetMin));
@@ -503,26 +579,25 @@ export async function createOrder(
   const res = await authFetch(`${api("/orders")}`, () => ({ method: "POST", body: form }));
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to create order"));
-  const raw = (json.data ?? json) as OrderRecord;
-  return { ...raw, attachments: Array.isArray(raw.attachments) ? raw.attachments : [] };
+  const raw = extractOrderRecordPayload(json);
+  return normalizeOrderRecord(raw);
 }
 
-export async function getOrders(options?: { category?: string }): Promise<OrderRecord[]> {
+export async function getOrders(options?: { categories?: string[] }): Promise<OrderRecord[]> {
   const q = new URLSearchParams();
-  if (options?.category && options.category.trim()) q.set("category", options.category.trim());
+  const cats = options?.categories?.map((c) => c.trim()).filter(Boolean) ?? [];
+  for (const c of cats) {
+    q.append("category", c);
+  }
   const path = q.toString() ? `/orders?${q.toString()}` : "/orders";
   const res = await authFetch(`${api(path)}`, { method: "GET" });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load orders"));
-  const data = (json.data ?? json) as unknown;
-  if (!Array.isArray(data)) return [];
-  return data.map((row) => {
-    const order = row as OrderRecord;
-    return {
-      ...order,
-      attachments: Array.isArray(order.attachments) ? order.attachments : [],
-    };
-  });
+  const data = extractOrderListPayload(json);
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[getOrders] status=${res.status} parsed=${data.length} keys=${JSON.stringify(Object.keys(json))}`);
+  }
+  return data.map((row) => normalizeOrderRecord(row as Record<string, unknown>));
 }
 
 export async function getOrderById(orderId: string): Promise<OrderRecord> {
@@ -531,24 +606,29 @@ export async function getOrderById(orderId: string): Promise<OrderRecord> {
   });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load order"));
-  const order = (json.data ?? json) as OrderRecord;
-  return { ...order, attachments: Array.isArray(order.attachments) ? order.attachments : [] };
+  const raw = extractOrderRecordPayload(json);
+  return normalizeOrderRecord(raw);
 }
 
 export async function updateOrder(orderId: string, data: OrderUpsertInput): Promise<OrderRecord> {
+  const cats =
+    data.categories == null
+      ? []
+      : data.categories.map((c) => String(c).trim()).filter(Boolean);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { categories: _categories, ...rest } = data;
   const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      ...data,
-      category:
-        data.category == null || String(data.category).trim() === "" ? null : String(data.category).trim(),
+      ...rest,
+      category: cats.length > 0 ? cats[0] : null,
     }),
   });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to update order"));
-  const order = (json.data ?? json) as OrderRecord;
-  return { ...order, attachments: Array.isArray(order.attachments) ? order.attachments : [] };
+  const raw = extractOrderRecordPayload(json);
+  return normalizeOrderRecord(raw);
 }
 
 export async function deleteOrder(orderId: string): Promise<void> {
@@ -563,15 +643,8 @@ export async function getMasterFavoriteOrders(): Promise<OrderRecord[]> {
   const res = await authFetch(`${api("/masters/me/favorite-orders")}`, { method: "GET" });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load favorite orders"));
-  const data = (json.data ?? json) as unknown;
-  if (!Array.isArray(data)) return [];
-  return data.map((row) => {
-    const order = row as OrderRecord;
-    return {
-      ...order,
-      attachments: Array.isArray(order.attachments) ? order.attachments : [],
-    };
-  });
+  const data = extractOrderListPayload(json);
+  return data.map((row) => normalizeOrderRecord(row as Record<string, unknown>));
 }
 
 export async function addMasterFavoriteOrder(orderId: string): Promise<void> {
@@ -695,7 +768,7 @@ export async function getUnlockedIds(action: string): Promise<string[]> {
 }
 
 export async function getCreditPacks(): Promise<CreditPack[]> {
-  const res = await fetch(`${api("/credits/packs")}`);
+  const res = await fetch(`${api("/credits/packs")}`, { credentials: "include" });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load credit packs"));
   const packsTop = json.packs;

@@ -32,6 +32,7 @@ import OrdersSmartFilter, {
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 import { Banknote, MapPin, CalendarClock, User, Phone, Heart, Lock, Loader2 } from "lucide-react";
 import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
+import { mergeOrderCategoriesFromForm } from "@/lib/mergeOrderFromForm";
 import styles from "./orderPage.module.css";
 
 const ORDER_CARD_DELAY = [
@@ -107,6 +108,28 @@ function useScrollReveal() {
   return [ref, visible] as const;
 }
 
+
+function useScrollRevealWhen(ready: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!ready) return;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -32px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ready]);
+
+  return [ref, visible] as const;
+}
+
 export default function OrderPage() {
   const t = useTranslations("order");
   const tNav = useTranslations("nav");
@@ -131,7 +154,15 @@ export default function OrderPage() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [toolbarRef, toolbarVisible] = useScrollReveal();
+
+  const pendingLocalOrderIdsRef = useRef<Set<string>>(new Set());
+
+  
+  const canCreateOrder = Boolean(
+    sessionUser &&
+      !["master", "admin"].includes(String(sessionUser.role).toLowerCase()),
+  );
+  const [toolbarRef, toolbarVisible] = useScrollRevealWhen(canCreateOrder);
   const [layoutRef, layoutVisible] = useScrollReveal();
   const [ordersRef, ordersVisible] = useScrollReveal();
 
@@ -169,17 +200,28 @@ export default function OrderPage() {
     };
   }, []);
 
-  const ordersCategoryParam =
-    filterState.categories.length === 1 ? filterState.categories[0] : undefined;
+  const ordersFetchCategoriesKey = useMemo(
+    () => [...filterState.categories].sort().join("\0"),
+    [filterState.categories],
+  );
 
   useEffect(() => {
     let cancelled = false;
     setOrdersLoading(true);
     setOrdersError("");
-    getOrders(ordersCategoryParam ? { category: ordersCategoryParam } : undefined)
+    getOrders(
+      filterState.categories.length > 0 ? { categories: filterState.categories } : undefined,
+    )
       .then((rows) => {
         if (cancelled) return;
-        setOrders(rows);
+        setOrders((prev) => {
+          const serverIds = new Set(rows.map((r) => r._id));
+          for (const id of serverIds) pendingLocalOrderIdsRef.current.delete(id);
+          const carry = prev.filter(
+            (p) => Boolean(p._id) && pendingLocalOrderIdsRef.current.has(p._id) && !serverIds.has(p._id),
+          );
+          return [...carry, ...rows];
+        });
       })
       .catch((err) => {
         if (cancelled) return;
@@ -191,7 +233,7 @@ export default function OrderPage() {
     return () => {
       cancelled = true;
     };
-  }, [ordersCategoryParam]);
+  }, [ordersFetchCategoriesKey, filterState.categories]);
 
   useEffect(() => {
     let cancelled = false;
@@ -251,7 +293,6 @@ export default function OrderPage() {
       : sessionUser?.role === "master"
         ? t("roleMaster")
         : t("roleClient");
-  const canCreateOrder = sessionUser?.role === "user";
 
   const orderCategoriesForUi = useMemo(
     () => mapOrderCategoriesWithLabels(orderCategories, t),
@@ -268,14 +309,28 @@ export default function OrderPage() {
 
   const filteredOrders = useMemo(() => {
     const query = debouncedSearch;
+    const isDefaultFilter =
+      !query &&
+      filterState.categories.length === 0 &&
+      !filterState.location &&
+      !filterState.negotiableOnly &&
+      filterState.budgetMin === 0 &&
+      filterState.budgetMax === FILTER_BUDGET_MAX &&
+      filterState.deadlines.length === 0;
+
+    if (isDefaultFilter) return orders;
+
     return orders.filter((order) => {
       if (query) {
         const haystack = `${order.title} ${order.description}`.toLowerCase();
         if (!haystack.includes(query)) return false;
       }
 
-      if (filterState.categories.length > 0 && !filterState.categories.includes(order.category)) {
-        return false;
+      if (filterState.categories.length > 0) {
+        const orderCats =
+          order.categories.length > 0 ? order.categories : order.category ? [order.category] : [];
+        const matches = filterState.categories.some((id) => orderCats.includes(id));
+        if (!matches) return false;
       }
 
       if (filterState.location) {
@@ -285,8 +340,9 @@ export default function OrderPage() {
       if (filterState.negotiableOnly && !order.priceNegotiable) return false;
 
       if (!order.priceNegotiable) {
-        const overlaps =
-          order.budgetMax >= filterState.budgetMin && order.budgetMin <= filterState.budgetMax;
+        const lo = Number(order.budgetMin) || 0;
+        const hi = Number(order.budgetMax) || 0;
+        const overlaps = hi >= filterState.budgetMin && lo <= filterState.budgetMax;
         if (!overlaps) return false;
       }
 
@@ -305,7 +361,7 @@ export default function OrderPage() {
 
   const handleCreateOrder = async (form: {
     title: string;
-    category: string;
+    categories: string[];
     description: string;
     location: string;
     budgetMin: number;
@@ -320,7 +376,7 @@ export default function OrderPage() {
 
     const created = await createOrder({
       title,
-      category: form.category.trim() === "" ? null : form.category.trim(),
+      categories: form.categories.length > 0 ? form.categories : null,
       description: form.description.trim(),
       location: form.location,
       budgetMin: form.budgetMin,
@@ -329,13 +385,18 @@ export default function OrderPage() {
       deadline: form.deadline,
       files: form.images,
     });
-    setOrders((prev) => [created, ...prev]);
+    const merged = mergeOrderCategoriesFromForm(created, form.categories);
+    if (merged._id) pendingLocalOrderIdsRef.current.add(merged._id);
+    setOrders((prev) => {
+      const without = prev.filter((p) => p._id !== merged._id);
+      return [merged, ...without];
+    });
     setToast({ type: "success", message: t("orderCreated") });
   };
 
   const handleUpdateOrder = async (form: {
     title: string;
-    category: string;
+    categories: string[];
     description: string;
     location: string;
     budgetMin: number;
@@ -352,7 +413,7 @@ export default function OrderPage() {
     const attachmentUrls = await uploadAttachments(form.images);
     const updated = await updateOrder(editingOrder._id, {
       title,
-      category: form.category.trim() === "" ? null : form.category.trim(),
+      categories: form.categories.length > 0 ? form.categories : null,
       description: form.description.trim(),
       location: form.location,
       budgetMin: form.budgetMin,
@@ -361,7 +422,8 @@ export default function OrderPage() {
       deadline: form.deadline,
       attachments: [...(editingOrder.attachments ?? []), ...attachmentUrls],
     });
-    setOrders((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
+    const mergedUpdate = mergeOrderCategoriesFromForm(updated, form.categories);
+    setOrders((prev) => prev.map((item) => (item._id === mergedUpdate._id ? mergedUpdate : item)));
     setEditingOrder(null);
     setToast({ type: "success", message: t("orderUpdated") });
   };
@@ -372,6 +434,7 @@ export default function OrderPage() {
     setBusyKey(`delete:${orderId}`);
     try {
       await deleteOrder(orderId);
+      pendingLocalOrderIdsRef.current.delete(orderId);
       setOrders((prev) => prev.filter((item) => item._id !== orderId));
       setToast({ type: "success", message: t("orderDeleted") });
     } catch (err) {
@@ -512,9 +575,9 @@ export default function OrderPage() {
               const isUnlockedForMaster = isMaster && unlockedContactIds.has(order._id);
               const contactOpen = isMaster ? isUnlockedForMaster : expandedContactKey === cardKey;
               const isOwner =
-                sessionUser?.role === "user" &&
-                Boolean(sessionUser.id) &&
-                order.publisher?._id === sessionUser.id;
+                canCreateOrder &&
+                Boolean(sessionUser?.id) &&
+                order.publisher?._id === sessionUser?.id;
               const canEditPending = isOwner && order.status === "pending";
               const rawFirstImage = (order.attachments ?? []).find((url) => isImageAttachment(url));
               const firstImageSrc = rawFirstImage ? getImageUrl(rawFirstImage) : "";
@@ -744,7 +807,12 @@ export default function OrderPage() {
           editingOrder
             ? {
                 title: editingOrder.title,
-                category: editingOrder.category,
+                categories:
+                  editingOrder.categories.length > 0
+                    ? editingOrder.categories
+                    : editingOrder.category
+                      ? [editingOrder.category]
+                      : [],
                 description: editingOrder.description,
                 location: editingOrder.location,
                 budgetMin: editingOrder.budgetMin,

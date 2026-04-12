@@ -15,7 +15,7 @@ export type LoginInput = {
 };
 
 export type AuthResponse = {
-  token?: string; // Optional when using HTTP-only cookie auth
+  token?: string;
   message?: string;
   user?: User;
   data?: { role?: string; slug?: string; id?: string };
@@ -117,6 +117,9 @@ export type OrderStatus = "pending" | "active" | "completed" | "cancelled";
 export type OrderRecord = {
   _id: string;
   title: string;
+  /** Canonical category ids (multi-select; API may send `categories` or legacy `category`). */
+  categories: string[];
+  /** First category id for backward compatibility; prefer `categories`. */
   category: string;
   description: string;
   location: string;
@@ -145,8 +148,8 @@ export type OrderCategoryOption = {
 
 export type OrderUpsertInput = {
   title: string;
-  /** Canonical category id from GET /orders/categories; omit, empty string, or null to clear (PATCH). */
-  category?: string | null;
+  /** Canonical category ids from GET /orders/categories; empty array or null clears (PATCH). */
+  categories?: string[] | null;
   description: string;
   location: string;
   budgetMin: number;
