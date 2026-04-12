@@ -32,7 +32,7 @@ import OrdersSmartFilter, {
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 import { Banknote, MapPin, CalendarClock, User, Phone, Heart, Lock, Loader2 } from "lucide-react";
 import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
-import { mergeOrderCategoriesFromForm } from "@/lib/mergeOrderFromForm";
+import { mergeOrderCategoriesFromForm, mergeOrderPublisherFromForm } from "@/lib/mergeOrderFromForm";
 import styles from "./orderPage.module.css";
 
 const ORDER_CARD_DELAY = [
@@ -363,6 +363,8 @@ export default function OrderPage() {
     title: string;
     categories: string[];
     description: string;
+    contactName: string;
+    contactPhone: string;
     location: string;
     budgetMin: number;
     budgetMax: number;
@@ -377,6 +379,8 @@ export default function OrderPage() {
     const created = await createOrder({
       title,
       categories: form.categories.length > 0 ? form.categories : null,
+      contactName: form.contactName.trim(),
+      contactPhone: form.contactPhone.trim(),
       description: form.description.trim(),
       location: form.location,
       budgetMin: form.budgetMin,
@@ -385,7 +389,11 @@ export default function OrderPage() {
       deadline: form.deadline,
       files: form.images,
     });
-    const merged = mergeOrderCategoriesFromForm(created, form.categories);
+    const merged = mergeOrderPublisherFromForm(
+      mergeOrderCategoriesFromForm(created, form.categories),
+      form.contactName,
+      form.contactPhone,
+    );
     if (merged._id) pendingLocalOrderIdsRef.current.add(merged._id);
     setOrders((prev) => {
       const without = prev.filter((p) => p._id !== merged._id);
@@ -398,6 +406,8 @@ export default function OrderPage() {
     title: string;
     categories: string[];
     description: string;
+    contactName: string;
+    contactPhone: string;
     location: string;
     budgetMin: number;
     budgetMax: number;
@@ -414,6 +424,8 @@ export default function OrderPage() {
     const updated = await updateOrder(editingOrder._id, {
       title,
       categories: form.categories.length > 0 ? form.categories : null,
+      contactName: form.contactName.trim(),
+      contactPhone: form.contactPhone.trim(),
       description: form.description.trim(),
       location: form.location,
       budgetMin: form.budgetMin,
@@ -422,7 +434,11 @@ export default function OrderPage() {
       deadline: form.deadline,
       attachments: [...(editingOrder.attachments ?? []), ...attachmentUrls],
     });
-    const mergedUpdate = mergeOrderCategoriesFromForm(updated, form.categories);
+    const mergedUpdate = mergeOrderPublisherFromForm(
+      mergeOrderCategoriesFromForm(updated, form.categories),
+      form.contactName,
+      form.contactPhone,
+    );
     setOrders((prev) => prev.map((item) => (item._id === mergedUpdate._id ? mergedUpdate : item)));
     setEditingOrder(null);
     setToast({ type: "success", message: t("orderUpdated") });
@@ -796,6 +812,11 @@ export default function OrderPage() {
         onClose={() => setFormModalOpen(false)}
         onSubmit={handleCreateOrder}
         categoryOptions={orderCategoriesForUi}
+        initialValues={
+          sessionUser && canCreateOrder
+            ? { contactName: sessionUser.name ?? "", contactPhone: "" }
+            : undefined
+        }
       />
       <OrderFormModal
         open={Boolean(editingOrder)}
@@ -814,6 +835,8 @@ export default function OrderPage() {
                       ? [editingOrder.category]
                       : [],
                 description: editingOrder.description,
+                contactName: editingOrder.publisher?.name ?? "",
+                contactPhone: editingOrder.publisher?.phone ?? "",
                 location: editingOrder.location,
                 budgetMin: editingOrder.budgetMin,
                 budgetMax: editingOrder.budgetMax,

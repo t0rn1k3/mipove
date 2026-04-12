@@ -16,3 +16,23 @@ export function mergeOrderCategoriesFromForm(
   const category = categories[0] ?? "";
   return { ...order, categories, category };
 }
+
+/** When POST omits `publisher`, fill from form so contact reveal shows name/phone immediately. */
+export function mergeOrderPublisherFromForm(
+  order: OrderRecord,
+  contactName: string,
+  contactPhone: string,
+): OrderRecord {
+  const name = contactName.trim();
+  const phone = contactPhone.trim();
+  if (!name && !phone) return order;
+  const prev = order.publisher ?? {};
+  return {
+    ...order,
+    publisher: {
+      ...prev,
+      name: (prev.name && String(prev.name).trim()) || name || prev.name,
+      phone: (prev.phone && String(prev.phone).trim()) || phone || prev.phone,
+    },
+  };
+}

@@ -61,6 +61,8 @@ export type OrderFormState = {
   title: string;
   categories: string[];
   description: string;
+  contactName: string;
+  contactPhone: string;
   images: File[];
   location: string;
   budgetMin: number;
@@ -73,6 +75,8 @@ const initialState: OrderFormState = {
   title: "",
   categories: [],
   description: "",
+  contactName: "",
+  contactPhone: "",
   images: [],
   location: "",
   budgetMin: 0,
@@ -102,6 +106,8 @@ export default function OrderSubmissionForm({
     ...initialState,
     ...initialValues,
     categories: initialValues?.categories ?? initialState.categories,
+    contactName: initialValues?.contactName ?? initialState.contactName,
+    contactPhone: initialValues?.contactPhone ?? initialState.contactPhone,
     images: initialValues?.images ?? [],
   });
   const [dragOver, setDragOver] = useState(false);
@@ -187,6 +193,8 @@ export default function OrderSubmissionForm({
     if (s === 1) {
       if (!form.title.trim()) next.title = t("errorTitle");
       if (!form.description.trim()) next.description = t("errorDescription");
+      if (!form.contactName.trim()) next.contactName = t("errorContactName");
+      if (!form.contactPhone.trim()) next.contactPhone = t("errorContactPhone");
     }
     if (s === 2) {
       if (categoryOptions.length === 0) {
@@ -292,6 +300,39 @@ export default function OrderSubmissionForm({
           />
           {errors.description ? (
             <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.description}</p>
+          ) : null}
+
+          <p className={styles.fieldHint}>{t("contactHint")}</p>
+          <label className={styles.label} htmlFor={`${formId}-contact-name`}>
+            {t("contactName")}
+          </label>
+          <input
+            id={`${formId}-contact-name`}
+            className={`${styles.input} ${errors.contactName ? styles.fieldError : ""}`}
+            type="text"
+            value={form.contactName}
+            onChange={(e) => setField("contactName", e.target.value)}
+            placeholder={t("contactNamePlaceholder")}
+            autoComplete="name"
+          />
+          {errors.contactName ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.contactName}</p>
+          ) : null}
+
+          <label className={styles.label} htmlFor={`${formId}-contact-phone`}>
+            {t("contactPhone")}
+          </label>
+          <input
+            id={`${formId}-contact-phone`}
+            className={`${styles.input} ${errors.contactPhone ? styles.fieldError : ""}`}
+            type="tel"
+            value={form.contactPhone}
+            onChange={(e) => setField("contactPhone", e.target.value)}
+            placeholder={t("contactPhonePlaceholder")}
+            autoComplete="tel"
+          />
+          {errors.contactPhone ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.contactPhone}</p>
           ) : null}
         </div>
       ) : null}

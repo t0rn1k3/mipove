@@ -150,6 +150,9 @@ export type OrderUpsertInput = {
   title: string;
   /** Canonical category ids from GET /orders/categories; empty array or null clears (PATCH). */
   categories?: string[] | null;
+  /** Contact shown on the order card (multipart POST / JSON PATCH field names: contactName, contactPhone). */
+  contactName?: string | null;
+  contactPhone?: string | null;
   description: string;
   location: string;
   budgetMin: number;

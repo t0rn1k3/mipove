@@ -536,9 +536,32 @@ function extractOrderListPayload(json: unknown): unknown[] {
   return [];
 }
 
+function extractPublisher(row: Record<string, unknown>): OrderRecord["publisher"] | undefined {
+  const pub = row.publisher;
+  if (pub && typeof pub === "object" && !Array.isArray(pub)) {
+    const p = pub as Record<string, unknown>;
+    return {
+      _id: typeof p._id === "string" ? p._id : undefined,
+      name: typeof p.name === "string" ? p.name : undefined,
+      phone: typeof p.phone === "string" ? p.phone : undefined,
+      email: typeof p.email === "string" ? p.email : undefined,
+    };
+  }
+  const cn = row.contactName;
+  const cp = row.contactPhone;
+  if (typeof cn === "string" || typeof cp === "string") {
+    return {
+      name: typeof cn === "string" && cn.trim() ? cn.trim() : undefined,
+      phone: typeof cp === "string" && cp.trim() ? cp.trim() : undefined,
+    };
+  }
+  return undefined;
+}
+
 function normalizeOrderRecord(row: Record<string, unknown>): OrderRecord {
   const base = row as OrderRecord;
   const categories = normalizeOrderCategoriesFromRow(row);
+  const publisher = extractPublisher(row) ?? base.publisher;
   return {
     ...base,
     categories,
@@ -547,6 +570,7 @@ function normalizeOrderRecord(row: Record<string, unknown>): OrderRecord {
     budgetMax: Number(base.budgetMax) || 0,
     priceNegotiable: base.priceNegotiable === true || base.priceNegotiable === "true" as unknown,
     attachments: Array.isArray(base.attachments) ? base.attachments : [],
+    publisher,
   };
 }
 
@@ -565,6 +589,10 @@ function appendOrderFormFields(form: FormData, data: Omit<OrderUpsertInput, "att
   form.append("budgetMax", String(data.budgetMax));
   form.append("priceNegotiable", String(data.priceNegotiable));
   form.append("deadline", data.deadline);
+  const cn = data.contactName != null ? String(data.contactName).trim() : "";
+  const cp = data.contactPhone != null ? String(data.contactPhone).trim() : "";
+  if (cn) form.append("contactName", cn);
+  if (cp) form.append("contactPhone", cp);
 }
 
 /** Create order: POST multipart with scalar fields + file attachments. */
@@ -615,14 +643,17 @@ export async function updateOrder(orderId: string, data: OrderUpsertInput): Prom
     data.categories == null
       ? []
       : data.categories.map((c) => String(c).trim()).filter(Boolean);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { categories: _categories, ...rest } = data;
+  const cn = rest.contactName != null ? String(rest.contactName).trim() : "";
+  const cp = rest.contactPhone != null ? String(rest.contactPhone).trim() : "";
   const res = await authFetch(`${api(`/orders/${encodeURIComponent(orderId)}`)}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       ...rest,
       category: cats.length > 0 ? cats[0] : null,
+      contactName: cn || null,
+      contactPhone: cp || null,
     }),
   });
   const json = await readJsonSafe(res);
