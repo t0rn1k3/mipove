@@ -333,7 +333,12 @@
     "ratingError": "Could not save rating. Try again.",
     "starLabel": "Rate {n} out of 5",
     "votes": "votes",
-    "ratingNotAllowed": "Only users and masters can rate."
+    "ratingNotAllowed": "Only users and masters can rate.",
+    "myOrders": "My orders",
+    "myOrdersSubtitle": "Orders you created on Mipove.",
+    "myOrdersLoading": "Loading your orders…",
+    "myOrdersEmpty": "You have not posted any orders yet.",
+    "myOrdersViewOrders": "Open orders page"
   },
   "profileRedirect": {
     "message": "Redirecting to your profile..."

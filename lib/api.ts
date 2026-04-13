@@ -779,12 +779,15 @@ export async function getOrders(options?: {
   categories?: string[];
   limit?: number;
   offset?: number;
+  /** When true, requests only the current user’s orders (`mine=true`). Backend should scope results to the authenticated publisher. */
+  mine?: boolean;
 }): Promise<GetOrdersPageResult> {
   const limit = options?.limit ?? ORDERS_PAGE_SIZE;
   const offset = options?.offset ?? 0;
   const q = new URLSearchParams();
   if (limit > 0) q.set("limit", String(limit));
   if (offset > 0) q.set("offset", String(offset));
+  if (options?.mine) q.set("mine", "true");
   const cats = options?.categories?.map((c) => c.trim()).filter(Boolean) ?? [];
   if (cats.length > 0) q.set("categories", cats.join(","));
   const path = `/orders?${q.toString()}`;
@@ -804,6 +807,14 @@ export async function getOrders(options?: {
     hasMore,
     nextOffset,
   };
+}
+
+/** Current user’s orders (GET /orders?mine=true&limit&offset). */
+export async function getMyOrders(options?: {
+  limit?: number;
+  offset?: number;
+}): Promise<GetOrdersPageResult> {
+  return getOrders({ mine: true, limit: options?.limit, offset: options?.offset });
 }
 
 export async function getOrderById(orderId: string): Promise<OrderRecord> {

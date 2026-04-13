@@ -333,7 +333,12 @@
     "ratingError": "შეფასების შენახვა ვერ მოხერხდა. სცადეთ ხელახლა.",
     "starLabel": "შეფასება {n} 5-დან",
     "votes": "ხმა",
-    "ratingNotAllowed": "ხმის მიცემა მხოლოდ მომხმარებლებს და ოსტატებს შეუძლიათ."
+    "ratingNotAllowed": "ხმის მიცემა მხოლოდ მომხმარებლებს და ოსტატებს შეუძლიათ.",
+    "myOrders": "თქვენი შეკვეთები",
+    "myOrdersSubtitle": "შეკვეთები Mipove-ზე",
+    "myOrdersLoading": "იბვირთება…",
+    "myOrdersEmpty": "არ გაბოლოება შეკვეთები.",
+    "myOrdersViewOrders": "შეკვეთების გვერდი"
   },
   "profileRedirect": {
     "message": "მიმართვა თქვენს პროფილზე..."

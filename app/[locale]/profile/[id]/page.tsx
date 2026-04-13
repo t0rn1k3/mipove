@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import EditProfileModal from "@/components/EditProfileModal/EditProfileModal";
 import LightboxModal from "@/components/LightboxModal/LightboxModal";
@@ -15,6 +17,7 @@ import {
   MapPin,
   Banknote,
 } from "lucide-react";
+import Logo from "@/components/logo/Logo";
 import {
   getMe,
   fetchMyPortfolio,
@@ -26,6 +29,9 @@ import {
   rateMaster,
   getMasterFavoriteOrders,
   removeMasterFavoriteOrder,
+  getMyOrders,
+  deleteOrder,
+  ORDERS_PAGE_SIZE,
 } from "@/lib/api";
 import type {
   MeProfileApiFields,
@@ -40,6 +46,10 @@ import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
 
 function isImageAttachment(url: string): boolean {
   return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
+}
+
+function orderBelongsToUser(order: OrderRecord, userId: string): boolean {
+  return order.publisher?._id === userId || order.user?._id === userId;
 }
 
 function mapMeToProfile(data: MeProfileApiFields, role?: string): ProfileData {
@@ -64,6 +74,8 @@ function mapMeToProfile(data: MeProfileApiFields, role?: string): ProfileData {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations("profile");
+  const tOrder = useTranslations("order");
   const params = useParams();
   const router = useRouter();
   const slug = params?.id as string | undefined;
@@ -91,6 +103,16 @@ export default function ProfilePage() {
   const [ratedMasters, setRatedMasters] = useState<RatedMasterItem[]>([]);
   const { balance: creditBalance } = useCreditBalance();
 
+  const [clientUserId, setClientUserId] = useState<string | null>(null);
+  const [myOrders, setMyOrders] = useState<OrderRecord[]>([]);
+  const [myOrdersLoading, setMyOrdersLoading] = useState(false);
+  const [myOrdersError, setMyOrdersError] = useState("");
+  const [myOrdersHasMore, setMyOrdersHasMore] = useState(false);
+  const [myOrdersNextOffset, setMyOrdersNextOffset] = useState(0);
+  const [myOrdersLoadingMore, setMyOrdersLoadingMore] = useState(false);
+  const [myOrdersDeleteBusyId, setMyOrdersDeleteBusyId] = useState<string | null>(null);
+  const myOrdersRequestIdRef = useRef(0);
+
   const rateInitialStars =
     slug && slug !== "me"
       ? (ratedMasters.find(
@@ -116,6 +138,65 @@ export default function ProfilePage() {
       .finally(() => setFavoriteLoading(false));
   }, [canShowFavoritesTab]);
 
+  const loadMoreMyOrders = useCallback(async () => {
+    if (!clientUserId || myOrdersLoadingMore || !myOrdersHasMore || myOrdersLoading) return;
+    const requestId = myOrdersRequestIdRef.current;
+    setMyOrdersLoadingMore(true);
+    setMyOrdersError("");
+    try {
+      const page = await getMyOrders({ limit: ORDERS_PAGE_SIZE, offset: myOrdersNextOffset });
+      if (requestId !== myOrdersRequestIdRef.current) return;
+      const rows = page.orders.filter((o) => orderBelongsToUser(o, clientUserId));
+      setMyOrders((prev) => {
+        const existing = new Set(prev.map((p) => p._id));
+        const toAdd = rows.filter((r) => !existing.has(r._id));
+        return [...prev, ...toAdd];
+      });
+      setMyOrdersHasMore(page.hasMore);
+      setMyOrdersNextOffset(page.nextOffset);
+    } catch (err) {
+      if (requestId !== myOrdersRequestIdRef.current) return;
+      setMyOrdersError(err instanceof Error ? err.message : "Failed to load orders");
+    } finally {
+      if (requestId === myOrdersRequestIdRef.current) setMyOrdersLoadingMore(false);
+    }
+  }, [
+    clientUserId,
+    myOrdersHasMore,
+    myOrdersLoading,
+    myOrdersLoadingMore,
+    myOrdersNextOffset,
+  ]);
+
+  useEffect(() => {
+    if (!clientUserId || userRole !== "user" || !isOwnProfile) {
+      setMyOrders([]);
+      setMyOrdersHasMore(false);
+      setMyOrdersNextOffset(0);
+      setMyOrdersError("");
+      return;
+    }
+    const requestId = ++myOrdersRequestIdRef.current;
+    setMyOrdersLoading(true);
+    setMyOrdersError("");
+    setMyOrdersLoadingMore(false);
+    getMyOrders({ limit: ORDERS_PAGE_SIZE, offset: 0 })
+      .then((page) => {
+        if (requestId !== myOrdersRequestIdRef.current) return;
+        const rows = page.orders.filter((o) => orderBelongsToUser(o, clientUserId));
+        setMyOrders(rows);
+        setMyOrdersHasMore(page.hasMore);
+        setMyOrdersNextOffset(page.nextOffset);
+      })
+      .catch((err) => {
+        if (requestId !== myOrdersRequestIdRef.current) return;
+        setMyOrdersError(err instanceof Error ? err.message : "Failed to load orders");
+      })
+      .finally(() => {
+        if (requestId === myOrdersRequestIdRef.current) setMyOrdersLoading(false);
+      });
+  }, [clientUserId, userRole, isOwnProfile]);
+
   useEffect(() => {
     if (!slug) {
       setProfile(null);
@@ -134,6 +215,7 @@ export default function ProfilePage() {
             router.replace("/admin");
             return;
           }
+          setClientUserId(data.role === "user" ? data._id : null);
           setProfile(mapMeToProfile(data, data.role));
           setIsOwnProfile(true);
           setIsMasterProfile(data.role === "master");
@@ -148,6 +230,7 @@ export default function ProfilePage() {
       .then(({ data }) => {
         setUserRole(data.role);
         if (data.slug === slug) {
+          setClientUserId(data.role === "user" ? data._id : null);
           setProfile(mapMeToProfile(data, data.role));
           setIsOwnProfile(true);
           setIsMasterProfile(data.role === "master");
@@ -163,6 +246,7 @@ export default function ProfilePage() {
           return;
         }
         return getProfileBySlug(slug).then((p) => {
+          setClientUserId(null);
           setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
           setIsOwnProfile(false);
           setIsMasterProfile(true);
@@ -172,6 +256,7 @@ export default function ProfilePage() {
       .catch(() =>
         getProfileBySlug(slug)
           .then((p) => {
+            setClientUserId(null);
             setProfile({ ...p, portfolioImages: p.portfolioImages ?? [] });
             setIsOwnProfile(false);
             setIsMasterProfile(true);
@@ -241,6 +326,20 @@ export default function ProfilePage() {
       setEditError(err instanceof Error ? err.message : "Update failed");
     } finally {
       setEditLoading(false);
+    }
+  };
+
+  const handleDeleteMyOrder = async (orderId: string) => {
+    if (!window.confirm(tOrder("deleteOrderConfirm"))) return;
+    setMyOrdersDeleteBusyId(orderId);
+    try {
+      await deleteOrder(orderId);
+      setMyOrders((prev) => prev.filter((o) => o._id !== orderId));
+      setToast(tOrder("orderDeleted"));
+    } catch (err) {
+      setToast(err instanceof Error ? err.message : tOrder("deleteOrderFailed"));
+    } finally {
+      setMyOrdersDeleteBusyId(null);
     }
   };
 
@@ -323,7 +422,120 @@ export default function ProfilePage() {
 
             <div className={styles.main}>
               {userRole === "user" && isOwnProfile ? (
-                <RatedMastersList ratedMasters={ratedMasters} />
+                <>
+                  <section className={styles.myOrdersSection} aria-labelledby="profile-my-orders-heading">
+                    <h2 id="profile-my-orders-heading" className={styles.myOrdersHeading}>
+                      {t("myOrders")}
+                    </h2>
+                    <p className={styles.myOrdersSubtitle}>{t("myOrdersSubtitle")}</p>
+                    {myOrdersLoading ? (
+                      <p className={styles.myOrdersMuted}>{t("myOrdersLoading")}</p>
+                    ) : null}
+                    {myOrdersError ? (
+                      <p className="mipoveGuestText mipoveGuestText--errorLight">{myOrdersError}</p>
+                    ) : null}
+                    {!myOrdersLoading && !myOrdersError && myOrders.length === 0 ? (
+                      <div className={styles.myOrdersEmpty}>
+                        <p>{t("myOrdersEmpty")}</p>
+                        <Link href="/order" className={styles.myOrdersPrimaryLink}>
+                          {t("myOrdersViewOrders")}
+                        </Link>
+                      </div>
+                    ) : null}
+                    {!myOrdersLoading && !myOrdersError && myOrders.length > 0 ? (
+                      <div className={styles.myOrdersList}>
+                        {myOrders.map((order) => {
+                          const rawThumb = (order.attachments ?? []).find((url) =>
+                            isImageAttachment(url),
+                          );
+                          const thumbSrc = rawThumb ? getImageUrl(rawThumb) : "";
+                          const locationLabel =
+                            String(
+                              order.locationData?.city ??
+                                order.locationData?.addressText ??
+                                order.location ??
+                                "",
+                            ).trim() || "—";
+                          const canDeletePending = order.status === "pending";
+                          const deleting = myOrdersDeleteBusyId === order._id;
+                          return (
+                            <article key={order._id} className={styles.myOrderCard}>
+                              <div className={styles.favoriteTop}>
+                                <div className={styles.myOrderThumbWrap}>
+                                  {thumbSrc ? (
+                                    <Image
+                                      src={thumbSrc}
+                                      alt=""
+                                      width={90}
+                                      height={90}
+                                      className={styles.favoriteThumb}
+                                    />
+                                  ) : (
+                                    <div className={styles.myOrderThumbPlaceholder} aria-hidden>
+                                      <div className={styles.myOrderThumbLogoLoop}>
+                                        <Logo
+                                          size={34}
+                                          showText={false}
+                                          className={styles.myOrderThumbLogo}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className={styles.favoriteMain}>
+                                  <h3 className={styles.favoriteTitle}>{order.title}</h3>
+                                  <p className={styles.favoriteDesc}>{order.description}</p>
+                                  <div className={styles.favoriteMeta}>
+                                    <span className={styles.favoriteMetaItem}>
+                                      <MapPin size={16} /> {locationLabel}
+                                    </span>
+                                    <span className={styles.favoriteMetaItem}>
+                                      <Banknote size={16} />{" "}
+                                      {order.priceNegotiable
+                                        ? "Negotiable"
+                                        : `\u20be${order.budgetMin} - \u20be${order.budgetMax}`}
+                                    </span>
+                                    <span className={styles.favoriteMetaItem}>
+                                      <CalendarClock size={16} /> {order.deadline || "—"}
+                                    </span>
+                                  </div>
+                                  <div className={styles.favoriteActions}>
+                                    <Link href="/order" className={styles.favoriteGhostBtn}>
+                                      {t("myOrdersViewOrders")}
+                                    </Link>
+                                    {canDeletePending ? (
+                                      <button
+                                        type="button"
+                                        className={styles.favoriteRemoveBtn}
+                                        disabled={deleting}
+                                        onClick={() => void handleDeleteMyOrder(order._id)}
+                                      >
+                                        {deleting ? tOrder("deletingOrder") : tOrder("deleteOrder")}
+                                      </button>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              </div>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                    {!myOrdersLoading && !myOrdersError && myOrdersHasMore ? (
+                      <div className={styles.myOrdersLoadMore}>
+                        <button
+                          type="button"
+                          className={styles.favoriteGhostBtn}
+                          onClick={() => void loadMoreMyOrders()}
+                          disabled={myOrdersLoadingMore}
+                        >
+                          {myOrdersLoadingMore ? tOrder("loadingMoreOrders") : tOrder("showMoreOrders")}
+                        </button>
+                      </div>
+                    ) : null}
+                  </section>
+                  <RatedMastersList ratedMasters={ratedMasters} />
+                </>
               ) : (
                 <>
                   <div className={styles.tabBar}>
