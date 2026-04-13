@@ -13,6 +13,10 @@ export default function RatedMastersList({ ratedMasters }: RatedMastersListProps
   const tProfile = useTranslations("profile");
   const tProfessions = useTranslations("professions");
 
+  const validRatedMasters = ratedMasters.filter(
+    (item) => item.master && item.master._id,
+  );
+
   return (
     <>
       <div className={styles.header}>
@@ -20,11 +24,11 @@ export default function RatedMastersList({ ratedMasters }: RatedMastersListProps
         <p className={styles.subtitle}>{tProfile("ratedMastersSubtitle")}</p>
       </div>
 
-      {ratedMasters.length === 0 ? (
+      {validRatedMasters.length === 0 ? (
         <p className={styles.empty}>{tProfile("noRatedYet")}</p>
       ) : (
         <div className={styles.grid}>
-          {ratedMasters.map((item) => (
+          {validRatedMasters.map((item) => (
             <Link
               key={item.master._id + item.ratedAt}
               href={`/profile/${item.master.slug}`}

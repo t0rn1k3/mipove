@@ -116,7 +116,7 @@ export default function ProfilePage() {
   const rateInitialStars =
     slug && slug !== "me"
       ? (ratedMasters.find(
-          (r) => r.master.slug === slug || r.master._id === slug,
+        (r) => r.master?.slug === slug || r.master?._id === slug,
         )?.stars ?? null)
       : null;
   const canVoteRole = userRole === "user" || userRole === "master";
