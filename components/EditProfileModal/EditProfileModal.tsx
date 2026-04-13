@@ -16,7 +16,9 @@ export default function EditProfileModal({
   editLoading,
   onClose,
   onSubmit,
+  variant = "master",
 }: EditProfileModalProps) {
+  const isClientProfile = variant === "user";
   const tProfessions = useTranslations("professions");
   const [professionsRaw, setProfessionsRaw] = useState<Professions[]>([]);
   const [specialtyValue, setSpecialtyValue] = useState(
@@ -29,7 +31,7 @@ export default function EditProfileModal({
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isClientProfile) return;
     let cancelled = false;
     getProfessions()
       .then((list) => {
@@ -44,7 +46,7 @@ export default function EditProfileModal({
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, isClientProfile]);
 
   if (!open) return null;
 
@@ -99,19 +101,7 @@ export default function EditProfileModal({
               defaultValue={values.phone}
             />
           </div>
-          <div className={styles.formRow}>
-            <div className={styles.formField}>
-              <label htmlFor="edit-specialty">Specialty</label>
-              <input type="hidden" name="specialty" value={specialtyValue} />
-              <CustomSelect
-                id="edit-specialty"
-                aria-label="Specialty"
-                value={specialtyValue}
-                placeholder="Select a specialty"
-                options={specialtyOptions}
-                onChange={setSpecialtyValue}
-              />
-            </div>
+          {isClientProfile ? (
             <div className={styles.formField}>
               <label htmlFor="edit-location">Location</label>
               <CityAutocomplete
@@ -121,37 +111,63 @@ export default function EditProfileModal({
                 placeholder="Start typing a city..."
               />
             </div>
-          </div>
-          <div className={styles.formField}>
-            <label htmlFor="edit-bio">Bio</label>
-            <textarea
-              id="edit-bio"
-              name="bio"
-              rows={4}
-              defaultValue={values.bio}
-            />
-          </div>
-          <div className={styles.formRow}>
-            <div className={styles.formField}>
-              <label htmlFor="edit-instagram">Instagram</label>
-              <input
-                id="edit-instagram"
-                name="instagram"
-                defaultValue={values.instagram || ""}
-                placeholder="@username"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label htmlFor="edit-website">Website</label>
-              <input
-                id="edit-website"
-                name="website"
-                type="url"
-                defaultValue={values.website || ""}
-                placeholder="https://"
-              />
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className={styles.formRow}>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-specialty">Specialty</label>
+                  <input type="hidden" name="specialty" value={specialtyValue} />
+                  <CustomSelect
+                    id="edit-specialty"
+                    aria-label="Specialty"
+                    value={specialtyValue}
+                    placeholder="Select a specialty"
+                    options={specialtyOptions}
+                    onChange={setSpecialtyValue}
+                  />
+                </div>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-location">Location</label>
+                  <CityAutocomplete
+                    id="edit-location"
+                    name="location"
+                    defaultValue={values.location === "—" ? "" : values.location}
+                    placeholder="Start typing a city..."
+                  />
+                </div>
+              </div>
+              <div className={styles.formField}>
+                <label htmlFor="edit-bio">Bio</label>
+                <textarea
+                  id="edit-bio"
+                  name="bio"
+                  rows={4}
+                  defaultValue={values.bio}
+                />
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-instagram">Instagram</label>
+                  <input
+                    id="edit-instagram"
+                    name="instagram"
+                    defaultValue={values.instagram || ""}
+                    placeholder="@username"
+                  />
+                </div>
+                <div className={styles.formField}>
+                  <label htmlFor="edit-website">Website</label>
+                  <input
+                    id="edit-website"
+                    name="website"
+                    type="url"
+                    defaultValue={values.website || ""}
+                    placeholder="https://"
+                  />
+                </div>
+              </div>
+            </>
+          )}
           <div className={styles.modalActions}>
             <button
               type="button"

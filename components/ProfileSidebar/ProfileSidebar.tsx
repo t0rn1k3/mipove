@@ -28,7 +28,9 @@ export default function ProfileSidebar({
   onChangePhoto,
   isUploadingPhoto,
   onBuyCredits,
+  variant = "master",
 }: ProfileSidebarProps) {
+  const isClientProfile = variant === "user";
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
   const tCredits = useTranslations("credits");
@@ -72,14 +74,17 @@ export default function ProfileSidebar({
           )}
         </div>
         <h1 className={styles.name}>{name}</h1>
-        <p className={styles.specialty}>
-          {translateProfessionDisplay(specialty, tProfessions) || specialty}
-        </p>
+        {!isClientProfile ? (
+          <p className={styles.specialty}>
+            {translateProfessionDisplay(specialty, tProfessions) || specialty}
+          </p>
+        ) : null}
         <div className={styles.location}>
           <MapPin size={18} className={styles.locationIcon} />
           <span>{location}</span>
         </div>
-        {(typeof rating === "number" || typeof credits === "number" || onBuyCredits) && (
+        {!isClientProfile &&
+        (typeof rating === "number" || typeof credits === "number" || onBuyCredits) ? (
           <div className={styles.quickStats}>
             {typeof rating === "number" && (
               <div className={styles.statPill}>
@@ -117,8 +122,8 @@ export default function ProfileSidebar({
               </div>
             ) : null}
           </div>
-        )}
-        <p className={styles.bio}>{bio}</p>
+        ) : null}
+        {!isClientProfile ? <p className={styles.bio}>{bio}</p> : null}
 
         <div className={styles.separator} />
 
@@ -137,7 +142,7 @@ export default function ProfileSidebar({
               <span className={styles.contactDetail}>{email}</span>
             </div>
           </a>
-          {instagram && (
+          {!isClientProfile && instagram ? (
             <a
               href={`https://instagram.com/${instagram.replace(/^@/, "")}`}
               target="_blank"
@@ -150,8 +155,8 @@ export default function ProfileSidebar({
                 <span className={styles.contactDetail}>@{instagram}</span>
               </div>
             </a>
-          )}
-          {website && (
+          ) : null}
+          {!isClientProfile && website ? (
             <a
               href={website.startsWith("http") ? website : `https://${website}`}
               target="_blank"
@@ -164,7 +169,7 @@ export default function ProfileSidebar({
                 <span className={styles.contactDetail}>{website}</span>
               </div>
             </a>
-          )}
+          ) : null}
         </div>
 
         {isOwnProfile && (onEdit || onLogout) && (

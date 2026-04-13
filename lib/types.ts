@@ -400,6 +400,8 @@ export type EditProfileModalProps = {
   editLoading: boolean;
   onClose: () => void;
   onSubmit: FormEventHandler<HTMLFormElement>;
+  /** Client profiles: only name, email, phone, location (no specialty, bio, socials). */
+  variant?: "master" | "user";
 };
 
 export type RatedMastersListProps = {
@@ -471,6 +473,8 @@ export type ProfileSidebarProps = {
   isUploadingPhoto?: boolean;
   /** Master: opens buy-credits flow (e.g. modal). */
   onBuyCredits?: () => void;
+  /** Client card: hide rating, specialty, bio, Instagram, and website. */
+  variant?: "master" | "user";
 };
 
 export type LogoProps = {

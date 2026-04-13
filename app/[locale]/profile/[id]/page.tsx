@@ -310,16 +310,25 @@ export default function ProfilePage() {
     setEditError("");
     setEditLoading(true);
     try {
-      const data = await updateProfile({
-        name: (form.elements.namedItem("name") as HTMLInputElement)?.value,
-        email: (form.elements.namedItem("email") as HTMLInputElement)?.value,
-        phone: (form.elements.namedItem("phone") as HTMLInputElement)?.value,
-        specialty: (form.elements.namedItem("specialty") as HTMLInputElement)?.value,
-        location: (form.elements.namedItem("location") as HTMLInputElement)?.value,
-        bio: (form.elements.namedItem("bio") as HTMLTextAreaElement)?.value,
-        instagram: (form.elements.namedItem("instagram") as HTMLInputElement)?.value || undefined,
-        website: (form.elements.namedItem("website") as HTMLInputElement)?.value || undefined,
-      });
+      const data = await updateProfile(
+        userRole === "user"
+          ? {
+              name: (form.elements.namedItem("name") as HTMLInputElement)?.value,
+              email: (form.elements.namedItem("email") as HTMLInputElement)?.value,
+              phone: (form.elements.namedItem("phone") as HTMLInputElement)?.value,
+              location: (form.elements.namedItem("location") as HTMLInputElement)?.value,
+            }
+          : {
+              name: (form.elements.namedItem("name") as HTMLInputElement)?.value,
+              email: (form.elements.namedItem("email") as HTMLInputElement)?.value,
+              phone: (form.elements.namedItem("phone") as HTMLInputElement)?.value,
+              specialty: (form.elements.namedItem("specialty") as HTMLInputElement)?.value,
+              location: (form.elements.namedItem("location") as HTMLInputElement)?.value,
+              bio: (form.elements.namedItem("bio") as HTMLTextAreaElement)?.value,
+              instagram: (form.elements.namedItem("instagram") as HTMLInputElement)?.value || undefined,
+              website: (form.elements.namedItem("website") as HTMLInputElement)?.value || undefined,
+            },
+      );
       setProfile(mapMeToProfile(data.data, userRole ?? undefined));
       setShowEditModal(false);
     } catch (err) {
@@ -396,13 +405,14 @@ export default function ProfilePage() {
             <div className={styles.sidebar}>
               <ProfileSidebar
                 {...profile}
-                rating={profile.rating}
-                reviewCount={profile.reviewCount}
+                rating={userRole === "master" ? profile.rating : undefined}
+                reviewCount={userRole === "master" ? profile.reviewCount : undefined}
                 credits={
                   isOwnProfile && userRole === "master" && creditBalance !== null
                     ? creditBalance
                     : undefined
                 }
+                variant={userRole === "user" ? "user" : "master"}
                 isOwnProfile={isOwnProfile}
                 onEdit={() => {
                   setEditModalKey((k) => k + 1);
@@ -683,6 +693,7 @@ export default function ProfilePage() {
           instagram: profile.instagram,
           website: profile.website,
         }}
+        variant={userRole === "user" ? "user" : "master"}
         editError={editError}
         editLoading={editLoading}
         onClose={() => setShowEditModal(false)}
