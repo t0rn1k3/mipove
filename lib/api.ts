@@ -536,6 +536,71 @@ function extractOrderListPayload(json: unknown): unknown[] {
   return [];
 }
 
+/** Default page size for GET /orders; keep in sync with orders UI. */
+export const ORDERS_PAGE_SIZE = 15;
+
+export type GetOrdersPageResult = {
+  orders: OrderRecord[];
+  hasMore: boolean;
+  nextOffset: number;
+};
+
+function tryPaginatedOrdersFromObject(
+  obj: Record<string, unknown> | undefined,
+  key: "items" | "orders",
+  allowLengthHeuristic: boolean,
+  limit: number,
+  offset: number,
+): { rawRows: unknown[]; hasMore: boolean; nextOffset: number } | null {
+  if (!obj) return null;
+  const arr = obj[key];
+  if (!Array.isArray(arr)) return null;
+  const hasExplicitMeta =
+    typeof obj.hasMore === "boolean" ||
+    typeof obj.nextOffset === "number" ||
+    typeof obj.total === "number";
+  if (!hasExplicitMeta && !(allowLengthHeuristic && key === "items")) return null;
+
+  const hasMore =
+    typeof obj.hasMore === "boolean"
+      ? obj.hasMore
+      : typeof obj.total === "number" && Number.isFinite(obj.total)
+        ? offset + arr.length < obj.total
+        : allowLengthHeuristic && key === "items"
+          ? limit > 0 && arr.length === limit
+          : false;
+  const nextOffset =
+    typeof obj.nextOffset === "number" && Number.isFinite(obj.nextOffset)
+      ? obj.nextOffset
+      : offset + arr.length;
+
+  return { rawRows: arr, hasMore, nextOffset };
+}
+
+function extractPaginatedOrdersPayload(
+  json: unknown,
+  limit: number,
+  offset: number,
+): { rawRows: unknown[]; hasMore: boolean; nextOffset: number } {
+  const root = asRecord(json);
+  const data = asRecord(root?.data);
+
+  const fromPaginated =
+    tryPaginatedOrdersFromObject(root ?? undefined, "items", true, limit, offset) ??
+    tryPaginatedOrdersFromObject(data ?? undefined, "items", true, limit, offset) ??
+    tryPaginatedOrdersFromObject(root ?? undefined, "orders", false, limit, offset) ??
+    tryPaginatedOrdersFromObject(data ?? undefined, "orders", false, limit, offset);
+
+  if (fromPaginated) return fromPaginated;
+
+  const legacy = extractOrderListPayload(json);
+  return {
+    rawRows: legacy,
+    hasMore: false,
+    nextOffset: offset + legacy.length,
+  };
+}
+
 function extractPublisher(row: Record<string, unknown>): OrderRecord["publisher"] | undefined {
   const pub = row.publisher;
   if (pub && typeof pub === "object" && !Array.isArray(pub)) {
@@ -710,19 +775,35 @@ export async function createOrder(
   return normalizeOrderRecord(raw);
 }
 
-export async function getOrders(options?: { categories?: string[] }): Promise<OrderRecord[]> {
+export async function getOrders(options?: {
+  categories?: string[];
+  limit?: number;
+  offset?: number;
+}): Promise<GetOrdersPageResult> {
+  const limit = options?.limit ?? ORDERS_PAGE_SIZE;
+  const offset = options?.offset ?? 0;
   const q = new URLSearchParams();
+  if (limit > 0) q.set("limit", String(limit));
+  if (offset > 0) q.set("offset", String(offset));
   const cats = options?.categories?.map((c) => c.trim()).filter(Boolean) ?? [];
   if (cats.length > 0) q.set("categories", cats.join(","));
-  const path = q.toString() ? `/orders?${q.toString()}` : "/orders";
+  const path = `/orders?${q.toString()}`;
   const res = await authFetch(`${api(path)}`, { method: "GET" });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load orders"));
-  const data = extractOrderListPayload(json);
+  const { rawRows, hasMore, nextOffset } = extractPaginatedOrdersPayload(json, limit, offset);
   if (process.env.NODE_ENV === "development") {
-    console.log(`[getOrders] status=${res.status} parsed=${data.length} keys=${JSON.stringify(Object.keys(json))}`);
+    console.log(
+      `[getOrders] status=${res.status} parsed=${rawRows.length} hasMore=${hasMore} keys=${JSON.stringify(
+        json && typeof json === "object" && !Array.isArray(json) ? Object.keys(json as object) : [],
+      )}`,
+    );
   }
-  return data.map((row) => normalizeOrderRecord(row as Record<string, unknown>));
+  return {
+    orders: rawRows.map((row) => normalizeOrderRecord(row as Record<string, unknown>)),
+    hasMore,
+    nextOffset,
+  };
 }
 
 export async function getOrderById(orderId: string): Promise<OrderRecord> {

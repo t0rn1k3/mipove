@@ -413,6 +413,48 @@
   object-fit: cover;
 }
 
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.loadMoreWrap .secondaryBtn {
+  min-width: 12rem;
+}
+
+.orderThumbPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: #f8fafc;
+}
+
+.orderThumbLogoLoop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: mipoveThumbLoop 3s ease-in-out infinite;
+}
+
+.orderThumbLogo {
+  color: var(--teal);
+  pointer-events: none;
+}
+
+@keyframes mipoveThumbLoop {
+  0%,
+  100% {
+    opacity: 0.86;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
 
 .orderTitle {
   font-family: var(--font-serif);

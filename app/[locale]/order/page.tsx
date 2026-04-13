@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -8,6 +8,7 @@ import {
   getMe,
   getImageUrl,
   getOrders,
+  ORDERS_PAGE_SIZE,
   getOrderCategories,
   createOrder,
   updateOrder,
@@ -24,6 +25,7 @@ import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
 import { InsufficientCreditsError } from "@/lib/types";
 import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
 import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
+import Logo from "@/components/logo/Logo";
 import OrdersSmartFilter, {
   FILTER_BUDGET_MAX,
   FILTER_LOCATION_VALUES,
@@ -180,6 +182,9 @@ export default function OrderPage() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState("");
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [ordersHasMore, setOrdersHasMore] = useState(false);
+  const [ordersNextOffset, setOrdersNextOffset] = useState(0);
+  const [ordersLoadingMore, setOrdersLoadingMore] = useState(false);
   const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
   const [unlockedContactIds, setUnlockedContactIds] = useState<Set<string>>(new Set());
   const [favoriteOrderIds, setFavoriteOrderIds] = useState<string[]>([]);
@@ -195,6 +200,30 @@ export default function OrderPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const pendingLocalOrderIdsRef = useRef<Set<string>>(new Set());
+  const ordersRequestIdRef = useRef(0);
+
+  const mergeFirstOrdersPage = useCallback((prev: OrderRecord[], rows: OrderRecord[]) => {
+    const serverIds = new Set(rows.map((r) => r._id));
+    for (const id of serverIds) pendingLocalOrderIdsRef.current.delete(id);
+    const carry = prev.filter(
+      (p) => Boolean(p._id) && pendingLocalOrderIdsRef.current.has(p._id) && !serverIds.has(p._id),
+    );
+    return [...carry, ...rows];
+  }, []);
+
+  const appendOrdersPage = useCallback((prev: OrderRecord[], rows: OrderRecord[]) => {
+    const serverIds = new Set(rows.map((r) => r._id));
+    for (const id of serverIds) pendingLocalOrderIdsRef.current.delete(id);
+    const pending = prev.filter(
+      (p) => Boolean(p._id) && pendingLocalOrderIdsRef.current.has(p._id),
+    );
+    const serverLoaded = prev.filter(
+      (p) => !p._id || !pendingLocalOrderIdsRef.current.has(p._id),
+    );
+    const existingIds = new Set(serverLoaded.map((p) => p._id));
+    const toAdd = rows.filter((r) => !existingIds.has(r._id));
+    return [...pending, ...serverLoaded, ...toAdd];
+  }, []);
 
   
   const canCreateOrder = Boolean(
@@ -245,34 +274,63 @@ export default function OrderPage() {
   );
 
   useEffect(() => {
+    const requestId = ++ordersRequestIdRef.current;
     let cancelled = false;
     setOrdersLoading(true);
     setOrdersError("");
-    getOrders(
-      filterState.categories.length > 0 ? { categories: filterState.categories } : undefined,
-    )
-      .then((rows) => {
-        if (cancelled) return;
-        setOrders((prev) => {
-          const serverIds = new Set(rows.map((r) => r._id));
-          for (const id of serverIds) pendingLocalOrderIdsRef.current.delete(id);
-          const carry = prev.filter(
-            (p) => Boolean(p._id) && pendingLocalOrderIdsRef.current.has(p._id) && !serverIds.has(p._id),
-          );
-          return [...carry, ...rows];
-        });
+    setOrdersLoadingMore(false);
+    getOrders({
+      categories: filterState.categories.length > 0 ? filterState.categories : undefined,
+      limit: ORDERS_PAGE_SIZE,
+      offset: 0,
+    })
+      .then((page) => {
+        if (cancelled || requestId !== ordersRequestIdRef.current) return;
+        setOrders((prev) => mergeFirstOrdersPage(prev, page.orders));
+        setOrdersHasMore(page.hasMore);
+        setOrdersNextOffset(page.nextOffset);
       })
       .catch((err) => {
-        if (cancelled) return;
+        if (cancelled || requestId !== ordersRequestIdRef.current) return;
         setOrdersError(err instanceof Error ? err.message : "Failed to load orders");
       })
       .finally(() => {
-        if (!cancelled) setOrdersLoading(false);
+        if (!cancelled && requestId === ordersRequestIdRef.current) setOrdersLoading(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [ordersFetchCategoriesKey, filterState.categories]);
+  }, [mergeFirstOrdersPage, ordersFetchCategoriesKey, filterState.categories]);
+
+  const loadMoreOrders = useCallback(async () => {
+    if (!ordersHasMore || ordersLoadingMore || ordersLoading) return;
+    const requestId = ordersRequestIdRef.current;
+    setOrdersLoadingMore(true);
+    setOrdersError("");
+    try {
+      const page = await getOrders({
+        categories: filterState.categories.length > 0 ? filterState.categories : undefined,
+        limit: ORDERS_PAGE_SIZE,
+        offset: ordersNextOffset,
+      });
+      if (requestId !== ordersRequestIdRef.current) return;
+      setOrders((prev) => appendOrdersPage(prev, page.orders));
+      setOrdersHasMore(page.hasMore);
+      setOrdersNextOffset(page.nextOffset);
+    } catch (err) {
+      if (requestId !== ordersRequestIdRef.current) return;
+      setOrdersError(err instanceof Error ? err.message : "Failed to load orders");
+    } finally {
+      if (requestId === ordersRequestIdRef.current) setOrdersLoadingMore(false);
+    }
+  }, [
+    appendOrdersPage,
+    filterState.categories,
+    ordersHasMore,
+    ordersLoading,
+    ordersLoadingMore,
+    ordersNextOffset,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
@@ -723,13 +781,21 @@ export default function OrderPage() {
                 >
                   <div className={styles.orderTop}>
                     <div className={styles.orderThumb}>
-                      <Image
-                        src={firstImageSrc || "/images/hero-main.jpg"}
-                        alt={order.title}
-                        width={88}
-                        height={88}
-                        className={styles.orderThumbImg}
-                      />
+                      {firstImageSrc ? (
+                        <Image
+                          src={firstImageSrc}
+                          alt={order.title}
+                          width={88}
+                          height={88}
+                          className={styles.orderThumbImg}
+                        />
+                      ) : (
+                        <div className={styles.orderThumbPlaceholder} aria-hidden>
+                          <div className={styles.orderThumbLogoLoop}>
+                            <Logo size={34} showText={false} className={styles.orderThumbLogo} />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className={styles.orderMain}>
                       <h3 className={styles.orderTitle}>{order.title}</h3>
@@ -881,6 +947,18 @@ export default function OrderPage() {
                 </article>
               );
             }) : null}
+            {!ordersLoading && !ordersError && ordersHasMore ? (
+              <div className={styles.loadMoreWrap}>
+                <button
+                  type="button"
+                  className={styles.secondaryBtn}
+                  onClick={() => void loadMoreOrders()}
+                  disabled={ordersLoadingMore}
+                >
+                  {ordersLoadingMore ? t("loadingMoreOrders") : t("showMoreOrders")}
+                </button>
+              </div>
+            ) : null}
             {!ordersLoading && !ordersError && filteredOrders.length === 0 ? (
               <p className={styles.noOrdersMatch}>{t("noOrdersMatch")}</p>
             ) : null}

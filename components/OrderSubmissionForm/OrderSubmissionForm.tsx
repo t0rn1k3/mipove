@@ -11,8 +11,8 @@ import {
 } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Hammer, Wrench } from "lucide-react";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import Logo from "@/components/logo/Logo";
 import type { OrderCategoryOption } from "@/lib/types";
 import styles from "./OrderSubmissionForm.module.css";
 
@@ -392,10 +392,9 @@ export default function OrderSubmissionForm({
               </div>
             ) : (
               <div className={styles.dropzonePlaceholder}>
-                <span className={styles.toolIcons} aria-hidden>
-                  <Hammer size={32} strokeWidth={1.75} />
-                  <Wrench size={28} strokeWidth={1.75} />
-                </span>
+                <div className={styles.dropzoneLogoLoop} aria-hidden>
+                  <Logo size={52} showText className={styles.dropzoneLogoInner} />
+                </div>
                 <span className={styles.dropzoneText}>{t("dropPrompt")}</span>
                 <span className={styles.dropzoneHint}>{t("dropHint")}</span>
               </div>

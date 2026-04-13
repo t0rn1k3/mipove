@@ -239,12 +239,27 @@
   text-align: center;
 }
 
-.toolIcons {
+.dropzoneLogoLoop {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  color: #0f766e;
-  opacity: 0.85;
+  justify-content: center;
+  animation: mipoveLogoLoop 3s ease-in-out infinite;
+}
+
+.dropzoneLogoInner {
+  pointer-events: none;
+}
+
+@keyframes mipoveLogoLoop {
+  0%,
+  100% {
+    opacity: 0.88;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
 }
 
 .dropzoneText {
