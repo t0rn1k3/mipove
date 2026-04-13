@@ -24,13 +24,34 @@
   animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.revealDelay1 { animation-delay: 0.1s; opacity: 0; }
-.revealDelay2 { animation-delay: 0.2s; opacity: 0; }
-.revealDelay3 { animation-delay: 0.35s; opacity: 0; }
-.revealDelay4 { animation-delay: 0.5s; opacity: 0; }
-.revealDelay5 { animation-delay: 0.65s; opacity: 0; }
-.revealDelay6 { animation-delay: 0.8s; opacity: 0; }
-.revealDelay7 { animation-delay: 0.95s; opacity: 0; }
+.revealDelay1 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+.revealDelay2 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+.revealDelay3 {
+  animation-delay: 0.35s;
+  opacity: 0;
+}
+.revealDelay4 {
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+.revealDelay5 {
+  animation-delay: 0.65s;
+  opacity: 0;
+}
+.revealDelay6 {
+  animation-delay: 0.8s;
+  opacity: 0;
+}
+.revealDelay7 {
+  animation-delay: 0.95s;
+  opacity: 0;
+}
 
 .backgroundImage {
   position: absolute;
@@ -216,17 +237,66 @@
   .rightSide {
     width: 500px;
   }
+
   .mainImage,
-.secondaryImage {
-  width:250px ;
-  height: 250px;
-}
+  .secondaryImage {
+    width: 250px;
+    height: 250px;
+  }
+  .searchBar {
+    width: 120%;
+  }
 }
 @media (max-width: 1230px) {
+  .rightSide {
+    bottom: 50px;
+    left: 50px;
+  }
+  .mainImage {
+    left: -10px;
+  }
+  .mainImage {
+    width: 250px;
+    height: 250px;
+  }
+  .mainImage,
+  .secondaryImage {
+    width: 230px;
+    height: 250px;
+  }
+  .mainImage img,
+  .secondaryImage img {
+    width: 100%;
+    height: 100%;
+  }
   .title {
+    font-size: 45px;
+  }
+  .description {
+    font-size: 18px;
+  }
+  .searchBar {
+    width: 130%;
+  }
+}
+@media (max-width: 1150px) {
+  .searchBar {
+    width: 150%;
   }
 }
 @media (max-width: 1025px) {
+  .searchBarSeparator::after {
+    margin-left: -30px;
+  }
+  .secondaryImage {
+    width: 250px;
+    height: 250px;
+  }
+  .mainImage img,
+  .secondaryImage img {
+    width: 100%;
+    height: 100%;
+  }
   .container {
     flex-direction: column;
     padding: 2rem 1.5rem;
@@ -266,8 +336,11 @@
     gap: 12px;
     width: auto;
   }
-  .searchBarSeparator:after {
-    display: block;
+  .searchBarSeparator::after {
+    display: none;
+  }
+  .searchBar {
+    width: 100%;
   }
   .searchBarButton {
     padding: 16px 1.75rem;
@@ -304,15 +377,24 @@
   .searchBar {
     margin-top: 1.5rem;
     max-width: 100%;
+    flex-direction: column;
   }
   .searchBarSeparator {
     flex-direction: column;
     padding: 0;
     background: transparent;
     gap: 12px;
+    width: 100%;
+    height: 50%;
   }
-  .searchBarSeparator:after {
-    display: none;
+  .searchBarButton {
+    border-radius: 1rem;
+  }
+  .heroLocationWrap {
+    padding: 15px 0;
+  }
+  .searchBarSeparator::after {
+    right: 0;
   }
   .searchInput {
     width: 100%;
@@ -342,9 +424,10 @@
   }
   .leftSide {
     text-align: left;
+    margin-top: 50px;
   }
   .title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     text-align: left;
   }
   .description {
