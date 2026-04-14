@@ -198,6 +198,7 @@ export type OrderUpsertInput = {
     max?: number;
     currency?: string;
   } | null;
+  priceNegotiable?: boolean;
   scheduledAt?: string | null;
   /** Optional snapshots when backend accepts explicit values. */
   customerNameSnapshot?: string | null;

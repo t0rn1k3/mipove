@@ -463,6 +463,7 @@ export default function OrderPage() {
         max: form.budgetMax,
         currency: form.budgetCurrency || "GEL",
       },
+      priceNegotiable: form.priceNegotiable,
       scheduledAt: form.scheduledAt || null,
       files: form.images,
     });
@@ -530,6 +531,7 @@ export default function OrderPage() {
         max: form.budgetMax,
         currency: form.budgetCurrency || "GEL",
       },
+      priceNegotiable: form.priceNegotiable,
       scheduledAt: form.scheduledAt || null,
       attachments: [...(editingOrder.attachments ?? []), ...attachmentUrls],
     });

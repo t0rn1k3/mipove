@@ -866,6 +866,9 @@ function appendOrderFormFields(form: FormData, data: Omit<OrderUpsertInput, "att
   form.append("description", data.description);
   if (data.location) form.append("location", JSON.stringify(data.location));
   if (data.budget) form.append("budget", JSON.stringify(data.budget));
+  if (typeof data.priceNegotiable === "boolean") {
+    form.append("priceNegotiable", data.priceNegotiable ? "true" : "false");
+  }
   if (data.scheduledAt) form.append("scheduledAt", data.scheduledAt);
   const cn =
     data.customerNameSnapshot != null ? String(data.customerNameSnapshot).trim() : "";

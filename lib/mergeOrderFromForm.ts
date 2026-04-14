@@ -78,10 +78,8 @@ export function mergeOrderMetaFromForm(
       ? order.budgetMax
       : form.budgetMax;
 
-  const priceNegotiable =
-    typeof order.priceNegotiable === "boolean"
-      ? order.priceNegotiable
-      : form.priceNegotiable;
+  /** Always use the submitted form value: API often returns `false` before the field is persisted. */
+  const priceNegotiable = form.priceNegotiable;
 
   const budget = order.budget ?? {
     min: form.budgetMin,

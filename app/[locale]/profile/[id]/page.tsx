@@ -34,7 +34,7 @@ import {
   spendCredits,
 } from "@/lib/api";
 import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
-import { formatScheduledLabel } from "@/lib/orderCardFormatters";
+import { formatBudgetLabel, formatScheduledLabel } from "@/lib/orderCardFormatters";
 import type {
   MeProfileApiFields,
   ProfileData,
@@ -589,10 +589,7 @@ export default function ProfilePage() {
                                       <MapPin size={16} /> {locationLabel}
                                     </span>
                                     <span className={styles.favoriteMetaItem}>
-                                      <Banknote size={16} />{" "}
-                                      {order.priceNegotiable
-                                        ? "Negotiable"
-                                        : `\u20be${order.budgetMin} - \u20be${order.budgetMax}`}
+                                      <Banknote size={16} /> {formatBudgetLabel(order, tOrder)}
                                     </span>
                                     <span className={styles.favoriteMetaItem}>
                                       <CalendarClock size={16} /> {formatScheduledLabel(order.scheduledAt)}

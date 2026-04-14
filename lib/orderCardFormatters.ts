@@ -13,7 +13,7 @@ export function formatBudgetLabel(
   order: OrderRecord,
   t: ReturnType<typeof useTranslations<"order">>,
 ): string {
-  if (order.priceNegotiable) return t("filterNegotiableOnly");
+  if (order.priceNegotiable) return t("budgetNegotiable");
   const minRaw = order.budget?.min ?? order.budgetMin;
   const maxRaw = order.budget?.max ?? order.budgetMax;
   const currency = order.budget?.currency || "GEL";
