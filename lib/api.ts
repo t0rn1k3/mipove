@@ -676,23 +676,36 @@ function extractPaginatedOrdersPayload(
   };
 }
 
+function strField(o: Record<string, unknown>, ...keys: string[]): string | undefined {
+  for (const k of keys) {
+    const v = o[k];
+    if (typeof v === "string") {
+      const t = v.trim();
+      if (t) return t;
+    }
+  }
+  return undefined;
+}
+
 function extractPublisher(row: Record<string, unknown>): OrderRecord["publisher"] | undefined {
   const pub = row.publisher;
+  const rootName = strField(row as Record<string, unknown>, "contactName", "customerName", "customerNameSnapshot");
+  const rootPhone = strField(row as Record<string, unknown>, "contactPhone", "customerPhone", "customerPhoneSnapshot");
   if (pub && typeof pub === "object" && !Array.isArray(pub)) {
     const p = pub as Record<string, unknown>;
+    const name = strField(p, "name", "displayName", "fullName", "contactName") || rootName;
+    const phone = strField(p, "phone", "contactPhone") || rootPhone;
     return {
       _id: typeof p._id === "string" ? p._id : undefined,
-      name: typeof p.name === "string" ? p.name : undefined,
-      phone: typeof p.phone === "string" ? p.phone : undefined,
+      name,
+      phone,
       email: typeof p.email === "string" ? p.email : undefined,
     };
   }
-  const cn = row.contactName;
-  const cp = row.contactPhone;
-  if (typeof cn === "string" || typeof cp === "string") {
+  if (rootName || rootPhone) {
     return {
-      name: typeof cn === "string" && cn.trim() ? cn.trim() : undefined,
-      phone: typeof cp === "string" && cp.trim() ? cp.trim() : undefined,
+      name: rootName,
+      phone: rootPhone,
     };
   }
   return undefined;
@@ -738,16 +751,28 @@ function extractCustomerSnapshot(
     const o = value as Record<string, unknown>;
     return {
       _id: typeof o._id === "string" ? o._id : undefined,
-      name: typeof o.name === "string" ? o.name : undefined,
-      phone: typeof o.phone === "string" ? o.phone : undefined,
+      name: strField(o, "name", "displayName", "fullName", "contactName"),
+      phone: strField(o, "phone", "contactPhone"),
       email: typeof o.email === "string" ? o.email : undefined,
     };
   };
+  const snapName =
+    typeof row.customerNameSnapshot === "string" && row.customerNameSnapshot.trim()
+      ? row.customerNameSnapshot.trim()
+      : typeof row.customerName === "string" && row.customerName.trim()
+        ? row.customerName.trim()
+        : undefined;
+  const snapPhone =
+    typeof row.customerPhoneSnapshot === "string" && row.customerPhoneSnapshot.trim()
+      ? row.customerPhoneSnapshot.trim()
+      : typeof row.customerPhone === "string" && row.customerPhone.trim()
+        ? row.customerPhone.trim()
+        : typeof row.contactPhone === "string" && row.contactPhone.trim()
+          ? row.contactPhone.trim()
+          : undefined;
   return {
-    customerNameSnapshot:
-      typeof row.customerNameSnapshot === "string" ? row.customerNameSnapshot : undefined,
-    customerPhoneSnapshot:
-      typeof row.customerPhoneSnapshot === "string" ? row.customerPhoneSnapshot : undefined,
+    customerNameSnapshot: snapName,
+    customerPhoneSnapshot: snapPhone,
     user: toContact(userRaw),
     orderingMaster: toContact(masterRaw),
   };
