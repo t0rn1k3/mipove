@@ -84,6 +84,11 @@ export type RatedMasterItem = {
   ratedAt: string;
 };
 
+export type RatingSummary = {
+  average: number;
+  count: number;
+};
+
 /* ========== Masters List ========== */
 
 export type MasterListItem = {
@@ -93,8 +98,7 @@ export type MasterListItem = {
   image?: string;
   specialty?: string;
   location?: string;
-  rating?: number;
-  reviewCount?: number;
+  rating?: RatingSummary;
   projectsCount?: number;
   skills?: string[];
   bio?: string;
@@ -320,8 +324,7 @@ export type ProfileData = {
   specialty: string;
   location: string;
   bio: string;
-  rating?: number;
-  reviewCount?: number;
+  rating?: RatingSummary;
   phone: string;
   email: string;
   instagram?: string;
@@ -339,8 +342,7 @@ export type MeProfileApiFields = {
   specialty?: string;
   location?: string;
   bio?: string;
-  rating?: number;
-  reviewCount?: number;
+  rating?: number | RatingSummary;
   image?: string;
   instagram?: string;
   website?: string;
@@ -364,8 +366,7 @@ export type PortfolioSectionProps = {
 
 export type MasterRatingSectionProps = {
   isMasterProfile: boolean;
-  rating?: number;
-  reviewCount?: number;
+  rating?: RatingSummary;
   isOwnProfile: boolean;
   slug?: string;
   canVoteRole: boolean;

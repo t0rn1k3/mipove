@@ -164,25 +164,23 @@ export default function MastersPage() {
         prev.map((m) => {
           if (m.slug !== masterSlug) return m;
           const backendRating = response?.data?.rating;
-          const backendReviewCount = response?.data?.reviewCount;
-          if (backendRating != null || backendReviewCount != null) {
+          if (backendRating) {
             return {
               ...m,
-              rating: backendRating ?? m.rating,
-              reviewCount: backendReviewCount ?? m.reviewCount,
+              rating: backendRating,
             };
           }
 
-          const oldCount = m.reviewCount ?? 0;
-          const oldAverage = m.rating ?? 0;
+          const oldCount = m.rating?.count ?? 0;
+          const oldAverage = m.rating?.average ?? 0;
           if (prevStars == null) {
             const newCount = oldCount + 1;
             const newAverage = ((oldAverage * oldCount) + stars) / newCount;
-            return { ...m, rating: newAverage, reviewCount: newCount };
+            return { ...m, rating: { average: newAverage, count: newCount } };
           }
-          if (oldCount <= 0) return { ...m, rating: stars, reviewCount: 1 };
+          if (oldCount <= 0) return { ...m, rating: { average: stars, count: 1 } };
           const newAverage = ((oldAverage * oldCount) - prevStars + stars) / oldCount;
-          return { ...m, rating: newAverage, reviewCount: oldCount };
+          return { ...m, rating: { average: newAverage, count: oldCount } };
         }),
       );
     },

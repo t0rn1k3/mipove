@@ -18,6 +18,7 @@ import type {
   CreditTransaction,
   SpendCreditsResult,
   CreditPack,
+  RatingSummary,
 } from "./types";
 import { InsufficientCreditsError } from "./types";
 
@@ -210,8 +211,7 @@ export async function getMe(): Promise<{
     specialty?: string;
     location?: string;
     bio?: string;
-    rating?: number;
-    reviewCount?: number;
+    rating?: number | RatingSummary;
     image?: string;
     instagram?: string;
     website?: string;
@@ -274,7 +274,38 @@ export async function getMasters(params?: {
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to fetch masters");
   const data = json.data ?? json;
-  return Array.isArray(data) ? data : [];
+  if (!Array.isArray(data)) return [];
+  return data.map((row) => {
+    const record = row as Record<string, unknown>;
+    const ratingRaw = record.rating;
+    const ratingFromObject =
+      ratingRaw && typeof ratingRaw === "object" && !Array.isArray(ratingRaw)
+        ? (ratingRaw as Record<string, unknown>)
+        : null;
+    const average =
+      typeof ratingFromObject?.average === "number"
+        ? ratingFromObject.average
+        : typeof ratingRaw === "number"
+          ? ratingRaw
+          : undefined;
+    const count =
+      typeof ratingFromObject?.count === "number"
+        ? ratingFromObject.count
+        : typeof record.reviewCount === "number"
+          ? record.reviewCount
+          : undefined;
+    const rating =
+      average != null || count != null
+        ? {
+            average: average ?? 0,
+            count: count ?? 0,
+          }
+        : undefined;
+    return {
+      ...(row as MasterListItem),
+      rating,
+    };
+  });
 }
 
 export async function getProfileBySlug(slug: string): Promise<{
@@ -282,8 +313,7 @@ export async function getProfileBySlug(slug: string): Promise<{
   specialty: string;
   location: string;
   bio: string;
-  rating?: number;
-  reviewCount?: number;
+  rating?: RatingSummary;
   phone: string;
   email: string;
   instagram?: string;
@@ -301,8 +331,32 @@ export async function getProfileBySlug(slug: string): Promise<{
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Profile not found");
   const data = json.data ?? json;
+  const ratingRaw = data?.rating;
+  const ratingObj =
+    ratingRaw && typeof ratingRaw === "object" && !Array.isArray(ratingRaw)
+      ? (ratingRaw as Record<string, unknown>)
+      : null;
+  const ratingAverage =
+    typeof ratingObj?.average === "number"
+      ? ratingObj.average
+      : typeof ratingRaw === "number"
+        ? ratingRaw
+        : undefined;
+  const ratingCount =
+    typeof ratingObj?.count === "number"
+      ? ratingObj.count
+      : typeof data?.reviewCount === "number"
+        ? data.reviewCount
+        : undefined;
   return {
     ...data,
+    rating:
+      ratingAverage != null || ratingCount != null
+        ? {
+            average: ratingAverage ?? 0,
+            count: ratingCount ?? 0,
+          }
+        : undefined,
     image: getImageUrl(data.image),
     portfolioImages: (data.portfolioImages ?? []).map((p: string) => getImageUrl(p)),
     works: (data.works ?? []).map((w: { _id?: string; id?: string }) => ({
@@ -319,8 +373,7 @@ export async function rateMaster(
 ): Promise<{
   data?: {
     stars?: number;
-    rating?: number;
-    reviewCount?: number;
+    rating?: RatingSummary;
     ratedMasters?: RatedMasterItem[];
   };
 }> {
@@ -354,11 +407,33 @@ export async function rateMaster(
   const ratedMasters = Array.isArray(ratedRaw)
     ? (ratedRaw as RatedMasterItem[])
     : undefined;
+  const ratingRaw = inner.rating;
+  const ratingObj =
+    ratingRaw && typeof ratingRaw === "object" && !Array.isArray(ratingRaw)
+      ? (ratingRaw as Record<string, unknown>)
+      : null;
+  const ratingAverage =
+    typeof ratingObj?.average === "number"
+      ? ratingObj.average
+      : typeof ratingRaw === "number"
+        ? ratingRaw
+        : undefined;
+  const ratingCount =
+    typeof ratingObj?.count === "number"
+      ? ratingObj.count
+      : typeof inner.reviewCount === "number"
+        ? inner.reviewCount
+        : undefined;
   return {
     data: {
       stars: typeof inner.stars === "number" ? inner.stars : undefined,
-      rating: typeof inner.rating === "number" ? inner.rating : undefined,
-      reviewCount: typeof inner.reviewCount === "number" ? inner.reviewCount : undefined,
+      rating:
+        ratingAverage != null || ratingCount != null
+          ? {
+              average: ratingAverage ?? 0,
+              count: ratingCount ?? 0,
+            }
+          : undefined,
       ratedMasters,
     },
   };

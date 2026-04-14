@@ -36,7 +36,9 @@ export default function MasterCard({
     getImageUrl(master.image) ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(master.name)}&size=200`;
 
-  const hasRating = master.rating != null && master.rating > 0;
+  const ratingAverage = Number(master.rating?.average ?? 0);
+  const ratingCount = Number(master.rating?.count ?? 0);
+  const hasRating = ratingAverage > 0;
   const skills = master.skills ?? [];
   const descriptionText = master.bio || master.description || "";
   const truncatedBio = descriptionText
@@ -57,7 +59,7 @@ export default function MasterCard({
   }, [myRating, master.slug]);
 
   const interactive = canRate && !!onRate;
-  const averageStars = hasRating ? Math.floor(master.rating!) : 0;
+  const averageStars = hasRating ? Math.floor(ratingAverage) : 0;
   const displayStars = rateHover || rateSelected || averageStars;
 
   const handleRateClick = async (stars: number) => {
@@ -102,7 +104,7 @@ export default function MasterCard({
               <div className={styles.ratingBadge}>
                 <Star size={14} className={styles.starFilled} />
                 <span className={styles.ratingText}>
-                  {master.rating!.toFixed(1)}
+                  {ratingAverage.toFixed(1)}
                 </span>
               </div>
             )}
@@ -149,7 +151,7 @@ export default function MasterCard({
                 })}
               </div>
               <span className={styles.reviewCount}>
-                ({master.reviewCount ?? 0} {t("reviews")})
+                ({ratingCount} {t("reviews")})
               </span>
               {rateSuccess && <p className={styles.rateSuccess}>{t("ratingSaved")}</p>}
               {rateError && (

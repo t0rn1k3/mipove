@@ -10,7 +10,6 @@ import styles from "./masterRatingSection.module.css";
 export default function MasterRatingSection({
   isMasterProfile,
   rating,
-  reviewCount,
   isOwnProfile,
   slug,
   canVoteRole,
@@ -65,7 +64,7 @@ export default function MasterRatingSection({
                 key={n}
                 size={18}
                 className={
-                  n <= Math.floor(rating ?? 0)
+                  n <= Math.floor(rating?.average ?? 0)
                     ? styles.masterRatingStarFilled
                     : styles.masterRatingStarEmpty
                 }
@@ -73,7 +72,7 @@ export default function MasterRatingSection({
             ))}
           </div>
           <p className={styles.masterRatingText}>
-            {Number((rating ?? 0)).toFixed(1)} ({reviewCount ?? 0} {tProfile("votes")})
+            {Number((rating?.average ?? 0)).toFixed(1)} ({rating?.count ?? 0} {tProfile("votes")})
           </p>
         </div>
       )}

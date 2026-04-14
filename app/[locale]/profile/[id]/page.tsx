@@ -53,6 +53,21 @@ function orderBelongsToUser(order: OrderRecord, userId: string): boolean {
 }
 
 function mapMeToProfile(data: MeProfileApiFields, role?: string): ProfileData {
+  const ratingRaw = data.rating;
+  const ratingObj =
+    ratingRaw && typeof ratingRaw === "object" && !Array.isArray(ratingRaw)
+      ? (ratingRaw as { average?: number; count?: number })
+      : null;
+  const ratingAverage =
+    typeof ratingObj?.average === "number"
+      ? ratingObj.average
+      : typeof ratingRaw === "number"
+        ? ratingRaw
+        : undefined;
+  const ratingCount =
+    typeof ratingObj?.count === "number"
+      ? ratingObj.count
+      : undefined;
   return {
     name: data.name,
     email: data.email,
@@ -61,8 +76,10 @@ function mapMeToProfile(data: MeProfileApiFields, role?: string): ProfileData {
       role === "user" ? "Client" : data.specialty || "—",
     location: data.location || "—",
     bio: data.bio || "",
-    rating: data.rating ?? 0,
-    reviewCount: data.reviewCount ?? 0,
+    rating:
+      ratingAverage != null || ratingCount != null
+        ? { average: ratingAverage ?? 0, count: ratingCount ?? 0 }
+        : { average: 0, count: 0 },
     image:
       getImageUrl(data.image) ||
       `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&size=400`,
@@ -355,13 +372,13 @@ export default function ProfilePage() {
   const submitRating = async (stars: number) => {
     if (!slug || slug === "me" || stars < 1) return;
     const res = await rateMaster(slug, stars);
-    if (res.data?.rating != null || res.data?.reviewCount != null) {
+    if (res.data?.rating) {
+      const nextRating = res.data.rating;
       setProfile((prev) =>
         prev
           ? {
               ...prev,
-              rating: res.data?.rating ?? prev.rating,
-              reviewCount: res.data?.reviewCount ?? prev.reviewCount,
+              rating: nextRating,
             }
           : prev,
       );
@@ -405,8 +422,8 @@ export default function ProfilePage() {
             <div className={styles.sidebar}>
               <ProfileSidebar
                 {...profile}
-                rating={userRole === "master" ? profile.rating : undefined}
-                reviewCount={userRole === "master" ? profile.reviewCount : undefined}
+                rating={userRole === "master" ? profile.rating?.average : undefined}
+                reviewCount={userRole === "master" ? profile.rating?.count : undefined}
                 credits={
                   isOwnProfile && userRole === "master" && creditBalance !== null
                     ? creditBalance
@@ -572,7 +589,6 @@ export default function ProfilePage() {
                       <MasterRatingSection
                         isMasterProfile={isMasterProfile}
                         rating={profile.rating}
-                        reviewCount={profile.reviewCount}
                         isOwnProfile={isOwnProfile}
                         slug={slug}
                         canVoteRole={canVoteRole}
