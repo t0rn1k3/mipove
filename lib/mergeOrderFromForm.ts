@@ -45,7 +45,6 @@ export function mergeOrderMetaFromForm(
   order: OrderRecord,
   form: {
     locationCity?: string;
-    locationAddressText?: string;
     locationLat?: number;
     locationLng?: number;
     budgetMin: number;
@@ -57,13 +56,15 @@ export function mergeOrderMetaFromForm(
   },
 ): OrderRecord {
   const orderLocation = String(order.location ?? "").trim();
-  const formLocation = String(form.locationAddressText ?? form.locationCity ?? "").trim();
+  const formLocation = String(form.locationCity ?? "").trim();
   const location = orderLocation || formLocation;
-  const locationData = order.locationData ?? {
-    city: form.locationCity,
-    addressText: form.locationAddressText,
-    lat: form.locationLat,
-    lng: form.locationLng,
+  const base = order.locationData;
+  const locationData = {
+    ...(base ?? {}),
+    city: formLocation || (base?.city != null ? String(base.city).trim() : ""),
+    lat: form.locationLat ?? base?.lat,
+    lng: form.locationLng ?? base?.lng,
+    addressText: undefined,
   };
 
   const orderDeadline = String(order.deadline ?? "").trim();

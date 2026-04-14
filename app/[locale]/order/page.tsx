@@ -440,7 +440,6 @@ export default function OrderPage() {
     contactName: string;
     contactPhone: string;
     locationCity: string;
-    locationAddressText: string;
     locationLat?: number;
     locationLng?: number;
     budgetMin: number;
@@ -463,7 +462,7 @@ export default function OrderPage() {
       description: form.description.trim(),
       location: {
         city: form.locationCity || undefined,
-        addressText: form.locationAddressText || undefined,
+        addressText: undefined,
         lat: typeof form.locationLat === "number" ? form.locationLat : undefined,
         lng: typeof form.locationLng === "number" ? form.locationLng : undefined,
       },
@@ -483,7 +482,6 @@ export default function OrderPage() {
       ),
       {
         locationCity: form.locationCity,
-        locationAddressText: form.locationAddressText,
         locationLat: form.locationLat,
         locationLng: form.locationLng,
         budgetMin: form.budgetMin,
@@ -509,7 +507,6 @@ export default function OrderPage() {
     contactName: string;
     contactPhone: string;
     locationCity: string;
-    locationAddressText: string;
     locationLat?: number;
     locationLng?: number;
     budgetMin: number;
@@ -534,7 +531,7 @@ export default function OrderPage() {
       description: form.description.trim(),
       location: {
         city: form.locationCity || undefined,
-        addressText: form.locationAddressText || undefined,
+        addressText: undefined,
         lat: typeof form.locationLat === "number" ? form.locationLat : undefined,
         lng: typeof form.locationLng === "number" ? form.locationLng : undefined,
       },
@@ -554,7 +551,6 @@ export default function OrderPage() {
       ),
       {
         locationCity: form.locationCity,
-        locationAddressText: form.locationAddressText,
         locationLat: form.locationLat,
         locationLng: form.locationLng,
         budgetMin: form.budgetMin,
@@ -841,9 +837,11 @@ export default function OrderPage() {
                 description: editingOrder.description,
                 contactName: editingOrder.publisher?.name ?? "",
                 contactPhone: editingOrder.publisher?.phone ?? "",
-                locationCity: editingOrder.locationData?.city ?? "",
-                locationAddressText:
-                  editingOrder.locationData?.addressText ?? editingOrder.location ?? "",
+                locationCity:
+                  editingOrder.locationData?.city ??
+                  editingOrder.locationData?.addressText ??
+                  editingOrder.location ??
+                  "",
                 locationLat: editingOrder.locationData?.lat,
                 locationLng: editingOrder.locationData?.lng,
                 budgetMin: editingOrder.budgetMin,

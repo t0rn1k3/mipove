@@ -37,7 +37,6 @@ export type OrderFormState = {
   contactPhone: string;
   images: File[];
   locationCity: string;
-  locationAddressText: string;
   locationLat?: number;
   locationLng?: number;
   budgetMin: number;
@@ -56,7 +55,6 @@ const initialState: OrderFormState = {
   contactPhone: "",
   images: [],
   locationCity: "",
-  locationAddressText: "",
   locationLat: undefined,
   locationLng: undefined,
   budgetMin: 0,
@@ -93,7 +91,6 @@ export default function OrderSubmissionForm({
     images: initialValues?.images ?? [],
   });
 
-  const locationInputValue = form.locationAddressText || form.locationCity;
   const [dragOver, setDragOver] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -177,7 +174,7 @@ export default function OrderSubmissionForm({
       }
     }
     if (s === 3) {
-      if (!locationInputValue.trim()) next.location = t("errorLocation");
+      if (!form.locationCity.trim()) next.location = t("errorLocation");
     }
     if (s === 4) {
       if (!form.priceNegotiable) {
@@ -417,17 +414,15 @@ export default function OrderSubmissionForm({
           <span className={styles.label}>{t("location")}</span>
           <CityAutocomplete
             id={`${formId}-location`}
-            value={locationInputValue}
+            value={form.locationCity}
             onChange={(v) => {
-              setField("locationAddressText", v);
+              setField("locationCity", v);
               if (!v.trim()) {
-                setField("locationCity", "");
                 setField("locationLat", undefined);
                 setField("locationLng", undefined);
               }
             }}
-            onSelect={(value, city) => {
-              setField("locationAddressText", value);
+            onSelect={(_value, city) => {
               setField("locationCity", city.name);
               setField("locationLat", city.latitude);
               setField("locationLng", city.longitude);
@@ -438,17 +433,6 @@ export default function OrderSubmissionForm({
           {errors.location ? (
             <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.location}</p>
           ) : null}
-          <label className={styles.label} htmlFor={`${formId}-location-address`}>
-            {t("locationAddress")}
-          </label>
-          <input
-            id={`${formId}-location-address`}
-            className={styles.input}
-            type="text"
-            value={form.locationAddressText}
-            onChange={(e) => setField("locationAddressText", e.target.value)}
-            placeholder={t("locationAddressPlaceholder")}
-          />
         </div>
       ) : null}
 

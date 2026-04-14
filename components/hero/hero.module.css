@@ -144,6 +144,7 @@
 
 .heroCityAutocomplete {
   background: transparent;
+  padding: 15px 0;
 }
 
 .heroCityAutocomplete input {
@@ -191,7 +192,6 @@
 .searchBarSeparator {
   display: flex;
   align-items: center;
-  padding: 20px 30px;
   width: 80%;
   border-radius: 15px;
   position: relative;
@@ -352,7 +352,6 @@
   .searchBarSeparator {
     flex-direction: row;
     flex: 1;
-    padding: 16px 20px;
     background: white;
     border-radius: 16px 0 0 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -425,9 +424,7 @@
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
-  .heroSpecialtyWrap {
-    padding: 15px 0;
-  }
+  
   .searchBarInput {
     padding: 14px 16px 14px 40px;
   }
