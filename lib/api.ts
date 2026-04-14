@@ -812,12 +812,7 @@ function normalizeOrderRecord(row: Record<string, unknown>): OrderRecord {
     locationData?.city ||
     locationData?.addressText ||
     (typeof row.location === "string" ? row.location : "");
-  const scheduledAt =
-    typeof row.scheduledAt === "string"
-      ? row.scheduledAt
-      : typeof row.deadline === "string"
-        ? row.deadline
-        : undefined;
+  const scheduledAt = typeof row.scheduledAt === "string" ? row.scheduledAt : undefined;
   const fallbackName =
     snapshot.customerNameSnapshot?.trim() ||
     snapshot.user?.name?.trim() ||

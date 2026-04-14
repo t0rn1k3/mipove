@@ -34,6 +34,7 @@ import {
   spendCredits,
 } from "@/lib/api";
 import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
+import { formatScheduledLabel } from "@/lib/orderCardFormatters";
 import type {
   MeProfileApiFields,
   ProfileData,
@@ -594,7 +595,7 @@ export default function ProfilePage() {
                                         : `\u20be${order.budgetMin} - \u20be${order.budgetMax}`}
                                     </span>
                                     <span className={styles.favoriteMetaItem}>
-                                      <CalendarClock size={16} /> {order.deadline || "—"}
+                                      <CalendarClock size={16} /> {formatScheduledLabel(order.scheduledAt)}
                                     </span>
                                   </div>
                                   <div className={styles.favoriteActions}>

@@ -16,14 +16,6 @@ import Logo from "@/components/logo/Logo";
 import type { OrderCategoryOption } from "@/lib/types";
 import styles from "./OrderSubmissionForm.module.css";
 
-const DEADLINE_VALUES = ["urgent", "week", "month"] as const;
-
-const DEADLINE_MSG_KEYS: Record<(typeof DEADLINE_VALUES)[number], string> = {
-  urgent: "deadlineUrgent",
-  week: "deadlineWeek",
-  month: "deadlineMonth",
-};
-
 const BUDGET_MAX = 5000;
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -44,7 +36,6 @@ export type OrderFormState = {
   budgetCurrency: string;
   priceNegotiable: boolean;
   scheduledAt: string;
-  deadline: (typeof DEADLINE_VALUES)[number] | "";
 };
 
 const initialState: OrderFormState = {
@@ -62,7 +53,6 @@ const initialState: OrderFormState = {
   budgetCurrency: "GEL",
   priceNegotiable: false,
   scheduledAt: "",
-  deadline: "",
 };
 
 export default function OrderSubmissionForm({
@@ -189,7 +179,7 @@ export default function OrderSubmissionForm({
           next.budget = t("errorBudget");
         }
       }
-      if (!form.scheduledAt.trim()) next.deadline = t("errorDeadline");
+      if (!form.scheduledAt.trim()) next.scheduledAt = t("errorDeadline");
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -570,28 +560,13 @@ export default function OrderSubmissionForm({
           </label>
           <input
             id={`${formId}-scheduled-at`}
-            className={`${styles.input} ${errors.deadline ? styles.fieldError : ""}`}
+            className={`${styles.input} ${errors.scheduledAt ? styles.fieldError : ""}`}
             type="date"
             value={form.scheduledAt}
             onChange={(e) => setField("scheduledAt", e.target.value)}
           />
-          <p className={`${styles.fieldHint} ${styles.deadlineHint}`}>{t("deadlineHeading")}</p>
-          <div className={styles.deadlineGroup} role="group" aria-label={t("deadlineHeading")}>
-            {DEADLINE_VALUES.map((value) => (
-              <button
-                key={value}
-                type="button"
-                className={`${styles.deadlinePill} ${
-                  form.deadline === value ? styles.deadlinePillActive : ""
-                } ${errors.deadline ? styles.deadlinePillError : ""}`}
-                onClick={() => setField("deadline", value)}
-              >
-                {t(DEADLINE_MSG_KEYS[value] as "deadlineUrgent")}
-              </button>
-            ))}
-          </div>
-          {errors.deadline ? (
-            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.deadline}</p>
+          {errors.scheduledAt ? (
+            <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.scheduledAt}</p>
           ) : null}
         </div>
       ) : null}

@@ -62,7 +62,7 @@ export default function OrderListCard({
   onDelete,
 }: OrderListCardProps) {
   const contactPanelId = `order-contact-${index}`;
-  const deadlineLabel = formatScheduledLabel(order.scheduledAt || order.deadline, t);
+  const scheduledLabel = formatScheduledLabel(order.scheduledAt);
   const locationLabel =
     String(order.locationData?.city ?? order.locationData?.addressText ?? order.location ?? "").trim() ||
     "—";
@@ -144,9 +144,9 @@ export default function OrderListCard({
             <MapPin size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
             <span className={styles.orderMetaValue}>{locationLabel}</span>
           </div>
-          <div className={styles.orderMetaRow} aria-label={`${t("metaExpectedBy")}: ${deadlineLabel}`}>
+          <div className={styles.orderMetaRow} aria-label={`${t("metaExpectedBy")}: ${scheduledLabel}`}>
             <CalendarClock size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-            <span className={styles.orderMetaValue}>{deadlineLabel}</span>
+            <span className={styles.orderMetaValue}>{scheduledLabel}</span>
           </div>
         </div>
       </div>

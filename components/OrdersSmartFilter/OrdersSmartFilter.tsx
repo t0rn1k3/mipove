@@ -9,7 +9,6 @@ import styles from "./ordersSmartFilter.module.css";
 
 export const FILTER_BUDGET_MAX = 5000;
 
-export const FILTER_DEADLINE_VALUES = ["urgent", "week", "month"] as const;
 export const FILTER_LOCATION_VALUES = [
   "tbilisi",
   "batumi",
@@ -23,12 +22,6 @@ export const FILTER_LOCATION_VALUES = [
   "mtskheta",
   "other",
 ] as const;
-
-const DEADLINE_MSG_KEYS: Record<(typeof FILTER_DEADLINE_VALUES)[number], string> = {
-  urgent: "filterDeadlineUrgent",
-  week: "filterDeadlineWeek",
-  month: "filterDeadlineMonth",
-};
 
 const LOCATION_MSG_KEYS: Record<(typeof FILTER_LOCATION_VALUES)[number], string> = {
   tbilisi: "filterLocationTbilisi",
@@ -51,7 +44,6 @@ export type OrderFilterState = {
   budgetMin: number;
   budgetMax: number;
   negotiableOnly: boolean;
-  deadlines: string[];
 };
 
 type OrdersSmartFilterProps = {
@@ -90,13 +82,6 @@ export default function OrdersSmartFilter({
       ? value.categories.filter((c) => c !== categoryId)
       : [...value.categories, categoryId];
     onChange({ ...value, categories });
-  };
-
-  const toggleDeadline = (deadline: string) => {
-    const deadlines = value.deadlines.includes(deadline)
-      ? value.deadlines.filter((d) => d !== deadline)
-      : [...value.deadlines, deadline];
-    onChange({ ...value, deadlines });
   };
 
   const minPct = (value.budgetMin / FILTER_BUDGET_MAX) * 100;
@@ -211,22 +196,6 @@ export default function OrdersSmartFilter({
           />
           <span>{t("filterNegotiableOnly")}</span>
         </label>
-      </div>
-
-      <div className={styles.group}>
-        <p className={styles.groupLabel}>{t("filterTimeline")}</p>
-        <div className={styles.pills}>
-          {FILTER_DEADLINE_VALUES.map((deadline) => (
-            <button
-              key={deadline}
-              type="button"
-              className={`${styles.pill} ${value.deadlines.includes(deadline) ? styles.pillActive : ""}`}
-              onClick={() => toggleDeadline(deadline)}
-            >
-              {t(DEADLINE_MSG_KEYS[deadline] as "filterDeadlineUrgent")}
-            </button>
-          ))}
-        </div>
       </div>
 
       <button type="button" className={styles.clearBtn} onClick={onClear}>

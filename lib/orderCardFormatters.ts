@@ -1,22 +1,9 @@
 import type { useTranslations } from "next-intl";
 import type { OrderRecord } from "./types";
 
-function formatDeadline(deadline: string, t: ReturnType<typeof useTranslations<"order">>) {
-  if (deadline === "urgent") return t("filterDeadlineUrgent");
-  if (deadline === "week") return t("filterDeadlineWeek");
-  if (deadline === "month") return t("filterDeadlineMonth");
-  return deadline;
-}
-
-export function formatScheduledLabel(
-  raw: string | undefined,
-  t: ReturnType<typeof useTranslations<"order">>,
-): string {
+export function formatScheduledLabel(raw: string | undefined): string {
   const value = String(raw ?? "").trim();
   if (!value) return "—";
-  if (value === "urgent" || value === "week" || value === "month") {
-    return formatDeadline(value, t);
-  }
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleDateString();

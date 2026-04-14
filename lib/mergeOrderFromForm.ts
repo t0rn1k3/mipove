@@ -52,7 +52,6 @@ export function mergeOrderMetaFromForm(
     budgetCurrency?: string;
     priceNegotiable: boolean;
     scheduledAt?: string;
-    deadline: string;
   },
 ): OrderRecord {
   const orderLocation = String(order.location ?? "").trim();
@@ -67,10 +66,8 @@ export function mergeOrderMetaFromForm(
     addressText: undefined,
   };
 
-  const orderDeadline = String(order.deadline ?? "").trim();
   const orderScheduledAt = String(order.scheduledAt ?? "").trim();
   const scheduledAt = orderScheduledAt || String(form.scheduledAt ?? "").trim();
-  const deadline = orderDeadline || String(form.deadline ?? "").trim();
 
   const budgetMin =
     order.budgetMin != null && Number.isFinite(order.budgetMin)
@@ -96,7 +93,7 @@ export function mergeOrderMetaFromForm(
     ...order,
     location,
     locationData,
-    deadline,
+    deadline: "",
     scheduledAt: scheduledAt || undefined,
     priceNegotiable,
     budgetMin,

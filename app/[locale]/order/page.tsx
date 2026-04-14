@@ -56,7 +56,6 @@ const INITIAL_FILTER_STATE: OrderFilterState = {
   budgetMin: 0,
   budgetMax: FILTER_BUDGET_MAX,
   negotiableOnly: false,
-  deadlines: [],
 };
 
 const LOCATION_ALIASES: Record<string, (typeof FILTER_LOCATION_VALUES)[number]> = {
@@ -386,8 +385,7 @@ export default function OrderPage() {
       !filterState.location &&
       !filterState.negotiableOnly &&
       filterState.budgetMin === 0 &&
-      filterState.budgetMax === FILTER_BUDGET_MAX &&
-      filterState.deadlines.length === 0;
+      filterState.budgetMax === FILTER_BUDGET_MAX;
 
     if (isDefaultFilter) return orders;
 
@@ -419,11 +417,6 @@ export default function OrderPage() {
         if (!overlaps) return false;
       }
 
-      const deadlineToken = String(order.scheduledAt ?? order.deadline ?? "");
-      if (filterState.deadlines.length > 0 && !filterState.deadlines.includes(deadlineToken)) {
-        return false;
-      }
-
       return true;
     });
   }, [debouncedSearch, filterState, orders]);
@@ -447,7 +440,6 @@ export default function OrderPage() {
     budgetCurrency: string;
     priceNegotiable: boolean;
     scheduledAt: string;
-    deadline: string;
     images: File[];
   }) => {
     const title = form.title.trim();
@@ -489,7 +481,6 @@ export default function OrderPage() {
         budgetCurrency: form.budgetCurrency,
         priceNegotiable: form.priceNegotiable,
         scheduledAt: form.scheduledAt,
-        deadline: form.scheduledAt || form.deadline,
       },
     );
     if (merged._id) pendingLocalOrderIdsRef.current.add(merged._id);
@@ -514,7 +505,6 @@ export default function OrderPage() {
     budgetCurrency: string;
     priceNegotiable: boolean;
     scheduledAt: string;
-    deadline: string;
     images: File[];
   }) => {
     if (!editingOrder) return;
@@ -558,7 +548,6 @@ export default function OrderPage() {
         budgetCurrency: form.budgetCurrency,
         priceNegotiable: form.priceNegotiable,
         scheduledAt: form.scheduledAt,
-        deadline: form.scheduledAt || form.deadline,
       },
     );
     setOrders((prev) => prev.map((item) => (item._id === mergedUpdate._id ? mergedUpdate : item)));
@@ -852,7 +841,6 @@ export default function OrderPage() {
                   typeof editingOrder.scheduledAt === "string"
                     ? editingOrder.scheduledAt.slice(0, 10)
                     : "",
-                deadline: (editingOrder.deadline as "urgent" | "week" | "month") ?? "",
                 images: [],
               }
             : undefined
