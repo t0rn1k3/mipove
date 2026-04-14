@@ -658,6 +658,27 @@ function extractPaginatedOrdersPayload(
   offset: number,
 ): { rawRows: unknown[]; hasMore: boolean; nextOffset: number } {
   const root = asRecord(json);
+  const rootDataRaw = root?.data;
+  if (root && Array.isArray(rootDataRaw) && rootDataRaw.length > 0 && typeof rootDataRaw[0] === "object") {
+    const hasExplicitMeta =
+      typeof root.hasMore === "boolean" ||
+      typeof root.nextOffset === "number" ||
+      typeof root.total === "number";
+    if (hasExplicitMeta) {
+      const arr = rootDataRaw;
+      const hasMore =
+        typeof root.hasMore === "boolean"
+          ? root.hasMore
+          : typeof root.total === "number" && Number.isFinite(root.total)
+            ? offset + arr.length < root.total
+            : limit > 0 && arr.length === limit;
+      const nextOffset =
+        typeof root.nextOffset === "number" && Number.isFinite(root.nextOffset)
+          ? root.nextOffset
+          : offset + arr.length;
+      return { rawRows: arr, hasMore, nextOffset };
+    }
+  }
   const data = asRecord(root?.data);
 
   const fromPaginated =
@@ -879,7 +900,7 @@ export async function getOrders(options?: {
   categories?: string[];
   limit?: number;
   offset?: number;
-  /** When true, requests only the current user’s orders (`mine=true`). Backend should scope results to the authenticated publisher. */
+  /** When true, requests only the current user’s orders (`mine=true` + `placedByMe=true`). Requires auth; backend returns full documents. */
   mine?: boolean;
 }): Promise<GetOrdersPageResult> {
   const limit = options?.limit ?? ORDERS_PAGE_SIZE;
@@ -887,11 +908,18 @@ export async function getOrders(options?: {
   const q = new URLSearchParams();
   if (limit > 0) q.set("limit", String(limit));
   if (offset > 0) q.set("offset", String(offset));
-  if (options?.mine) q.set("mine", "true");
+  const mine = options?.mine === true;
+  if (mine) {
+    q.set("mine", "true");
+    q.set("placedByMe", "true");
+  }
   const cats = options?.categories?.map((c) => c.trim()).filter(Boolean) ?? [];
   if (cats.length > 0) q.set("categories", cats.join(","));
   const path = `/orders?${q.toString()}`;
-  const res = await authFetch(`${api(path)}`, { method: "GET" });
+  // Public marketplace list must not run the auth refresh + "session expired" path on 401.
+  const res = mine
+    ? await authFetch(`${api(path)}`, { method: "GET" })
+    : await fetch(`${api(path)}`, { method: "GET", credentials: "include" });
   const json = await readJsonSafe(res);
   if (!res.ok) throw new Error(extractMessage(json, "Failed to load orders"));
   const { rawRows, hasMore, nextOffset } = extractPaginatedOrdersPayload(json, limit, offset);

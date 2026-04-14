@@ -185,8 +185,9 @@ export default function OrderPage() {
   const [ordersHasMore, setOrdersHasMore] = useState(false);
   const [ordersNextOffset, setOrdersNextOffset] = useState(0);
   const [ordersLoadingMore, setOrdersLoadingMore] = useState(false);
-  const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
   const [unlockedContactIds, setUnlockedContactIds] = useState<Set<string>>(new Set());
+  /** Master-only: which order’s contact panel is expanded (unlock is separate). */
+  const [expandedContactKey, setExpandedContactKey] = useState<string | null>(null);
   const [favoriteOrderIds, setFavoriteOrderIds] = useState<string[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -274,12 +275,15 @@ export default function OrderPage() {
   );
 
   useEffect(() => {
+    if (sessionLoading) return;
+
     const requestId = ++ordersRequestIdRef.current;
     let cancelled = false;
     setOrdersLoading(true);
     setOrdersError("");
     setOrdersLoadingMore(false);
     getOrders({
+      mine: canCreateOrder,
       categories: filterState.categories.length > 0 ? filterState.categories : undefined,
       limit: ORDERS_PAGE_SIZE,
       offset: 0,
@@ -300,7 +304,13 @@ export default function OrderPage() {
     return () => {
       cancelled = true;
     };
-  }, [mergeFirstOrdersPage, ordersFetchCategoriesKey, filterState.categories]);
+  }, [
+    sessionLoading,
+    canCreateOrder,
+    mergeFirstOrdersPage,
+    ordersFetchCategoriesKey,
+    filterState.categories,
+  ]);
 
   const loadMoreOrders = useCallback(async () => {
     if (!ordersHasMore || ordersLoadingMore || ordersLoading) return;
@@ -309,6 +319,7 @@ export default function OrderPage() {
     setOrdersError("");
     try {
       const page = await getOrders({
+        mine: canCreateOrder,
         categories: filterState.categories.length > 0 ? filterState.categories : undefined,
         limit: ORDERS_PAGE_SIZE,
         offset: ordersNextOffset,
@@ -325,6 +336,7 @@ export default function OrderPage() {
     }
   }, [
     appendOrdersPage,
+    canCreateOrder,
     filterState.categories,
     ordersHasMore,
     ordersLoading,
@@ -650,7 +662,6 @@ export default function OrderPage() {
         return next;
       });
       setCreditBalance(result.remaining);
-      setExpandedContactKey(orderId);
       setToast({ type: "success", message: tCredits("contactUnlocked") });
     } catch (err) {
       if (err instanceof InsufficientCreditsError) {
@@ -723,7 +734,7 @@ export default function OrderPage() {
           aria-labelledby="orders-heading"
         >
           <h2 id="orders-heading" className={styles.panelTitle}>
-            {t("ordersList")}
+            {canCreateOrder ? t("ordersList") : t("title")}
           </h2>
           <div
             ref={ordersRef}
@@ -743,16 +754,16 @@ export default function OrderPage() {
               const customerName =
                 String(
                   order.customerNameSnapshot ??
-                    order.publisher?.name ??
                     order.user?.name ??
                     order.orderingMaster?.name ??
+                    order.publisher?.name ??
                     "",
                 ).trim() || "—";
               const customerPhone = String(
                 order.customerPhoneSnapshot ??
-                  order.publisher?.phone ??
                   order.user?.phone ??
                   order.orderingMaster?.phone ??
+                  order.publisher?.phone ??
                   "",
               ).trim();
               const telHrefFinal = customerPhone ? `tel:${customerPhone.replace(/\s/g, "")}` : "";
@@ -762,11 +773,14 @@ export default function OrderPage() {
               const isFavorite = favoriteOrderIds.includes(order._id);
               const isMaster = sessionUser?.role === "master";
               const isUnlockedForMaster = isMaster && unlockedContactIds.has(order._id);
-              const contactOpen = isMaster ? isUnlockedForMaster : expandedContactKey === cardKey;
               const isOwner =
                 canCreateOrder &&
                 Boolean(sessionUser?.id) &&
-                order.publisher?._id === sessionUser?.id;
+                (order.publisher?._id === sessionUser?.id ||
+                  order.user?._id === sessionUser?.id);
+              /** Masters: details only after unlock + “see contact” click. Others: never show this panel. */
+              const contactOpen =
+                isMaster && isUnlockedForMaster && expandedContactKey === cardKey;
               const canEditPending = isOwner && order.status === "pending";
               const rawFirstImage = (order.attachments ?? []).find((url) => isImageAttachment(url));
               const firstImageSrc = rawFirstImage ? getImageUrl(rawFirstImage) : "";
@@ -899,14 +913,14 @@ export default function OrderPage() {
                         </span>
                       </button>
                     ) : null}
-                    {!isMaster ? (
+                    {isMaster && isUnlockedForMaster ? (
                       <button
                         type="button"
                         className={styles.contactInfoBtn}
                         aria-expanded={contactOpen}
                         aria-controls={contactPanelId}
                         onClick={() =>
-                          setExpandedContactKey(contactOpen ? null : cardKey)
+                          setExpandedContactKey((prev) => (prev === cardKey ? null : cardKey))
                         }
                       >
                         {contactOpen ? t("hideContactInformation") : t("seeContactInformation")}
