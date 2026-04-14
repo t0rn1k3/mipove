@@ -101,7 +101,9 @@ export default function MasterCard({
             <div className={styles.gradientOverlay} aria-hidden />
 
             {hasRating && (
-              <div className={styles.ratingBadge}>
+              <div
+                className={`${styles.ratingBadge} ${ratingAverage >= 4 ? styles.ratingBadgeHigh : styles.ratingBadgeLow}`}
+              >
                 <Star size={14} className={styles.starFilled} />
                 <span className={styles.ratingText}>
                   {ratingAverage.toFixed(1)}
