@@ -421,6 +421,8 @@ export type CustomSelectProps = {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Merged onto the trigger button (e.g. hero strip styling). */
+  triggerClassName?: string;
   id?: string;
   "aria-label"?: string;
 };

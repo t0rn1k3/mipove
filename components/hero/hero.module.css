@@ -127,6 +127,7 @@
 }
 .searchInput {
   position: relative;
+  width: 45%;
 }
 .searchInput img {
   position: absolute;
@@ -165,6 +166,28 @@
 .heroCityAutocomplete input::placeholder {
   color: #768283;
 }
+
+.heroSpecialtyWrap {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.heroSpecialtyTrigger {
+  background: transparent;
+  padding: 0;
+  padding-left: 35px;
+  padding-right: 1.25rem;
+  min-height: 1.25rem;
+  font-size: 1rem;
+  font-family: inherit;
+  box-shadow: none;
+}
+
+.heroSpecialtyTrigger:focus-visible {
+  box-shadow: none;
+}
+
 .searchBarSeparator {
   display: flex;
   align-items: center;
@@ -401,6 +424,9 @@
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  .heroSpecialtyWrap {
+    padding: 15px 0;
   }
   .searchBarInput {
     padding: 14px 16px 14px 40px;

@@ -11,6 +11,7 @@ export default function CustomSelect({
   placeholder = "Select...",
   disabled = false,
   className = "",
+  triggerClassName = "",
   id,
   "aria-label": ariaLabel,
 }: CustomSelectProps) {
@@ -70,7 +71,7 @@ export default function CustomSelect({
         aria-controls={listboxId}
         aria-label={ariaLabel}
         disabled={disabled}
-        className={`${styles.trigger} ${isOpen ? styles.triggerOpen : ""}`}
+        className={`${styles.trigger} ${isOpen ? styles.triggerOpen : ""} ${triggerClassName}`.trim()}
         onClick={() => setIsOpen((prev) => !prev)}
         onKeyDown={handleKeyDown}
       >

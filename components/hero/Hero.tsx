@@ -1,36 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import CustomSelect from "@/components/CustomSelect/CustomSelect";
 import { useTranslations } from "next-intl";
+import { getProfessions } from "@/lib/api";
+import { mapProfessionsToSelectOptions } from "@/lib/professions";
+import type { Professions } from "@/lib/types";
 import styles from "./hero.module.css";
 
 export default function Hero() {
   const t = useTranslations("hero");
   const tCommon = useTranslations("common");
+  const tMasters = useTranslations("masters");
+  const tProfessions = useTranslations("professions");
   const router = useRouter();
-  const [skill, setSkill] = useState("");
+  const [specialty, setSpecialty] = useState("");
   const [location, setLocation] = useState("");
+  const [professionsRaw, setProfessionsRaw] = useState<Professions[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProfessions()
+      .then((list) => {
+        if (!cancelled) setProfessionsRaw(Array.isArray(list) ? list : []);
+      })
+      .catch(() => {
+        if (!cancelled) setProfessionsRaw([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const professionOptions = useMemo(
+    () => mapProfessionsToSelectOptions(professionsRaw, tProfessions),
+    [professionsRaw, tProfessions],
+  );
+
+  const specialtySelectOptions = useMemo(
+    () => [{ value: "", label: tMasters("allSpecialties") }, ...professionOptions],
+    [professionOptions, tMasters],
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (skill.trim()) params.set("specialty", skill.trim());
+    if (specialty.trim()) params.set("specialty", specialty.trim());
     if (location.trim()) params.set("location", location.trim());
     router.push(`/masters${params.toString() ? `?${params}` : ""}`);
-  };
-
-  const popularSkills = [
-    t("painting"),
-    t("sculpture"),
-    t("pottery"),
-    t("woodwork"),
-  ];
-
-  const handlePopularClick = (item: string) => {
-    setSkill(item);
   };
 
   return (
@@ -60,17 +80,20 @@ export default function Hero() {
             <div className={styles.searchBarSeparator}>
               <div className={styles.searchInput}>
                 <Image
-                  src="/icons/search.svg"
-                  alt={tCommon("search")}
+                  src="/icons/palette.svg"
+                  alt={tCommon("specialty")}
                   width={20}
                   height={20}
                 />
-                <input
-                  type="text"
-                  placeholder={t("searchBySkill")}
-                  className={styles.searchBarInput}
-                  value={skill}
-                  onChange={(e) => setSkill(e.target.value)}
+                <CustomSelect
+                  id="hero-specialty"
+                  options={specialtySelectOptions}
+                  value={specialty}
+                  onChange={setSpecialty}
+                  placeholder={tMasters("allSpecialties")}
+                  aria-label={tCommon("specialty")}
+                  className={styles.heroSpecialtyWrap}
+                  triggerClassName={styles.heroSpecialtyTrigger}
                 />
               </div>
               <div className={styles.searchInput}>
