@@ -25,14 +25,13 @@ import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
 import { InsufficientCreditsError } from "@/lib/types";
 import BackgroundImage from "@/components/BackgroundImage/backgroundImage";
 import OrderFormModal from "@/components/OrderFormModal/OrderFormModal";
-import Logo from "@/components/logo/Logo";
+import OrderListCard from "@/components/OrderListCard/OrderListCard";
 import OrdersSmartFilter, {
   FILTER_BUDGET_MAX,
   FILTER_LOCATION_VALUES,
   type OrderFilterState,
 } from "@/components/OrdersSmartFilter/OrdersSmartFilter";
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
-import { Banknote, MapPin, CalendarClock, User, Phone, Heart, Lock, Loader2 } from "lucide-react";
 import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
 import {
   mergeOrderCategoriesFromForm,
@@ -90,43 +89,6 @@ function normalizeLocation(raw: string): string {
   if (LOCATION_ALIASES[full]) return LOCATION_ALIASES[full];
   const city = full.split(",")[0].trim();
   return LOCATION_ALIASES[city] ?? city;
-}
-
-function formatDeadline(deadline: string, t: ReturnType<typeof useTranslations<"order">>) {
-  if (deadline === "urgent") return t("filterDeadlineUrgent");
-  if (deadline === "week") return t("filterDeadlineWeek");
-  if (deadline === "month") return t("filterDeadlineMonth");
-  return deadline;
-}
-
-function formatScheduledLabel(raw: string | undefined, t: ReturnType<typeof useTranslations<"order">>) {
-  const value = String(raw ?? "").trim();
-  if (!value) return "—";
-  if (value === "urgent" || value === "week" || value === "month") {
-    return formatDeadline(value, t);
-  }
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString();
-}
-
-function formatBudgetLabel(order: OrderRecord, t: ReturnType<typeof useTranslations<"order">>) {
-  if (order.priceNegotiable) return t("filterNegotiableOnly");
-  const minRaw = order.budget?.min ?? order.budgetMin;
-  const maxRaw = order.budget?.max ?? order.budgetMax;
-  const currency = order.budget?.currency || "GEL";
-  const min = Number(minRaw);
-  const max = Number(maxRaw);
-  const hasMin = Number.isFinite(min) && min > 0;
-  const hasMax = Number.isFinite(max) && max > 0;
-  if (hasMin && hasMax) return `${min.toLocaleString()} - ${max.toLocaleString()} ${currency}`;
-  if (hasMin) return `${min.toLocaleString()} ${currency}`;
-  if (hasMax) return `${max.toLocaleString()} ${currency}`;
-  return `0 ${currency}`;
-}
-
-function isImageAttachment(url: string): boolean {
-  return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
 }
 
 function useScrollReveal() {
@@ -744,223 +706,56 @@ export default function OrderPage() {
             {!ordersLoading && ordersError ? (
               <p className="mipoveGuestText mipoveGuestText--errorLight">{ordersError}</p>
             ) : null}
-            {!ordersLoading && !ordersError ? filteredOrders.map((order, index) => {
-              const cardKey = order._id;
-              const contactPanelId = `order-contact-${index}`;
-              const deadlineLabel = formatScheduledLabel(order.scheduledAt || order.deadline, t);
-              const locationLabel =
-                String(order.locationData?.city ?? order.locationData?.addressText ?? order.location ?? "").trim() || "—";
-              const budgetLabel = formatBudgetLabel(order, t);
-              const customerName =
-                String(
-                  order.customerNameSnapshot ??
-                    order.user?.name ??
-                    order.orderingMaster?.name ??
-                    order.publisher?.name ??
-                    "",
-                ).trim() || "—";
-              const customerPhone = String(
-                order.customerPhoneSnapshot ??
-                  order.user?.phone ??
-                  order.orderingMaster?.phone ??
-                  order.publisher?.phone ??
-                  "",
-              ).trim();
-              const telHrefFinal = customerPhone ? `tel:${customerPhone.replace(/\s/g, "")}` : "";
-              const categoryLabels = (order.categories ?? [])
-                .map((id) => orderCategoriesForUi.find((c) => c.id === id)?.label ?? id)
-                .filter(Boolean);
-              const isFavorite = favoriteOrderIds.includes(order._id);
-              const isMaster = sessionUser?.role === "master";
-              const isUnlockedForMaster = isMaster && unlockedContactIds.has(order._id);
-              const isOwner =
-                canCreateOrder &&
-                Boolean(sessionUser?.id) &&
-                (order.publisher?._id === sessionUser?.id ||
-                  order.user?._id === sessionUser?.id);
-              /** Masters: details only after unlock + “see contact” click. Others: never show this panel. */
-              const contactOpen =
-                isMaster && isUnlockedForMaster && expandedContactKey === cardKey;
-              const canEditPending = isOwner && order.status === "pending";
-              const rawFirstImage = (order.attachments ?? []).find((url) => isImageAttachment(url));
-              const firstImageSrc = rawFirstImage ? getImageUrl(rawFirstImage) : "";
-              const attachments = order.attachments ?? [];
-              const deleting = busyKey === `delete:${order._id}`;
-              const favoriteBusy = busyKey === `favorite:${order._id}`;
-              const unlockBusy = busyKey === `unlock:${order._id}`;
-              return (
-                <article
-                  key={cardKey}
-                  className={`${styles.orderCard} ${styles.scrollReveal} ${ORDER_CARD_DELAY[index % ORDER_CARD_DELAY.length]}`}
-                >
-                  <div className={styles.orderTop}>
-                    <div className={styles.orderThumb}>
-                      {firstImageSrc ? (
-                        <Image
-                          src={firstImageSrc}
-                          alt={order.title}
-                          width={88}
-                          height={88}
-                          className={styles.orderThumbImg}
-                        />
-                      ) : (
-                        <div className={styles.orderThumbPlaceholder} aria-hidden>
-                          <div className={styles.orderThumbLogoLoop}>
-                            <Logo size={34} showText={false} className={styles.orderThumbLogo} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className={styles.orderMain}>
-                      <h3 className={styles.orderTitle}>{order.title}</h3>
-                      <p className={styles.orderDescription}>{order.description}</p>
-                      {categoryLabels.length > 0 ? (
-                        <div className={styles.attachmentsWrap}>
-                          {categoryLabels.map((label) => (
-                            <span key={label} className={styles.attachmentLink}>
-                              {label}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-                      {attachments.length > 0 ? (
-                        <div className={styles.attachmentsWrap}>
-                          {attachments.slice(0, 4).map((url) => (
-                            <a
-                              key={url}
-                              href={getImageUrl(url)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className={styles.attachmentLink}
-                            >
-                              {isImageAttachment(url) ? t("attachmentImage") : t("attachmentFile")}
-                            </a>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-                    <div className={styles.orderMeta}>
-                      <div
-                        className={styles.orderMetaRow}
-                        aria-label={`${t("metaPriceRange")}: ${budgetLabel}`}
-                      >
-                        <Banknote size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>{budgetLabel}</span>
-                      </div>
-                      <div
-                        className={styles.orderMetaRow}
-                        aria-label={`${tCommon("location")}: ${locationLabel}`}
-                      >
-                        <MapPin size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>{locationLabel}</span>
-                      </div>
-                      <div
-                        className={styles.orderMetaRow}
-                        aria-label={`${t("metaExpectedBy")}: ${deadlineLabel}`}
-                      >
-                        <CalendarClock size={18} className={styles.orderMetaIcon} strokeWidth={2} aria-hidden />
-                        <span className={styles.orderMetaValue}>{deadlineLabel}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.orderFooter}>
-                    {isMaster ? (
-                      <button
-                        type="button"
-                        className={`${styles.favoriteBtn} ${isFavorite ? styles.favoriteBtnActive : ""}`}
-                        onClick={() => handleToggleFavorite(order._id)}
-                        aria-label={isFavorite ? t("removeFromFavorites") : t("addToFavorites")}
-                        disabled={favoriteBusy}
-                      >
-                        <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
-                      </button>
-                    ) : null}
-                    {canEditPending ? (
-                      <button
-                        type="button"
-                        className={styles.secondaryBtn}
-                        onClick={() => setEditingOrder(order)}
-                        disabled={deleting}
-                      >
-                        {t("editOrder")}
-                      </button>
-                    ) : null}
-                    {canEditPending ? (
-                      <button
-                        type="button"
-                        className={styles.dangerBtn}
-                        onClick={() => void handleDeleteOrder(order._id)}
-                        disabled={deleting}
-                      >
-                        {deleting ? t("deletingOrder") : t("deleteOrder")}
-                      </button>
-                    ) : null}
-                    {isMaster && !isUnlockedForMaster ? (
-                      <button
-                        type="button"
-                        className={styles.contactInfoBtn}
-                        onClick={() => void handleUnlockContact(order._id)}
-                        disabled={unlockBusy}
-                        aria-busy={unlockBusy}
-                      >
-                        <span className={styles.contactInfoBtnInner}>
-                          {unlockBusy ? (
-                            <Loader2 size={16} className={styles.contactInfoBtnIconSpin} strokeWidth={2} aria-hidden />
-                          ) : (
-                            <Lock size={16} strokeWidth={2} aria-hidden />
-                          )}
-                          <span>{unlockBusy ? tCredits("unlockContactLoading") : tCredits("unlockContact")}</span>
-                        </span>
-                      </button>
-                    ) : null}
-                    {isMaster && isUnlockedForMaster ? (
-                      <button
-                        type="button"
-                        className={styles.contactInfoBtn}
-                        aria-expanded={contactOpen}
-                        aria-controls={contactPanelId}
-                        onClick={() =>
-                          setExpandedContactKey((prev) => (prev === cardKey ? null : cardKey))
-                        }
-                      >
-                        {contactOpen ? t("hideContactInformation") : t("seeContactInformation")}
-                      </button>
-                    ) : null}
-                  </div>
-                  <div
-                    className={`${styles.contactReveal} ${contactOpen ? styles.contactRevealOpen : ""}`}
-                  >
-                    <div className={styles.contactRevealInner}>
-                      <div
-                        className={styles.orderContactExtra}
-                        id={contactPanelId}
-                        role="region"
-                        aria-hidden={!contactOpen}
-                        inert={contactOpen ? undefined : true}
-                      >
-                        <div className={styles.contactNamePhoneRow}>
-                          <div className={styles.contactInlineGroup} aria-label={`${tCommon("name")}: ${customerName}`}>
-                            <User size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
-                            <span className={styles.contactExtraValue}>{customerName}</span>
-                          </div>
-                          {customerPhone ? (
-                            <div
-                              className={styles.contactInlineGroup}
-                              aria-label={`${tCommon("phone")}: ${customerPhone}`}
-                            >
-                              <Phone size={18} className={styles.contactExtraIcon} strokeWidth={2} aria-hidden />
-                              <a href={telHrefFinal} className={styles.contactExtraLink}>
-                                {customerPhone}
-                              </a>
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            }) : null}
+            {!ordersLoading && !ordersError
+              ? filteredOrders.map((order, index) => {
+                  const cardKey = order._id;
+                  const categoryLabels = (order.categories ?? [])
+                    .map((id) => orderCategoriesForUi.find((c) => c.id === id)?.label ?? id)
+                    .filter(Boolean);
+                  const isFavorite = favoriteOrderIds.includes(order._id);
+                  const isMaster = sessionUser?.role === "master";
+                  const isUnlockedForMaster = isMaster && unlockedContactIds.has(order._id);
+                  const isOwner =
+                    canCreateOrder &&
+                    Boolean(sessionUser?.id) &&
+                    (order.publisher?._id === sessionUser?.id ||
+                      order.user?._id === sessionUser?.id);
+                  const contactOpen =
+                    isMaster && isUnlockedForMaster && expandedContactKey === cardKey;
+                  const canEditPending = isOwner && order.status === "pending";
+                  const deleting = busyKey === `delete:${order._id}`;
+                  const favoriteBusy = busyKey === `favorite:${order._id}`;
+                  const unlockBusy = busyKey === `unlock:${order._id}`;
+                  return (
+                    <OrderListCard
+                      key={cardKey}
+                      order={order}
+                      index={index}
+                      categoryLabels={categoryLabels}
+                      cardShellClassName={`${styles.scrollReveal} ${ORDER_CARD_DELAY[index % ORDER_CARD_DELAY.length]}`}
+                      t={t}
+                      tCommon={tCommon}
+                      tCredits={tCredits}
+                      showFavorite={isMaster}
+                      isFavorite={isFavorite}
+                      favoriteBusy={favoriteBusy}
+                      onToggleFavorite={() => void handleToggleFavorite(order._id)}
+                      showContactActions={isMaster}
+                      isUnlockedForMaster={isUnlockedForMaster}
+                      unlockBusy={unlockBusy}
+                      onUnlockContact={() => void handleUnlockContact(order._id)}
+                      contactOpen={contactOpen}
+                      onToggleContactReveal={() =>
+                        setExpandedContactKey((prev) => (prev === cardKey ? null : cardKey))
+                      }
+                      canEditPending={canEditPending}
+                      deleting={deleting}
+                      onEdit={() => setEditingOrder(order)}
+                      onDelete={() => void handleDeleteOrder(order._id)}
+                    />
+                  );
+                })
+              : null}
             {!ordersLoading && !ordersError && ordersHasMore ? (
               <div className={styles.loadMoreWrap}>
                 <button

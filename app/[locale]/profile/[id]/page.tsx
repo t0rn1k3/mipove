@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -12,12 +12,9 @@ import PortfolioLightbox from "@/components/PortfolioLightbox/PortfolioLightbox"
 import MasterRatingSection from "@/components/MasterRatingSection/MasterRatingSection";
 import PortfolioSection from "@/components/PortfolioSection/PortfolioSection";
 import RatedMastersList from "@/components/RatedMastersList/RatedMastersList";
-import {
-  CalendarClock,
-  MapPin,
-  Banknote,
-} from "lucide-react";
+import { CalendarClock, MapPin, Banknote } from "lucide-react";
 import Logo from "@/components/logo/Logo";
+import OrderListCard from "@/components/OrderListCard/OrderListCard";
 import {
   getMe,
   fetchMyPortfolio,
@@ -32,14 +29,20 @@ import {
   getMyOrders,
   deleteOrder,
   ORDERS_PAGE_SIZE,
+  getOrderCategories,
+  getUnlockedIds,
+  spendCredits,
 } from "@/lib/api";
+import { mapOrderCategoriesWithLabels } from "@/lib/orderCategoryI18n";
 import type {
   MeProfileApiFields,
   ProfileData,
   RatedMasterItem,
   Work,
   OrderRecord,
+  OrderCategoryOption,
 } from "@/lib/types";
+import { InsufficientCreditsError } from "@/lib/types";
 import styles from "../profilePage.module.css";
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
@@ -93,6 +96,8 @@ function mapMeToProfile(data: MeProfileApiFields, role?: string): ProfileData {
 export default function ProfilePage() {
   const t = useTranslations("profile");
   const tOrder = useTranslations("order");
+  const tCommon = useTranslations("common");
+  const tCredits = useTranslations("credits");
   const params = useParams();
   const router = useRouter();
   const slug = params?.id as string | undefined;
@@ -110,15 +115,21 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"work" | "favorites">("work");
   const [favoriteOrders, setFavoriteOrders] = useState<OrderRecord[]>([]);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
-  const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null);
+  const [favoriteRemoveBusyId, setFavoriteRemoveBusyId] = useState<string | null>(null);
+  const [favoriteUnlockBusyId, setFavoriteUnlockBusyId] = useState<string | null>(null);
   const [favoriteError, setFavoriteError] = useState("");
+  const [favoriteOrderCategories, setFavoriteOrderCategories] = useState<OrderCategoryOption[]>([]);
+  const [unlockedFavoriteContactIds, setUnlockedFavoriteContactIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [expandedFavoriteContactKey, setExpandedFavoriteContactKey] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isMasterProfile, setIsMasterProfile] = useState(false);
   const [ratedMasters, setRatedMasters] = useState<RatedMasterItem[]>([]);
-  const { balance: creditBalance } = useCreditBalance();
+  const { balance: creditBalance, setBalance: setCreditBalance } = useCreditBalance();
 
   const [clientUserId, setClientUserId] = useState<string | null>(null);
   const [myOrders, setMyOrders] = useState<OrderRecord[]>([]);
@@ -154,6 +165,25 @@ export default function ProfilePage() {
       .catch((err) => setFavoriteError(err instanceof Error ? err.message : "Failed to load favorites"))
       .finally(() => setFavoriteLoading(false));
   }, [canShowFavoritesTab]);
+
+  useEffect(() => {
+    if (!canShowFavoritesTab) return;
+    getOrderCategories()
+      .then((rows) => setFavoriteOrderCategories(rows))
+      .catch(() => setFavoriteOrderCategories([]));
+  }, [canShowFavoritesTab]);
+
+  useEffect(() => {
+    if (!canShowFavoritesTab) return;
+    getUnlockedIds("view_contact")
+      .then((ids) => setUnlockedFavoriteContactIds(new Set(ids)))
+      .catch(() => {});
+  }, [canShowFavoritesTab]);
+
+  const favoriteOrderCategoriesForUi = useMemo(
+    () => mapOrderCategoriesWithLabels(favoriteOrderCategories, tOrder),
+    [favoriteOrderCategories, tOrder],
+  );
 
   const loadMoreMyOrders = useCallback(async () => {
     if (!clientUserId || myOrdersLoadingMore || !myOrdersHasMore || myOrdersLoading) return;
@@ -352,6 +382,47 @@ export default function ProfilePage() {
       setEditError(err instanceof Error ? err.message : "Update failed");
     } finally {
       setEditLoading(false);
+    }
+  };
+
+  const handleRemoveFavoriteOrder = async (orderId: string) => {
+    setFavoriteRemoveBusyId(orderId);
+    try {
+      await removeMasterFavoriteOrder(orderId);
+      setFavoriteOrders((prev) => prev.filter((item) => item._id !== orderId));
+      setToast(tOrder("favoriteRemoved"));
+    } catch (err) {
+      setToast(err instanceof Error ? err.message : tOrder("favoriteActionFailed"));
+    } finally {
+      setFavoriteRemoveBusyId(null);
+    }
+  };
+
+  const handleUnlockFavoriteContact = async (orderId: string) => {
+    setFavoriteUnlockBusyId(orderId);
+    try {
+      const result = await spendCredits("view_contact", orderId);
+      setUnlockedFavoriteContactIds((prev) => {
+        const next = new Set(prev);
+        next.add(orderId);
+        return next;
+      });
+      setCreditBalance(result.remaining);
+      setToast(tCredits("contactUnlocked"));
+    } catch (err) {
+      if (err instanceof InsufficientCreditsError) {
+        setToast(
+          tCredits("insufficientDesc", {
+            required: err.required,
+            balance: err.balance,
+          }),
+        );
+        setBuyCreditsOpen(true);
+        return;
+      }
+      setToast(err instanceof Error ? err.message : tOrder("favoriteActionFailed"));
+    } finally {
+      setFavoriteUnlockBusyId(null);
     }
   };
 
@@ -620,69 +691,43 @@ export default function ProfilePage() {
                         </div>
                       ) : (
                         <div className={styles.favoritesList}>
-                          {favoriteOrders.map((order) => {
-                            const rawThumb = order.attachments.find((url) => isImageAttachment(url));
-                            const thumbSrc = rawThumb ? getImageUrl(rawThumb) : "";
+                          {favoriteOrders.map((order, index) => {
+                            const categoryLabels = (order.categories ?? [])
+                              .map(
+                                (id) =>
+                                  favoriteOrderCategoriesForUi.find((c) => c.id === id)?.label ?? id,
+                              )
+                              .filter(Boolean);
+                            const isUnlocked = unlockedFavoriteContactIds.has(order._id);
+                            const contactOpen =
+                              isUnlocked && expandedFavoriteContactKey === order._id;
+                            const cardBusy =
+                              favoriteRemoveBusyId === order._id ||
+                              favoriteUnlockBusyId === order._id;
                             return (
-                            <article key={order._id} className={styles.favoriteOrderCard}>
-                              <div className={styles.favoriteTop}>
-                                <Image
-                                  src={thumbSrc || "/images/hero-main.jpg"}
-                                  alt={order.title}
-                                  width={90}
-                                  height={90}
-                                  className={styles.favoriteThumb}
-                                />
-                                <div className={styles.favoriteMain}>
-                                  <div className={styles.favoriteHeadRow}>
-                                    <div>
-                                      <p className={styles.favoriteClient}>{order.publisher?.name ?? "Client"}</p>
-                                      <p className={styles.favoriteSavedAt}>Saved order</p>
-                                    </div>
-                                  </div>
-                                  <h3 className={styles.favoriteTitle}>{order.title}</h3>
-                                  <p className={styles.favoriteDesc}>{order.description}</p>
-                                  <div className={styles.favoriteMeta}>
-                                    <span className={styles.favoriteMetaItem}>
-                                      <MapPin size={16} /> {order.location}
-                                    </span>
-                                    <span className={styles.favoriteMetaItem}>
-                                      <Banknote size={16} /> {order.priceNegotiable ? "Negotiable" : `₾${order.budgetMin} - ₾${order.budgetMax}`}
-                                    </span>
-                                    <span className={styles.favoriteMetaItem}>
-                                      <CalendarClock size={16} /> {order.deadline}
-                                    </span>
-                                  </div>
-                                  <div className={styles.favoriteActions}>
-                                    <button type="button" className={styles.favoritePrimaryBtn}>
-                                      Submit Proposal
-                                    </button>
-                                    <button type="button" className={styles.favoriteGhostBtn}>
-                                      View Details
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className={styles.favoriteRemoveBtn}
-                                      disabled={favoriteBusyId === order._id}
-                                      onClick={async () => {
-                                        setFavoriteBusyId(order._id);
-                                        try {
-                                          await removeMasterFavoriteOrder(order._id);
-                                          setFavoriteOrders((prev) => prev.filter((item) => item._id !== order._id));
-                                          setToast("Removed from favorites");
-                                        } catch (err) {
-                                          setToast(err instanceof Error ? err.message : "Failed to remove favorite");
-                                        } finally {
-                                          setFavoriteBusyId(null);
-                                        }
-                                      }}
-                                    >
-                                      {favoriteBusyId === order._id ? "Removing..." : "Remove"}
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </article>
+                            <OrderListCard
+                              key={order._id}
+                              order={order}
+                              index={index}
+                              categoryLabels={categoryLabels}
+                              t={tOrder}
+                              tCommon={tCommon}
+                              tCredits={tCredits}
+                              showFavorite
+                              isFavorite
+                              favoriteBusy={cardBusy}
+                              onToggleFavorite={() => void handleRemoveFavoriteOrder(order._id)}
+                              showContactActions
+                              isUnlockedForMaster={isUnlocked}
+                              unlockBusy={favoriteUnlockBusyId === order._id}
+                              onUnlockContact={() => void handleUnlockFavoriteContact(order._id)}
+                              contactOpen={contactOpen}
+                              onToggleContactReveal={() =>
+                                setExpandedFavoriteContactKey((prev) =>
+                                  prev === order._id ? null : order._id,
+                                )
+                              }
+                            />
                             );
                           })}
                         </div>
