@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { useTranslations } from "next-intl";
 import Logo from "@/components/logo/Logo";
 import styles from "./about.module.css";
 
 
 
 function useScrollReveal() {
+ 
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -23,14 +24,15 @@ function useScrollReveal() {
     return () => observer.disconnect();
   }, []);
 
-  return { ref, isVisible };
+  return [ref, isVisible] as const;
 }
 
 export default function AboutPage() {
-  const storySection = useScrollReveal();
-  const drivesSection = useScrollReveal();
-  const joinSection = useScrollReveal();
-  const footerSection = useScrollReveal();
+  const [storySectionRef, storySectionVisible] = useScrollReveal();
+  const [drivesSectionRef, drivesSectionVisible] = useScrollReveal();
+  const [joinSectionRef, joinSectionVisible] = useScrollReveal();
+  const [footerSectionRef, footerSectionVisible] = useScrollReveal();
+  const t = useTranslations("about");
 
   return (
     <main className={styles.page}>
@@ -44,51 +46,30 @@ export default function AboutPage() {
         <h1
           className={`${styles.heroTitle} ${styles.reveal} ${styles.revealDelay2}`}
         >
-          About Mipove
+         {t("title")}
         </h1>
-        <p
-          className={`${styles.heroSubtitle} ${styles.reveal} ${styles.revealDelay3}`}
-        >
-          Where &quot;Find Me&quot; meets exceptional craftsmanship. Connecting
-          you with Georgia&apos;s finest artisans and masters.
-        </p>
       </section>
 
    
-      <section ref={storySection.ref} className={styles.section}>
+      <section ref={storySectionRef} className={styles.section}>
         <div
-          className={`${styles.sectionInner} ${storySection.isVisible ? styles.visible : ""}`}
+          className={`${styles.sectionInner} ${storySectionVisible ? styles.visible : ""}`}
         >
           <div
             className={`${styles.storyCard} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
           >
-            <h2 className={styles.storyTitle}>Our Story</h2>
+            <h2 className={styles.storyTitle}>{t("ourStory")}</h2>
             <p className={styles.storyText}>
-              In the heart of Georgia, where centuries of craftsmanship
-              tradition meet modern innovation, mipove was born from a simple
-              yet powerful idea: what if finding the perfect artisan or
-              master was as easy as it should be?
+              {t("story1")}
             </p>
             <p className={styles.storyText}>
-              We noticed that while Georgia is home to incredibly talented
-              craftspeople—from master woodworkers and sculptors to innovative
-              designers and skilled tradespeople—there was no elegant way for
-              people to discover and connect with them. The process was
-              fragmented, relying on word-of-mouth and chance encounters.
+             {t("story2")}
             </p>
             <p className={styles.storyText}>
-              <strong>Mipove changes that.</strong> Our name, meaning &quot;find
-              me&quot; in Georgian, embodies our mission: making exceptional
-              talent visible, accessible, and connected to those who need it.
-              We&apos;ve created a platform that celebrates the human element of
-              craftsmanship while leveraging modern technology to make discovery
-              effortless.
+              {t("story3")}
             </p>
             <p className={styles.storyText}>
-              Today, mipove is more than a directory—it&apos;s a thriving
-              community where professionals showcase their artistry, clients
-              find trusted experts, and meaningful projects come to life through
-              authentic connections.
+              {t("story4")}
             </p>
           </div>
         </div>
@@ -96,20 +77,16 @@ export default function AboutPage() {
 
 
       {/* What Drives Us */}
-      <section ref={drivesSection.ref} className={styles.section}>
+      <section ref={drivesSectionRef} className={styles.section}>
         <div
-          className={`${styles.sectionInner} ${drivesSection.isVisible ? styles.visible : ""}`}
+          className={`${styles.sectionInner} ${drivesSectionVisible ? styles.visible : ""}`}
         >
           <h2
             className={`${styles.sectionTitle} ${styles.sectionTitleCenter} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
           >
-            What Drives Us
+            {t("whatDrivesUs")}
           </h2>
-          <p
-            className={`${styles.sectionSubtitle} ${styles.sectionSubtitleCenter} ${styles.scrollReveal} ${styles.scrollRevealDelay2}`}
-          >
-            The principles that guide everything we do
-          </p>
+         
           <div className={styles.drivesGrid}>
             {[
               {
@@ -158,8 +135,8 @@ export default function AboutPage() {
      
 
       {/* Join Community */}
-      <section ref={joinSection.ref} className={styles.joinSection}>
-        <div className={joinSection.isVisible ? styles.visible : ""}>
+      <section ref={joinSectionRef} className={styles.joinSection}>
+        <div className={joinSectionVisible ? styles.visible : ""}>
           <div
             className={`${styles.joinCard} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}
           >
@@ -181,8 +158,8 @@ export default function AboutPage() {
       </section>
 
       {/* Footer */}
-      <footer ref={footerSection.ref} className={styles.footer}>
-        <div className={footerSection.isVisible ? styles.visible : ""}>
+      <footer ref={footerSectionRef} className={styles.footer}>
+        <div className={footerSectionVisible ? styles.visible : ""}>
           <Link
             href="/"
             className={`${styles.footerLogo} ${styles.scrollReveal} ${styles.scrollRevealDelay1}`}

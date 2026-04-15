@@ -401,7 +401,6 @@
   },
   "about": {
     "title": "About Mipove",
-    "subtitle": "Where \"Find Me\" meets exceptional craftsmanship. Connecting you with Georgia's finest artisans and masters.",
     "ourStory": "Our Story",
     "story1": "In the heart of Georgia, where centuries of craftsmanship tradition meet modern innovation, mipove was born from a simple yet powerful idea: what if finding the perfect artisan or master was as easy as it should be?",
     "story2": "We noticed that while Georgia is home to incredibly talented craftspeople—from master woodworkers and sculptors to innovative designers and skilled tradespeople—there was no elegant way for people to discover and connect with them. The process was fragmented, relying on word-of-mouth and chance encounters.",
@@ -516,6 +515,7 @@
     "shoe_Designer": "Shoe Designer",
     "photographer": "Photographer",
     "videographer": "Videographer",
+    "graphic_designer": "Graphic Designer",
     "restorer": "Restorer",
     "other": "Other"
   },
