@@ -195,8 +195,12 @@ export default function OrderSubmissionForm({
     setStep((x) => Math.max(1, x - 1));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /** Block native / implicit submit (e.g. Enter in inputs) so save only runs from the explicit button. */
+  const preventImplicitSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+  };
+
+  const submitFromButton = async () => {
     if (!validateStep(TOTAL_STEPS)) return;
     setSubmitting(true);
     try {
@@ -209,7 +213,7 @@ export default function OrderSubmissionForm({
   return (
     <form
       className={`${styles.form} ${embedded ? styles.formEmbedded : ""}`}
-      onSubmit={handleSubmit}
+      onSubmit={preventImplicitSubmit}
       noValidate
     >
       <div className={styles.steps} aria-label={t("stepsAria")}>
@@ -584,7 +588,12 @@ export default function OrderSubmissionForm({
             {t("next")}
           </button>
         ) : (
-          <button type="submit" className={styles.btnPrimary} disabled={submitting}>
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            disabled={submitting}
+            onClick={() => void submitFromButton()}
+          >
             {submitting ? t("submitting") : (submitLabel ?? t("submit"))}
           </button>
         )}
