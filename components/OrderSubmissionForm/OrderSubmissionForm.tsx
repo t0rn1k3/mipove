@@ -406,6 +406,7 @@ export default function OrderSubmissionForm({
           ) : null}
 
           <span className={styles.label}>{t("location")}</span>
+          <div className={styles.locationInput}>
           <CityAutocomplete
             id={`${formId}-location`}
             value={form.locationCity}
@@ -424,6 +425,7 @@ export default function OrderSubmissionForm({
             placeholder={t("locationPlaceholder")}
             className={errors.location ? styles.selectError : ""}
           />
+          </div>
           {errors.location ? (
             <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.location}</p>
           ) : null}

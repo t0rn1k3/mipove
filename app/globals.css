@@ -24,6 +24,34 @@
   font-family: var(--font-sans);
 }
 
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 118, 110, 0.55) rgba(255, 255, 255, 0.35);
+}
+
+html::-webkit-scrollbar {
+  width: 10px;
+}
+
+html::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  margin: 6px 0;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: rgba(0, 231, 211, 0.45);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 118, 110, 0.65);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
 body {
   background: var(--cream);
 }
