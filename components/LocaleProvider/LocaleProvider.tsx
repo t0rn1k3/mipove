@@ -16,6 +16,7 @@ function setLocaleCookie(locale: AppLocale) {
 
 export function LocaleProvider({
   initialLocale,
+  timeZone,
   enMessages,
   kaMessages,
   children,
@@ -55,7 +56,11 @@ export function LocaleProvider({
 
   return (
     <LocaleContext.Provider value={value}>
-      <NextIntlClientProvider locale={locale} messages={allMessages[locale]}>
+      <NextIntlClientProvider
+        locale={locale}
+        messages={allMessages[locale]}
+        timeZone={timeZone}
+      >
         {children}
       </NextIntlClientProvider>
     </LocaleContext.Provider>

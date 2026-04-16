@@ -1,5 +1,5 @@
 import { LocaleProvider } from "@/components/LocaleProvider/LocaleProvider";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTimeZone } from "next-intl/server";
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import localFont from "next/font/local";
@@ -45,6 +45,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const locale = (await getLocale()) as "en" | "ka";
+  const timeZone = await getTimeZone();
   const [enMessages, kaMessages] = await Promise.all([
     import("../messages/en.json").then((m) => m.default),
     import("../messages/ka.json").then((m) => m.default),
@@ -55,6 +56,7 @@ export default async function RootLayout({
       <body className={`${sharpe.variable} ${playfair.variable} ${inter.variable}`}>
         <LocaleProvider
           initialLocale={locale}
+          timeZone={timeZone}
           enMessages={enMessages}
           kaMessages={kaMessages}
         >

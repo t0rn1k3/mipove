@@ -447,6 +447,8 @@ export type AppLocale = "en" | "ka";
 
 export type LocaleProviderProps = {
   initialLocale: AppLocale;
+  /** Must match `timeZone` in `i18n/request.ts` (from `getTimeZone()` in root layout). */
+  timeZone: string;
   enMessages: Record<string, unknown>;
   kaMessages: Record<string, unknown>;
   children: ReactNode;
