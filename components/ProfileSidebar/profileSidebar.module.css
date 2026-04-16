@@ -330,7 +330,7 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .sidebar {
-    max-width: 400px;
-    margin: 0 auto 2rem;
+    max-width: 90%;
+    margin: 1rem auto 2rem;
   }
 }

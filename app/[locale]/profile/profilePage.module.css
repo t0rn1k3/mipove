@@ -268,7 +268,6 @@
 
 .favoriteMeta {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem 1rem;
   margin-top: 0.75rem;
 }
@@ -280,6 +279,9 @@
   color: #374151;
   font-size: 0.8rem;
   font-weight: 600;
+  background-color: var(--teal-light);
+  padding: 4px 10px;
+  border-radius: 9999px;
 }
 
 .favoriteActions {
@@ -436,16 +438,15 @@
 
   .sidebar {
     position: static;
-    max-width: 400px;
+    width: 100%;
     margin: 0 auto 2rem;
   }
 
   .main {
     padding-left: 0;
   }
-
   .favoriteTop {
-    flex-direction: column;
+    justify-content: space-around;
   }
 
   .favoriteThumb {
@@ -469,6 +470,16 @@
 @media (max-width: 480px) {
   .contactTitle {
     font-size: 1.5rem;
+  }
+  .favoriteMetaItem {
+    font-size: 0.6rem;
+  }
+  .favoriteGhostBtn{
+    font-size: 0.7rem;
+  }
+  .myOrderThumbPlaceholder {
+    width: 60px;
+    height: 60px;
   }
 }
 

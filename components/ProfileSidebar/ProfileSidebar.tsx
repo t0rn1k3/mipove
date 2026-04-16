@@ -44,44 +44,46 @@ export default function ProfileSidebar({
   return (
     <aside className={styles.sidebar}>
       <div className={styles.card}>
-        <div className={styles.avatarWrapper}>
-          <Image
-            src={avatarSrc}
-            alt={name}
-            width={200}
-            height={200}
-            className={styles.avatar}
-          />
-          {isOwnProfile && onChangePhoto && (
-            <label
-              className={styles.addPhotoBtn}
-            aria-label={isUploadingPhoto ? t("uploadingPhoto") : t("changePhoto")}
-            title={isUploadingPhoto ? t("uploading") : t("changePhoto")}
-            >
-              <span className={styles.addPhotoBtnIcon}>+</span>
-              <input
-                type="file"
-                accept="image/*"
-                className={styles.hiddenInput}
-                disabled={isUploadingPhoto}
-                onChange={(e) => {
-                  const file = e.currentTarget.files?.[0];
-                  e.currentTarget.value = "";
-                  if (file) onChangePhoto(file);
-                }}
-              />
-            </label>
-          )}
-        </div>
-        <h1 className={styles.name}>{name}</h1>
-        {!isClientProfile ? (
-          <p className={styles.specialty}>
-            {translateProfessionDisplay(specialty, tProfessions) || specialty}
-          </p>
-        ) : null}
-        <div className={styles.location}>
-          <MapPin size={18} className={styles.locationIcon} />
-          <span>{location}</span>
+        <div className={styles.cardContent}>
+          <div className={styles.avatarWrapper}>
+            <Image
+              src={avatarSrc}
+              alt={name}
+              width={200}
+              height={200}
+              className={styles.avatar}
+            />
+            {isOwnProfile && onChangePhoto && (
+              <label
+                className={styles.addPhotoBtn}
+              aria-label={isUploadingPhoto ? t("uploadingPhoto") : t("changePhoto")}
+              title={isUploadingPhoto ? t("uploading") : t("changePhoto")}
+              >
+                <span className={styles.addPhotoBtnIcon}>+</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className={styles.hiddenInput}
+                  disabled={isUploadingPhoto}
+                  onChange={(e) => {
+                    const file = e.currentTarget.files?.[0];
+                    e.currentTarget.value = "";
+                    if (file) onChangePhoto(file);
+                  }}
+                />
+              </label>
+            )}
+          </div>
+          <h1 className={styles.name}>{name}</h1>
+          {!isClientProfile ? (
+            <p className={styles.specialty}>
+              {translateProfessionDisplay(specialty, tProfessions) || specialty}
+            </p>
+          ) : null}
+          <div className={styles.location}>
+            <MapPin size={18} className={styles.locationIcon} />
+            <span>{location}</span>
+          </div>
         </div>
         {!isClientProfile &&
         (typeof rating === "number" || typeof credits === "number" || onBuyCredits) ? (

@@ -26,8 +26,17 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_FRONTEND_URL?.trim() || "http://localhost:3000",
+  ),
   title: "Mipove",
   description: "Mipove is a platform for masters in different fields",
+  /** Explicit so browsers/CDNs don’t keep the default Next tab icon */
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml", sizes: "any" }],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default async function RootLayout({
