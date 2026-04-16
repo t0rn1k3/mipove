@@ -69,6 +69,11 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
       {
+        protocol: "https",
+        hostname: "s3.eu-central-003.backblazeb2.com",
+        pathname: "/**",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         pathname: "/**",
