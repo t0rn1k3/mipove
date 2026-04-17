@@ -336,8 +336,13 @@
   color: #374151;
   text-align: right;
 }
+@media (max-width: 1400px) {
+  .orderMeta {
+    width: 100px;
+  }
+}
 
-@media (max-width: 720px) {
+@media (max-width: 1200px) {
   .orderTop {
     display: grid;
     grid-template-columns: 64px minmax(0, 1fr);
