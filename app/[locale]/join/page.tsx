@@ -165,11 +165,6 @@ export default function JoinPage() {
         >
           {t("title")}
         </h1>
-        <p
-          className={`${styles.subtitle} ${styles.reveal} ${styles.revealDelay3}`}
-        >
-          {t("subtitle")}
-        </p>
       </section>
 
       {/* Main Content */}
@@ -232,13 +227,6 @@ export default function JoinPage() {
                     </li>
                   ))}
                 </ul>
-              </div>
-
-              <div className={styles.trustedCallout}>
-                <p className={styles.trustedText}>{t("trustedBy")}</p>
-                <p className={styles.communityText}>
-                  {t("joinCommunity")}
-                </p>
               </div>
             </>
           )}
@@ -425,7 +413,7 @@ export default function JoinPage() {
                 </span>
               </button>
 
-              {!isAdminMode && (
+              {/* {!isAdminMode && (
                 <p className={styles.legalText}>
                   {t("termsPrefix")}{" "}
                   <Link href="/terms" className={styles.legalLink}>
@@ -437,7 +425,7 @@ export default function JoinPage() {
                   </Link>
                   .
                 </p>
-              )}
+              )} */}
             </form>
           ) : (
             <form className={styles.form} onSubmit={handleLoginSubmit}>

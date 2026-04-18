@@ -139,7 +139,7 @@
 .layout {
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(240px, 300px);
+  grid-template-columns: minmax(220px, 280px) minmax(600px, 1fr) minmax(auto, 300px);
   gap: 1.25rem;
   align-items: start;
 }
@@ -334,6 +334,28 @@
   color: #b91c1c;
 }
 
+@media (max-width : 1200px)
+{
+  .layout {
+    grid-template-columns: minmax(220px, 280px) minmax(500px, 1fr) minmax(auto, 300px);
+  }
+  .asideBtnBase {
+    font-size: 0.7rem;
+  }
+  .avatarWrap {
+    width: 70px;
+    height: 70px;
+  }
+  .asideName {
+    font-size: 1rem;
+  }
+  .asideRole {
+    font-size: 0.7rem;
+  }
+  .asideEmail {
+    font-size: 0.7rem;
+  }
+}
 @media (max-width: 1024px) {
   .layout {
     grid-template-columns: 1fr;

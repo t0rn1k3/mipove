@@ -77,7 +77,7 @@ export default function Hero() {
             className={`${styles.searchBar} ${styles.reveal} ${styles.revealDelay3}`}
             onSubmit={handleSearch}
           >
-            <div className={styles.searchBarSeparator}>
+            {/* <div className={styles.searchBarSeparator}>
               <div className={styles.searchInput}>
                 <Image
                   src="/icons/palette.svg"
@@ -116,7 +116,7 @@ export default function Hero() {
 
             <button type="submit" className={styles.searchBarButton}>
               {t("searchButton")}
-            </button>
+            </button> */}
           </form>
         </div>
 
@@ -126,7 +126,7 @@ export default function Hero() {
             className={`${styles.mainImage} ${styles.reveal} ${styles.revealDelay5}`}
           >
             <Image
-              src="/images/artisan-2.jpg"
+              src="/images/master-3.jpg"
               alt={t("heroMainAlt")}
               width={280}
               height={280}
@@ -137,7 +137,7 @@ export default function Hero() {
             className={`${styles.secondaryImage} ${styles.reveal} ${styles.revealDelay6}`}
           >
             <Image
-              src="/images/artisan-2.jpg"
+              src="/images/master-1.jpg"
               alt={t("heroSecondaryAlt")}
               width={280}
               height={280}

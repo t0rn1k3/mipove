@@ -144,7 +144,7 @@ export default function AboutPage() {
       </section>
 
       {/* What Drives Us */}
-      <section ref={drivesSectionRef} className={styles.section}>
+      {/* <section ref={drivesSectionRef} className={styles.section}>
         <div
           className={`${styles.sectionInner} ${drivesSectionVisible ? styles.visible : ""}`}
         >
@@ -177,7 +177,7 @@ export default function AboutPage() {
             })}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Join Community */}
       <section ref={joinSectionRef} className={styles.joinSection}>

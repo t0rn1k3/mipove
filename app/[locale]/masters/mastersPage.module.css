@@ -126,17 +126,15 @@
   gap: 2rem;
 }
 
-/* @media (min-width: 768px) {
+@media (max-width: 768px) {
   .grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-auto-rows: auto;
   }
+
 }
 
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-} */
+
 
 /* Empty state */
 .emptyState {
@@ -228,6 +226,18 @@
   }
 }
 
+
+@media (max-width : 672px) {
+  .filterInput {
+    border-radius: 0 9999px 9999px 0;
+  }
+  .filterField:last-child .filterInput,
+  .filterField:last-child button[role="combobox"] {
+    border-radius: 9999px;
+    margin-top: 0.5rem;
+  }
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 70px 0.75rem 40px;
@@ -243,5 +253,15 @@
   .socialIcons {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 385px) {
+  .filterField:first-child .filterInput {
+    border-radius: 9999px;
+  }
+  .filterField:nth-child(2) .filterInput {
+    border-radius: 9999px;
+    margin-top: 0.5rem;
   }
 }

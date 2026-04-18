@@ -227,3 +227,57 @@
 .viewBtn:hover {
   background: #4d8589;
 }
+
+
+@media (max-width: 768px) {
+    .imageContainer {
+      height: 100px;
+    }
+    .ratingText {
+      font-size: 0.6rem;
+    }
+      .starFilled {
+        width: 10px;
+        height: 10px;
+      }
+      .starEmpty {
+        width: 10px;
+        height: 10px;
+      }
+    .name {
+      font-size: 0.8rem;
+    }
+    .specialty {
+      font-size: 0.6rem;
+    }
+    .bio {
+      font-size: 0.5rem;
+    }
+    .viewBtn {
+      font-size: 0.6rem;
+      padding: 0.3rem 0.8rem;
+    }
+    .rateStarBtn svg {
+      width: 10px;
+      height: 10px;
+    }
+    .reviewCount {
+      font-size: 0.4rem;
+    }
+    .locationIcon {
+      width: 10px;
+      height: 10px;
+    }
+    .locationRow {
+      font-size: 0.5rem;
+    }
+    .skillTag {
+      font-size: 0.6rem;
+    }
+    .skillTags {
+      gap: 0.3rem;
+    }
+    .bio {
+      height: 2rem;
+    }
+}

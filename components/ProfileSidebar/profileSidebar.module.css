@@ -334,3 +334,75 @@
     margin: 1rem auto 2rem;
   }
 }
+@media (max-width: 426px) {
+  .avatarWrapper {
+    width: 100px;
+    height: 100px;
+  }
+  .name {
+    font-size: 1.2rem;
+  }
+  .specialty {
+    font-size: 0.8rem;
+  }
+  .specialty {
+    font-size: 0.8rem;
+  }
+  .location {
+    font-size: 0.8rem;
+  }
+  .locationIcon {
+    width: 16px;
+    height: 16px;
+  }
+  .creditCard {
+    padding: 0.5rem 0.75rem;
+  }
+  .creditLabel {
+    font-size: 0.6rem;
+  }
+  .creditValue {
+    font-size: 1rem;
+  }
+  .buyCreditsBtn {
+    padding: 0.3rem 0.8rem;
+  }
+  .creditActions {
+    gap: 0.3rem;
+  }
+  .historyLinkBtn {
+    padding: 0.3rem 0.8rem;
+  }
+  .bio {
+    font-size: 0.8rem;
+  }
+  .separator {
+    margin-bottom: 1rem;
+  }
+  .contactBlock {
+    padding: 0.5rem 0.75rem;
+  }
+  .contactIcon {
+    width: 16px;
+    height: 16px;
+  }
+  .contactLabel {
+    font-size: 0.6rem;
+  }
+  .contactDetail {
+    font-size: 0.8rem;
+  }
+  .actionBtn {
+    padding: 0.5rem 0.75rem;
+  }
+  .logoutBtn {
+    padding: 0.5rem 0.75rem;
+  }
+  .addPhotoBtn {
+    width: 30px;
+    height: 30px;
+  }
+  .addPhotoBtnIcon {
+    font-size: 18px;
+  }
+}

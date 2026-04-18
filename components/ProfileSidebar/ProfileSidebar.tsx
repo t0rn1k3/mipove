@@ -104,23 +104,23 @@ export default function ProfileSidebar({
                 </div>
                 {onBuyCredits ? (
                   <div className={styles.creditActions}>
-                    <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                    {/* <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
                       {tCredits("buy")}
                     </button>
                     <Link href="/credits" className={styles.historyLinkBtn}>
                       {tCredits("history")}
-                    </Link>
+                    </Link> */}
                   </div>
                 ) : null}
               </div>
             ) : onBuyCredits ? (
               <div className={styles.creditActions}>
-                <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                {/* <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
                   {tCredits("buy")}
                 </button>
                 <Link href="/credits" className={styles.historyLinkBtn}>
                   {tCredits("history")}
-                </Link>
+                </Link> */}
               </div>
             ) : null}
           </div>
