@@ -126,7 +126,7 @@ export default function Hero() {
             className={`${styles.mainImage} ${styles.reveal} ${styles.revealDelay5}`}
           >
             <Image
-              src="/images/master-3.jpg"
+              src="/images/master-1.jpg"
               alt={t("heroMainAlt")}
               width={280}
               height={280}
@@ -137,7 +137,7 @@ export default function Hero() {
             className={`${styles.secondaryImage} ${styles.reveal} ${styles.revealDelay6}`}
           >
             <Image
-              src="/images/master-1.jpg"
+              src="/images/master-3.jpg"
               alt={t("heroSecondaryAlt")}
               width={280}
               height={280}
