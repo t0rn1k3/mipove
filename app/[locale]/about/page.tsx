@@ -217,6 +217,8 @@ export default function AboutPage() {
             {t("madeIn")}
           </p>
         </div>
+
+  
       </footer>
     </main>
   );
