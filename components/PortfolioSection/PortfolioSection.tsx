@@ -9,6 +9,7 @@ import {
 } from "@/lib/api";
 import type { PortfolioSectionProps } from "@/lib/types";
 import styles from "./portfolioSection.module.css";
+import { useTranslations } from "next-intl";
 
 export default function PortfolioSection({
   portfolioImages,
@@ -26,6 +27,8 @@ export default function PortfolioSection({
   const [portfolioUploading, setPortfolioUploading] = useState(false);
   const [portfolioError, setPortfolioError] = useState("");
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
+
+  const t = useTranslations("profile");
 
   useEffect(() => {
     const urls = selectedPortfolioPreviews;
@@ -138,10 +141,10 @@ export default function PortfolioSection({
       <div
         className={`${styles.portfolioHeader} ${styles.scrollReveal} ${styles.visibleDelay1}`}
       >
-        <h2 className={styles.portfolioTitle}>Portfolio</h2>
+        <h2 className={styles.portfolioTitle}>{t("portfolio")}</h2>
         {userRole === "master" && isOwnProfile && (
           <label className={styles.portfolioAddBtn}>
-            {portfolioUploading ? "Uploading..." : "Add photos"}
+            {portfolioUploading ? t("uploading") : t("addPhotos")}
             <input
               type="file"
               accept="image/*"
@@ -163,7 +166,7 @@ export default function PortfolioSection({
             <p className="mipoveGuestText mipoveGuestText--errorLight">{portfolioError}</p>
           )}
           <p className={styles.portfolioPendingLabel}>
-            Ready to upload ({selectedPortfolioPreviews.length})
+            {t("readyToUpload")} ({selectedPortfolioPreviews.length})
           </p>
           <div className={styles.portfolioGrid}>
             {selectedPortfolioPreviews.map((src) => (
@@ -186,7 +189,7 @@ export default function PortfolioSection({
               onClick={clearSelectedPortfolio}
               disabled={portfolioUploading}
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="button"
@@ -194,7 +197,7 @@ export default function PortfolioSection({
               onClick={() => void handleUploadPortfolio()}
               disabled={portfolioUploading}
             >
-              {portfolioUploading ? "Uploading..." : "Upload photos"}
+              {portfolioUploading ? t("uploading") : t("uploadPhotos")}
             </button>
           </div>
         </div>
@@ -222,16 +225,16 @@ export default function PortfolioSection({
                     type="button"
                     className={styles.portfolioDeleteBtn}
                     aria-label="Remove photo from portfolio"
-                    title="Remove photo"
+                    title={t("removePhoto")}
                     disabled={Boolean(deletingUrl) || portfolioUploading}
                     onClick={(e) => void handleDeletePortfolioImage(src, e)}
                   >
-                    {deletingUrl === src ? "…" : "×"}
+                    {deletingUrl === src ? "…" : t("remove")}
                   </button>
                 ) : null}
                 <Image
                   src={src}
-                  alt="Portfolio image"
+                  alt={t("portfolioImage")}
                   width={400}
                   height={500}
                   className={styles.workImage}
