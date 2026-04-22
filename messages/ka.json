@@ -22,7 +22,13 @@
     "contactUs": "დაგვიკავშირდით",
     "active": "აქტიური",
     "blocked": "დაბლოკილი",
-    "noCitiesFound": "ქალაქები ვერ მოიძებნა"
+    "noCitiesFound": "ქალაქები ვერ მოიძებნა",
+    "selectSpecialty": "სპეციალობის არჩევა",
+    "startTypingCity": "ქალაქის სახელის დაწკრილება...",
+    "instagramUsername": "@username",
+    "websitePlaceholder": "https://",
+    "saving": "ინახება...",
+    "saveChanges": "ცვლილებების შენახვა"
   },
   "nav": {
     "home": "მთავარი",
@@ -311,6 +317,8 @@
     "readyToUpload": "ატვირთვისთვის მზად",
     "uploadPhotos": "ფოტოების ატვირთვა",
     "editProfile": "პროფილის რედაქტირება",
+    "rating": "შეფასება",
+    "availableCredits": "ხელმისაწვდომი კრედიტები",
     "saveChanges": "ცვლილებების შენახვა",
     "saving": "ინახება...",
     "changePhoto": "ფოტოს შეცვლა",

@@ -18,6 +18,7 @@ export default function EditProfileModal({
   onSubmit,
   variant = "master",
 }: EditProfileModalProps) {
+  const t = useTranslations("common");
   const isClientProfile = variant === "user";
   const tProfessions = useTranslations("professions");
   const [professionsRaw, setProfessionsRaw] = useState<Professions[]>([]);
@@ -73,7 +74,7 @@ export default function EditProfileModal({
           )}
           <div className={styles.formRow}>
             <div className={styles.formField}>
-              <label htmlFor="edit-name">Name</label>
+              <label htmlFor="edit-name">{t("name")}</label>
               <input
                 id="edit-name"
                 name="name"
@@ -82,7 +83,7 @@ export default function EditProfileModal({
               />
             </div>
             <div className={styles.formField}>
-              <label htmlFor="edit-email">Email</label>
+              <label htmlFor="edit-email">{t("email")}</label>
               <input
                 id="edit-email"
                 name="email"
@@ -93,7 +94,7 @@ export default function EditProfileModal({
             </div>
           </div>
           <div className={styles.formField}>
-            <label htmlFor="edit-phone">Phone</label>
+            <label htmlFor="edit-phone">{t("phone")}</label>
             <input
               id="edit-phone"
               name="phone"
@@ -103,7 +104,7 @@ export default function EditProfileModal({
           </div>
           {isClientProfile ? (
             <div className={styles.formField}>
-              <label htmlFor="edit-location">Location</label>
+              <label htmlFor="edit-location">{t("location")}</label>
               <CityAutocomplete
                 id="edit-location"
                 name="location"
@@ -115,29 +116,29 @@ export default function EditProfileModal({
             <>
               <div className={styles.formRow}>
                 <div className={styles.formField}>
-                  <label htmlFor="edit-specialty">Specialty</label>
+                  <label htmlFor="edit-specialty">{t("specialty")}</label>
                   <input type="hidden" name="specialty" value={specialtyValue} />
                   <CustomSelect
                     id="edit-specialty"
-                    aria-label="Specialty"
+                    aria-label={t("specialty")}
                     value={specialtyValue}
-                    placeholder="Select a specialty"
+                    placeholder={t("selectSpecialty")}
                     options={specialtyOptions}
                     onChange={setSpecialtyValue}
                   />
                 </div>
                 <div className={styles.formField}>
-                  <label htmlFor="edit-location">Location</label>
+                  <label htmlFor="edit-location">{t("location")}</label>
                   <CityAutocomplete
                     id="edit-location"
                     name="location"
                     defaultValue={values.location === "—" ? "" : values.location}
-                    placeholder="Start typing a city..."
+                    placeholder={t("startTypingCity")}
                   />
                 </div>
               </div>
               <div className={styles.formField}>
-                <label htmlFor="edit-bio">Bio</label>
+                <label htmlFor="edit-bio">{t("bio")}</label>
                 <textarea
                   id="edit-bio"
                   name="bio"
@@ -147,22 +148,22 @@ export default function EditProfileModal({
               </div>
               <div className={styles.formRow}>
                 <div className={styles.formField}>
-                  <label htmlFor="edit-instagram">Instagram</label>
+                  <label htmlFor="edit-instagram">{t("instagram")}</label>
                   <input
                     id="edit-instagram"
                     name="instagram"
                     defaultValue={values.instagram || ""}
-                    placeholder="@username"
+                    placeholder={t("instagramUsername")}
                   />
                 </div>
                 <div className={styles.formField}>
-                  <label htmlFor="edit-website">Website</label>
+                  <label htmlFor="edit-website">{t("website")}</label>
                   <input
                     id="edit-website"
                     name="website"
                     type="url"
                     defaultValue={values.website || ""}
-                    placeholder="https://"
+                    placeholder={t("websitePlaceholder")}
                   />
                 </div>
               </div>
@@ -174,14 +175,14 @@ export default function EditProfileModal({
               className={styles.cancelBtn}
               onClick={onClose}
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
               className={styles.submitBtn}
               disabled={editLoading}
             >
-              {editLoading ? "Saving..." : "Save Changes"}
+              {editLoading ? t("saving") : t("saveChanges")}
             </button>
           </div>
         </form>

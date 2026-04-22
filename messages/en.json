@@ -22,7 +22,13 @@
     "contactUs": "Contact us",
     "active": "Active",
     "blocked": "Blocked",
-    "noCitiesFound": "No cities found"
+    "noCitiesFound": "No cities found",
+    "selectSpecialty": "Select specialty",
+    "startTypingCity": "Start typing a city...",
+    "instagramUsername": "@username",
+    "websitePlaceholder": "https://",
+    "saving": "Saving...",
+    "saveChanges": "Save changes"
   },
   "nav": {
     "home": "Home",
@@ -310,6 +316,8 @@
     "uploading": "Uploading...",
     "readyToUpload": "Ready to upload",
     "uploadPhotos": "Upload photos",
+    "rating": "Rating",
+    "availableCredits": "Available credits",
     "editProfile": "Edit Profile",
     "saveChanges": "Save Changes",
     "saving": "Saving...",
