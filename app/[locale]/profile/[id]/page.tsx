@@ -470,7 +470,7 @@ export default function ProfilePage() {
     return (
       <div className={styles.page}>
         <div className={styles.container}>
-          <p className={styles.portfolioSubtitle}>Loading...</p>
+          <p className={styles.portfolioSubtitle}>{t("loading")}</p>
         </div>
       </div>
     );
@@ -480,7 +480,7 @@ export default function ProfilePage() {
     return (
       <div className={styles.page}>
         <div className={styles.container}>
-          <p className={styles.portfolioSubtitle}>Profile not found.</p>
+          <p className={styles.portfolioSubtitle}>{t("profileNotFound")}</p>
         </div>
       </div>
     );
@@ -640,7 +640,7 @@ export default function ProfilePage() {
                       className={`${styles.tabBtn} ${activeTab === "work" ? styles.tabBtnActive : ""}`}
                       onClick={() => setActiveTab("work")}
                     >
-                      My Work
+                      {t("myWork")}
                     </button>
                     {canShowFavoritesTab ? (
                       <button
@@ -648,7 +648,7 @@ export default function ProfilePage() {
                         className={`${styles.tabBtn} ${activeTab === "favorites" ? styles.tabBtnActive : ""}`}
                         onClick={() => setActiveTab("favorites")}
                       >
-                        Favorite Orders
+                        {t("favoriteOrders")}
                       </button>
                     ) : null}
                   </div>
@@ -679,13 +679,13 @@ export default function ProfilePage() {
                     <section className={styles.favoritesSection} aria-label="Favorite orders">
                       {favoriteLoading ? (
                         <div className={styles.favoritesEmpty}>
-                          <p>Loading favorites...</p>
+                          <p>{t("loadingFavorites")}</p>
                         </div>
                       ) : favoriteError ? (
                         <p className="mipoveGuestText mipoveGuestText--errorLight">{favoriteError}</p>
                       ) : favoriteOrders.length === 0 ? (
                         <div className={styles.favoritesEmpty}>
-                          <p>No saved orders yet.</p>
+                          <p>{t("noSavedOrders")}</p>
                         </div>
                       ) : (
                         <div className={styles.favoritesList}>
@@ -772,7 +772,7 @@ export default function ProfilePage() {
         images={profile.portfolioImages}
         index={selectedPortfolioIndex}
         onIndexChange={setSelectedPortfolioIndex}
-        title="Portfolio"
+        title={t("portfolio")}
         onClose={() => setSelectedPortfolioIndex(null)}
       />
       {toast ? <div className={styles.profileToast}>{toast}</div> : null}
