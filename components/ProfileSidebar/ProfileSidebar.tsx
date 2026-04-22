@@ -90,7 +90,7 @@ export default function ProfileSidebar({
           <div className={styles.quickStats}>
             {typeof rating === "number" && (
               <div className={styles.statPill}>
-                <span className={styles.statLabel}>Rating</span>
+                <span className={styles.statLabel}>{t("rating")}</span>
                 <span className={styles.statValue}>
                   {rating.toFixed(1)}{typeof reviewCount === "number" ? ` (${reviewCount})` : ""}
                 </span>
@@ -99,7 +99,7 @@ export default function ProfileSidebar({
             {typeof credits === "number" ? (
               <div className={styles.creditWrap}>
                 <div className={styles.creditCard}>
-                  <span className={styles.creditLabel}>Available credits</span>
+                  <span className={styles.creditLabel}>{t("availableCredits")}</span>
                   <strong className={styles.creditValue}>{credits}</strong>
                 </div>
                 {onBuyCredits ? (
@@ -116,10 +116,10 @@ export default function ProfileSidebar({
             ) : onBuyCredits ? (
               <div className={styles.creditActions}>
                 {/* <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
-                  {tCredits("buy")}
+                  {t("buyCredits")}
                 </button>
                 <Link href="/credits" className={styles.historyLinkBtn}>
-                  {tCredits("history")}
+                  {t("creditHistory")}
                 </Link> */}
               </div>
             ) : null}
@@ -153,7 +153,7 @@ export default function ProfileSidebar({
             >
               <Instagram size={20} className={styles.contactIcon} />
               <div className={styles.contactContent}>
-                <span className={styles.contactLabel}>Instagram</span>
+                <span className={styles.contactLabel}>{t("instagram")}</span>
                 <span className={styles.contactDetail}>@{instagram}</span>
               </div>
             </a>
@@ -167,7 +167,7 @@ export default function ProfileSidebar({
             >
               <Globe size={20} className={styles.contactIcon} />
               <div className={styles.contactContent}>
-                <span className={styles.contactLabel}>Website</span>
+                <span className={styles.contactLabel}>{t("website")}</span>
                 <span className={styles.contactDetail}>{website}</span>
               </div>
             </a>
