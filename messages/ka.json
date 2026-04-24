@@ -113,7 +113,7 @@
     "clearFilters": "ფილტრების გასუფთავება",
     "allLocations": "ყველა მდებარეობა",
     "allCategories": "ყველა",
-    "noOrdersMatch": "ფილტრებს შეკვეთები არ შეესაბამება.",
+    "noOrdersMatch": "შეკვეთები არ მოიძებნა.",
     "orderCategories": {
       "wood": "ხე",
       "metal": "ლითონი",

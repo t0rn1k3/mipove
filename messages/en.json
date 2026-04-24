@@ -113,7 +113,7 @@
     "clearFilters": "Clear filters",
     "allLocations": "All locations",
     "allCategories": "All",
-    "noOrdersMatch": "No orders match your filters.",
+    "noOrdersMatch": "Orders can't be found.",
     "orderCategories": {
       "wood": "Wood",
       "metal": "Metal",
