@@ -106,6 +106,7 @@
     "filterSearch": "შეკვეთების ძებნა…",
     "filterCategory": "კატეგორიები",
     "filterLocation": "მდებარეობა",
+    "filterLocationPlaceholder": "შეიყვანეთ ან აირჩიეთ ქალაქი…",
     "filterBudget": "ბიუჯეტი (₾)",
     "filterTimeline": "ვადა",
     "filterNegotiableOnly": "მხოლოდ შეთანხმებით",

@@ -106,6 +106,7 @@
     "filterSearch": "Search orders…",
     "filterCategory": "Categories",
     "filterLocation": "Location",
+    "filterLocationPlaceholder": "Type or choose a city…",
     "filterBudget": "Budget (₾)",
     "filterTimeline": "Timeline",
     "filterNegotiableOnly": "Negotiable only",

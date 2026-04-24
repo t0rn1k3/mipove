@@ -90,6 +90,22 @@ function normalizeLocation(raw: string): string {
   return LOCATION_ALIASES[city] ?? city;
 }
 
+/** Match order location to free-text / autocomplete filter (masters-style). */
+function orderLocationMatchesFilter(rawLocation: string, filterText: string): boolean {
+  const needle = filterText.trim().toLowerCase();
+  if (!needle) return true;
+  const rawStr = String(rawLocation ?? "").trim().toLowerCase();
+  if (!rawStr) return false;
+  if (rawStr.includes(needle)) return true;
+  const needleCity = needle.split(",")[0].trim();
+  if (needleCity && rawStr.includes(needleCity)) return true;
+  const orderNorm = normalizeLocation(String(rawLocation ?? ""));
+  const filterNorm = normalizeLocation(filterText);
+  if (filterNorm && orderNorm === filterNorm) return true;
+  if (needleCity && orderNorm.includes(needleCity)) return true;
+  return false;
+}
+
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -405,7 +421,9 @@ export default function OrderPage() {
       if (filterState.location) {
         const rawLocation =
           order.locationData?.city || order.locationData?.addressText || order.location;
-        if (normalizeLocation(String(rawLocation ?? "")) !== filterState.location) return false;
+        if (!orderLocationMatchesFilter(String(rawLocation ?? ""), filterState.location)) {
+          return false;
+        }
       }
 
       if (filterState.negotiableOnly && !order.priceNegotiable) return false;

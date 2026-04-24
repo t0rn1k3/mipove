@@ -1,10 +1,10 @@
 "use client";
 
-import { type CSSProperties } from "react";
-import { Search } from "lucide-react";
+import { type CSSProperties, useId } from "react";
+import { MapPin, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import CustomSelect from "@/components/CustomSelect/CustomSelect";
-import type { OrderCategoryOption, SelectOption } from "@/lib/types";
+import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
+import type { OrderCategoryOption } from "@/lib/types";
 import styles from "./ordersSmartFilter.module.css";
 
 export const FILTER_BUDGET_MAX = 5000;
@@ -22,20 +22,6 @@ export const FILTER_LOCATION_VALUES = [
   "mtskheta",
   "other",
 ] as const;
-
-const LOCATION_MSG_KEYS: Record<(typeof FILTER_LOCATION_VALUES)[number], string> = {
-  tbilisi: "filterLocationTbilisi",
-  batumi: "filterLocationBatumi",
-  kutaisi: "filterLocationKutaisi",
-  rustavi: "filterLocationRustavi",
-  zugdidi: "filterLocationZugdidi",
-  gori: "filterLocationGori",
-  poti: "filterLocationPoti",
-  telavi: "filterLocationTelavi",
-  akhaltsikhe: "filterLocationAkhaltsikhe",
-  mtskheta: "filterLocationMtskheta",
-  other: "filterLocationOther",
-};
 
 export type OrderFilterState = {
   search: string;
@@ -66,14 +52,7 @@ export default function OrdersSmartFilter({
 }: OrdersSmartFilterProps) {
   const t = useTranslations("order");
   const tCommon = useTranslations("common");
-
-  const locationOptions: SelectOption[] = [
-    { value: "", label: t("allLocations") },
-    ...FILTER_LOCATION_VALUES.map((v) => ({
-      value: v,
-      label: t(LOCATION_MSG_KEYS[v] as "filterLocationTbilisi"),
-    })),
-  ];
+  const locationFieldId = useId();
 
   const setSearch = (search: string) => onChange({ ...value, search });
 
@@ -132,17 +111,20 @@ export default function OrdersSmartFilter({
         )}
       </div>
 
-      <div className={styles.group}>
-        <p className={styles.groupLabel}>{t("filterLocation")}</p>
-        <CustomSelect
-          id="orders-filter-location"
-          value={value.location}
-          options={locationOptions}
-          onChange={(location) => onChange({ ...value, location })}
-          placeholder={t("allLocations")}
-          aria-label={t("filterLocation")}
-        />
-      </div>
+      <label className={styles.group} htmlFor={locationFieldId}>
+        <span className={styles.groupLabel}>{t("filterLocation")}</span>
+        <span className={styles.locationWrap}>
+          <MapPin size={16} className={styles.locationIcon} aria-hidden />
+          <CityAutocomplete
+            id={locationFieldId}
+            value={value.location}
+            onChange={(location) => onChange({ ...value, location })}
+            onSelect={(v) => onChange({ ...value, location: v })}
+            placeholder={t("filterLocationPlaceholder")}
+            className={styles.ordersCityAutocomplete}
+          />
+        </span>
+      </label>
 
       <div className={styles.group}>
         <p className={styles.groupLabel}>{t("filterBudget")}</p>
