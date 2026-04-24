@@ -19,19 +19,12 @@ const sharpe = localFont({
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-playfair",
+const robotoMono = localFont({
+  src: "../public/fonts/RobotoMono-Regular.woff2",
+  variable: "--font-roboto-mono",
   display: "swap",
 });
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -61,7 +54,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <body className={`${sharpe.variable} ${playfair.variable} ${inter.variable}`}>
+      <body className={`${sharpe.variable} ${robotoMono.variable}`}>
         {/*
           EU/GDPR: obtain consent before loading GA for EEA users, or wire Consent Mode v2
           + a CMP when you add a cookie banner (see docs/ga4.md).

@@ -130,7 +130,7 @@
 }
 
 .ctaButton {
-  width: 150px;
+  /* width: 150px; */
   background: var(--teal);
   color: #fff;
   text-align: center;

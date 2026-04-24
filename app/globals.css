@@ -9,8 +9,6 @@
   --white-70: rgba(255, 255, 255, 0.7);
   --white-80: rgba(255, 255, 255, 0.8);
   --white-95: rgba(255, 255, 255, 0.95);
-  --font-serif: var(--font-playfair), "Playfair Display", serif;
-  --font-sans: var(--font-inter), "Inter", sans-serif;
   --container-max: 1280px;
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
@@ -21,7 +19,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: var(--font-sans);
 }
 
 html {
