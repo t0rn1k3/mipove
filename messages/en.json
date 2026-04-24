@@ -82,7 +82,7 @@
   "order": {
     "title": "Orders",
     "description": "Your orders will appear here.",
-    "smartFilter": "Smart filter",
+    "smartFilter": "filter",
     "searchPlaceholder": "Search orders…",
     "filterByCity": "Filter by city…",
     "statusLabel": "Status",

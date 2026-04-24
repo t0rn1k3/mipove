@@ -82,7 +82,7 @@
   "order": {
     "title": "შეკვეთები",
     "description": "თქვენი შეკვეთები აქ გამოჩნდება.",
-    "smartFilter": "ჭკვიანი ფილტრი",
+    "smartFilter": "ფილტრი",
     "searchPlaceholder": "შეკვეთების ძებნა…",
     "filterByCity": "ფილტრი ქალაქით…",
     "statusLabel": "სტატუსი",
