@@ -1089,11 +1089,16 @@ export async function spendCredits(
     throw new Error(extractMessage(json, "Too many requests. Please wait and try again."));
   }
   if (!res.ok) throw new Error(extractMessage(json, "Failed to spend credits"));
-  const inner = (json.data ?? json) as Record<string, unknown>;
-  const success = inner.success === true;
+  const root = json as Record<string, unknown>;
+  const inner = (root.data != null && typeof root.data === "object" && !Array.isArray(root.data)
+    ? (root.data as Record<string, unknown>)
+    : root) as Record<string, unknown>;
+  const success = root.success === true || inner.success === true;
+  /** `remaining` may live on the envelope (next to `data`) or inside `data` — prefer both. */
+  const remainingRaw = inner.remaining ?? root.remaining;
   const remaining =
-    typeof inner.remaining === "number" && Number.isFinite(inner.remaining) ? inner.remaining : 0;
-  const dataRaw = inner.data;
+    typeof remainingRaw === "number" && Number.isFinite(remainingRaw) ? remainingRaw : 0;
+  const dataRaw = inner.data ?? root.data;
   const data =
     dataRaw != null && typeof dataRaw === "object" && !Array.isArray(dataRaw)
       ? (dataRaw as { phone?: string; email?: string })
