@@ -30,6 +30,7 @@ export default function PortfolioSection({
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
 
   const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
 
   useEffect(() => {
     const urls = selectedPortfolioPreviews;
@@ -61,7 +62,7 @@ export default function PortfolioSection({
     const nextCount = currentCount + files.length;
     if (nextCount > 30) {
       setPortfolioError(
-        `You can have up to 30 portfolio images (currently ${currentCount}).`,
+        tCommon("portfolioMaxImages", { currentCount }),
       );
       return;
     }
@@ -190,7 +191,7 @@ export default function PortfolioSection({
               onClick={clearSelectedPortfolio}
               disabled={portfolioUploading}
             >
-              {t("cancel")}
+              {tCommon("cancel")}
             </button>
             <button
               type="button"

@@ -28,7 +28,8 @@
     "instagramUsername": "@username",
     "websitePlaceholder": "https://",
     "saving": "Saving...",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "portfolioMaxImages": "You can have up to {currentCount} portfolio images."
   },
   "nav": {
     "home": "Home",

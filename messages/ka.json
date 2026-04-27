@@ -28,7 +28,8 @@
     "instagramUsername": "@username",
     "websitePlaceholder": "https://",
     "saving": "ინახება...",
-    "saveChanges": "ცვლილებების შენახვა"
+    "saveChanges": "ცვლილებების შენახვა",
+    "portfolioMaxImages": "სურათების მაქსიმალური რაოდენობა {currentCount}."
   },
   "nav": {
     "home": "მთავარი",
