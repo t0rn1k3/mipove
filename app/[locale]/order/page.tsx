@@ -13,7 +13,6 @@ import {
   createOrder,
   updateOrder,
   deleteOrder,
-  uploadFile,
   addMasterFavoriteOrder,
   removeMasterFavoriteOrder,
   getMasterFavoriteOrders,
@@ -439,11 +438,6 @@ export default function OrderPage() {
     });
   }, [debouncedSearch, filterState, orders]);
 
-  const uploadAttachments = async (files: File[]) => {
-    if (!files.length) return [] as string[];
-    return Promise.all(files.map((file) => uploadFile(file)));
-  };
-
   const handleCreateOrder = async (form: {
     title: string;
     categories: string[];
@@ -458,7 +452,6 @@ export default function OrderPage() {
     budgetCurrency: string;
     priceNegotiable: boolean;
     scheduledAt: string;
-    images: File[];
   }) => {
     const title = form.title.trim();
     if (!title) throw new Error("Title is required");
@@ -483,7 +476,7 @@ export default function OrderPage() {
       },
       priceNegotiable: form.priceNegotiable,
       scheduledAt: form.scheduledAt || null,
-      files: form.images,
+      files: [],
     });
     const merged = mergeOrderMetaFromForm(
       mergeOrderPublisherFromForm(
@@ -524,14 +517,12 @@ export default function OrderPage() {
     budgetCurrency: string;
     priceNegotiable: boolean;
     scheduledAt: string;
-    images: File[];
   }) => {
     if (!editingOrder) return;
     const title = form.title.trim();
     if (!title) throw new Error("Title is required");
     if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error("Price must be zero or greater");
 
-    const attachmentUrls = await uploadAttachments(form.images);
     const updated = await updateOrder(editingOrder._id, {
       title,
       categories: form.categories.length > 0 ? form.categories : null,
@@ -551,7 +542,7 @@ export default function OrderPage() {
       },
       priceNegotiable: form.priceNegotiable,
       scheduledAt: form.scheduledAt || null,
-      attachments: [...(editingOrder.attachments ?? []), ...attachmentUrls],
+      attachments: editingOrder.attachments ?? [],
     });
     const mergedUpdate = mergeOrderMetaFromForm(
       mergeOrderPublisherFromForm(
@@ -861,7 +852,6 @@ export default function OrderPage() {
                   typeof editingOrder.scheduledAt === "string"
                     ? editingOrder.scheduledAt.slice(0, 10)
                     : "",
-                images: [],
               }
             : undefined
         }

@@ -1,9 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import type { useTranslations } from "next-intl";
 import { Banknote, MapPin, CalendarClock, User, Phone, Heart, Lock, Loader2 } from "lucide-react";
-import Logo from "@/components/logo/Logo";
 import { getImageUrl } from "@/lib/api";
 import type { OrderRecord } from "@/lib/types";
 import {
@@ -84,29 +82,10 @@ export default function OrderListCard({
   ).trim();
   const telHrefFinal = customerPhone ? `tel:${customerPhone.replace(/\s/g, "")}` : "";
   const attachments = order.attachments ?? [];
-  const rawFirstImage = attachments.find((url) => isImageAttachment(url));
-  const firstImageSrc = rawFirstImage ? getImageUrl(rawFirstImage) : "";
 
   return (
     <article className={[styles.orderCard, cardShellClassName].filter(Boolean).join(" ")}>
       <div className={styles.orderTop}>
-        <div className={styles.orderThumb}>
-          {firstImageSrc ? (
-            <Image
-              src={firstImageSrc}
-              alt={order.title}
-              width={88}
-              height={88}
-              className={styles.orderThumbImg}
-            />
-          ) : (
-            <div className={styles.orderThumbPlaceholder} aria-hidden>
-              <div className={styles.orderThumbLogoLoop}>
-                <Logo size={34} showText={false} className={styles.orderThumbLogo} />
-              </div>
-            </div>
-          )}
-        </div>
         <div className={styles.orderMain}>
           <h3 className={styles.orderTitle}>{order.title}</h3>
           <p className={styles.orderDescription}>{order.description}</p>

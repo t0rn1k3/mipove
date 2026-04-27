@@ -217,53 +217,6 @@
   text-decoration: underline;
 }
 
-.orderThumb {
-  width: 88px;
-  height: 88px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f3f4f6;
-  flex-shrink: 0;
-}
-
-.orderThumbImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.orderThumbPlaceholder {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  background: #f8fafc;
-}
-
-.orderThumbLogoLoop {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: mipoveThumbLoop 3s ease-in-out infinite;
-}
-
-.orderThumbLogo {
-  color: var(--teal);
-  pointer-events: none;
-}
-
-@keyframes mipoveThumbLoop {
-  0%,
-  100% {
-    opacity: 0.86;
-    transform: translateY(0);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-3px);
-  }
-}
-
 .orderTitle {
   font-family: var(--font-serif);
   font-size: 1.05rem;
@@ -343,20 +296,9 @@
   .contactInfoBtn {
     font-size: 0.7rem;
   }
-  .orderThumb {
-    width: 70px;
-    height: 70px;
-  }
 }
 
 @media (max-width: 1200px) {
-
-
-  .orderThumb {
-    grid-area: thumb;
-    
-  }
-
   .orderMain {
     grid-area: main;
   }
@@ -379,5 +321,22 @@
 
   .contactInfoBtn {
     width: 60%;
+  }
+}
+@media (max-width : 650px) {
+  .orderTop {
+    flex-direction: column;
+  }
+  .orderTitle {
+    font-size: 1rem;
+  }
+  .orderDescription {
+    font-size: 0.8rem;
+  }
+  .orderFooter {
+    justify-content: space-around;
+  }
+  .contactInfoBtn{
+    width : auto;
   }
 }

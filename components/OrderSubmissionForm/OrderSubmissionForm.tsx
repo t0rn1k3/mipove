@@ -1,23 +1,12 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
-import Image from "next/image";
+import { useCallback, useId, useMemo, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
-import Logo from "@/components/logo/Logo";
 import type { OrderCategoryOption } from "@/lib/types";
 import styles from "./OrderSubmissionForm.module.css";
 
 const BUDGET_MAX = 5000;
-const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
 const TOTAL_STEPS = 4;
 
@@ -27,7 +16,6 @@ export type OrderFormState = {
   description: string;
   contactName: string;
   contactPhone: string;
-  images: File[];
   locationCity: string;
   locationLat?: number;
   locationLng?: number;
@@ -44,7 +32,6 @@ const initialState: OrderFormState = {
   description: "",
   contactName: "",
   contactPhone: "",
-  images: [],
   locationCity: "",
   locationLat: undefined,
   locationLng: undefined,
@@ -70,7 +57,6 @@ export default function OrderSubmissionForm({
 }) {
   const t = useTranslations("orderForm");
   const formId = useId();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<OrderFormState>({
     ...initialState,
@@ -78,23 +64,10 @@ export default function OrderSubmissionForm({
     categories: initialValues?.categories ?? initialState.categories,
     contactName: initialValues?.contactName ?? initialState.contactName,
     contactPhone: initialValues?.contactPhone ?? initialState.contactPhone,
-    images: initialValues?.images ?? [],
   });
 
-  const [dragOver, setDragOver] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (form.images.length === 0) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(form.images[0]);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [form.images]);
 
   const stepNavItems = useMemo(
     () => [
@@ -128,25 +101,6 @@ export default function OrderSubmissionForm({
       return next;
     });
   }, []);
-
-  const addFiles = useCallback((list: FileList | File[]) => {
-    const incoming = Array.from(list);
-    if (incoming.length === 0) return;
-    const oversized = incoming.find((f) => f.size > MAX_FILE_BYTES);
-    if (oversized) {
-      setErrors((prev) => ({ ...prev, images: t("errorFileSize") }));
-      return;
-    }
-    setForm((prev) => ({
-      ...prev,
-      images: [...prev.images, ...incoming].slice(0, 8),
-    }));
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next.images;
-      return next;
-    });
-  }, [t]);
 
   const validateStep = (s: number): boolean => {
     const next: Record<string, string> = {};
@@ -329,82 +283,7 @@ export default function OrderSubmissionForm({
       {step === 3 ? (
         <div className={styles.stepCard}>
           <h2 className={styles.stepTitle}>{t("step2Heading")}</h2>
-          <p className={styles.fieldHint}>{t("visualsHeading")}</p>
-          <div
-            className={`${styles.dropzone} ${dragOver ? styles.dropzoneActive : ""} ${
-              form.images.length ? styles.dropzoneHasFile : ""
-            }`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragOver(false);
-              addFiles(e.dataTransfer.files);
-            }}
-            onClick={() => fileInputRef.current?.click()}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }
-            }}
-            aria-label={t("dropPrompt")}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip"
-              multiple
-              className={styles.hiddenInput}
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files?.length) addFiles(files);
-                e.target.value = "";
-              }}
-            />
-            {previewUrl && form.images.length > 0 ? (
-              <div className={styles.previewWrap}>
-                <Image
-                  src={previewUrl}
-                  alt=""
-                  width={200}
-                  height={140}
-                  className={styles.previewImg}
-                  unoptimized
-                />
-                <span className={styles.previewBadge}>
-                  {t("imageCount", { count: form.images.length })}
-                </span>
-              </div>
-            ) : (
-              <div className={styles.dropzonePlaceholder}>
-                <div className={styles.dropzoneLogoLoop} aria-hidden>
-                  <Logo size={52} showText className={styles.dropzoneLogoInner} />
-                </div>
-                <span className={styles.dropzoneText}>{t("dropPrompt")}</span>
-                <span className={styles.dropzoneHint}>{t("dropHint")}</span>
-              </div>
-            )}
-          </div>
-          {errors.images ? <p className="mipoveGuestText mipoveGuestText--errorLight">{errors.images}</p> : null}
-          {form.images.length > 0 ? (
-            <button
-              type="button"
-              className={styles.textBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                setField("images", []);
-              }}
-            >
-              {t("clearImages")}
-            </button>
-          ) : null}
-
+          <p className={styles.fieldHint}>{t("locationStepHint")}</p>
           <span className={styles.label}>{t("location")}</span>
           <div className={styles.locationInput}>
           <CityAutocomplete
