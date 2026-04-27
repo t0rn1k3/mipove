@@ -354,7 +354,9 @@
     "myOrdersSubtitle": "Orders you created on Mipove.",
     "myOrdersLoading": "Loading your orders…",
     "myOrdersEmpty": "You have not posted any orders yet.",
-    "myOrdersViewOrders": "Open orders page"
+    "myOrdersViewOrders": "Open orders page",
+    "removePhoto": "Remove photo",
+    "portfolioImage": "Portfolio image"
   },
   "profileRedirect": {
     "message": "Redirecting to your profile..."

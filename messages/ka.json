@@ -354,7 +354,9 @@
     "myOrdersSubtitle": "შეკვეთები Mipove-ზე",
     "myOrdersLoading": "იბვირთება…",
     "myOrdersEmpty": "არ გაბოლოება შეკვეთები.",
-    "myOrdersViewOrders": "შეკვეთების გვერდი"
+    "myOrdersViewOrders": "შეკვეთების გვერდი",
+    "removePhoto": "ფოტოს წაშლა",
+    "portfolioImage": "პორტფოლიოს სურათი",
   },
   "profileRedirect": {
     "message": "მიმართვა თქვენს პროფილზე..."

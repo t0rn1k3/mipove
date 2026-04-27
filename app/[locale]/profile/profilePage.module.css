@@ -481,5 +481,15 @@
     width: 60px;
     height: 60px;
   }
+  .tabBtn {
+    font-size: 0.75rem;
+  }
+  .tabBtnActive {
+    font-size: 0.75rem;
+  }
+  .tabBar {
+    gap: 0.35rem;
+    padding: 0.25rem;
+  }
 }
 
