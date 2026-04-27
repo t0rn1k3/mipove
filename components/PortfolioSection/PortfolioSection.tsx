@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import {
   deletePortfolioImages,
   fetchMyPortfolio,
@@ -32,12 +32,17 @@ export default function PortfolioSection({
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
 
+  /** Latest blob URLs — revoke only on unmount (not on every append) so previews stay valid. */
+  const pendingPreviewUrlsRef = useRef<string[]>([]);
+  pendingPreviewUrlsRef.current = selectedPortfolioPreviews;
+
   useEffect(() => {
-    const urls = selectedPortfolioPreviews;
     return () => {
-      for (const url of urls) URL.revokeObjectURL(url);
+      for (const url of pendingPreviewUrlsRef.current) {
+        URL.revokeObjectURL(url);
+      }
     };
-  }, [selectedPortfolioPreviews]);
+  }, []);
 
   const delays = [
     styles.visibleDelay2,
@@ -58,17 +63,10 @@ export default function PortfolioSection({
     setPortfolioError("");
     if (!files || files.length === 0) return;
 
-    const currentCount = portfolioImages?.length ?? 0;
-    const nextCount = currentCount + files.length;
-    if (nextCount > 30) {
-      setPortfolioError(
-        tCommon("portfolioMaxImages", { currentCount }),
-      );
-      return;
-    }
+    const uploadedCount = portfolioImages?.length ?? 0;
+    const arr = Array.from(files);
 
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    const arr = Array.from(files);
     for (const f of arr) {
       if (!allowedTypes.includes(f.type)) {
         setPortfolioError("Only JPG, PNG, or WebP images are allowed.");
@@ -80,9 +78,17 @@ export default function PortfolioSection({
       }
     }
 
-    const previews = arr.map((f) => URL.createObjectURL(f));
-    setSelectedPortfolioFiles(arr);
-    setSelectedPortfolioPreviews(previews);
+    const combinedFiles = [...selectedPortfolioFiles, ...arr];
+    if (uploadedCount + combinedFiles.length > 30) {
+      setPortfolioError(
+        tCommon("portfolioMaxImages", { currentCount: uploadedCount }),
+      );
+      return;
+    }
+
+    const newPreviews = arr.map((f) => URL.createObjectURL(f));
+    setSelectedPortfolioFiles(combinedFiles);
+    setSelectedPortfolioPreviews((prev) => [...prev, ...newPreviews]);
   };
 
   const clearSelectedPortfolio = () => {
