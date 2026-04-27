@@ -223,6 +223,16 @@
   cursor: not-allowed;
 }
 
+.portfolioDeleteSpinner {
+  animation: portfolioDeleteSpin 0.65s linear infinite;
+}
+
+@keyframes portfolioDeleteSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .workImage {
   width: 100%;
   height: auto;
@@ -273,5 +283,8 @@
 @media (max-width: 480px) {
   .portfolioTitle {
     font-size: 1.5rem;
+  }
+  .submitBtn {
+    font-size: 0.75rem
   }
 }

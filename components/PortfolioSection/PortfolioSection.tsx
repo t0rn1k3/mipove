@@ -10,6 +10,7 @@ import {
 import type { PortfolioSectionProps } from "@/lib/types";
 import styles from "./portfolioSection.module.css";
 import { useTranslations } from "next-intl";
+import { Loader2, X } from "lucide-react";
 
 export default function PortfolioSection({
   portfolioImages,
@@ -224,12 +225,21 @@ export default function PortfolioSection({
                   <button
                     type="button"
                     className={styles.portfolioDeleteBtn}
-                    aria-label="Remove photo from portfolio"
+                    aria-label={t("removePhoto")}
                     title={t("removePhoto")}
                     disabled={Boolean(deletingUrl) || portfolioUploading}
                     onClick={(e) => void handleDeletePortfolioImage(src, e)}
                   >
-                    {deletingUrl === src ? "…" : t("remove")}
+                    {deletingUrl === src ? (
+                      <Loader2
+                        size={16}
+                        strokeWidth={2}
+                        className={styles.portfolioDeleteSpinner}
+                        aria-hidden
+                      />
+                    ) : (
+                      <X size={16} strokeWidth={2} aria-hidden />
+                    )}
                   </button>
                 ) : null}
                 <Image
