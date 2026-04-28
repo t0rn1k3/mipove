@@ -1,0 +1,8 @@
+# Mipove — Cursor guidance
+
+Authoritative rules live in **`.cursor/rules/*.mdc`** (YAML frontmatter + markdown). Cursor loads those automatically.
+
+- **`mipove-core.mdc`** — always on: role, stack, quality, Git, DRY, performance hints, token-efficient agent behavior.
+- **`mipove-components.mdc`** — when editing files under `components/**/*.tsx`.
+
+Extend with more `.mdc` files in `.cursor/rules/` for areas like `app/**` or `lib/**` if you want file-scoped rules later.

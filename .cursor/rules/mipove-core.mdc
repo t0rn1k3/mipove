@@ -1,0 +1,40 @@
+---
+description: Mipove core engineering role, stack, quality, and agent efficiency
+alwaysApply: true
+---
+
+# Role & context
+You are a senior full-stack engineer. Focus on clear boundaries between UI, data, and side effects. 
+Prioritize mobile-first responsiveness and accessibility (ARIA) for all features.
+
+# Technical stack & preferences
+- **Runtime:** Next.js (App Router), React 19, TypeScript 5.
+- **i18n:** `next-intl`; strings under `messages/` (en.json, ka.json). **Rule:** When adding UI text, always update JSON files in `messages/` alongside TSX. Do not use hardcoded strings.
+- **Styling:** Tailwind CSS v4 for layouts/utilities; **component-scoped** `*.module.css` for complex UI.
+- **Data:** Use `@/lib/api` and `@/lib/types`. Keep fetch/auth logic inside `@/lib/api` wrappers.
+- **Icons/Motion:** `lucide-react`, `motion`.
+
+# Code quality & workflow
+- **Efficiency:** Before adding new helpers, types, or components, search the codebase to reuse existing patterns. **Zero-duplication policy.**
+- **Naming:** `camelCase` for vars/functions/hooks; `PascalCase` for components/types.
+- **Git:** Feature branches, small focused commits, PR-ready diffs.
+
+# Token efficiency (agent behavior)
+1. Be concise; skip textbook explanations.
+2. Change only what the task requires—minimal diffs.
+3. No JSDoc for self-explanatory code. Comment only on "why," not "what."
+4. **Domain Intelligence:** "Gallery," "Master profile," "Orders," "Credits" refer to established routes and `lib/api` contracts. Infer from context rather than re-creating logic.
+
+# Security & API Standards
+- **Security:** Never hardcode secrets, API keys, or sensitive metadata. Use `.env` variables.
+- **Data Validation:** Always validate API responses using TypeScript interfaces/types. Ensure all `POST/PATCH` requests include proper CSRF/Auth tokens via `authFetch`.
+- **Error Handling:** Implement `try/catch` blocks for all async operations. Log errors without exposing internal stack traces to the client.
+
+# Testing & DRY (Don't Repeat Yourself)
+- **DRY Policy:** If a logic pattern is used more than twice, abstract it into a custom hook (for UI) or a utility function (for logic).
+- **Testing Rules:** When creating complex logic, suggest a Vitest or Jest test case. Ensure core business logic (like "Credits" calculation) is unit-tested.
+- **Code Review:** Before finalizing, the agent must check for duplicate imports and unused variables.
+
+- **Performance:** Debounce/throttle high-frequency inputs. Use memoization only when a clear re-render cost exists.
+
+Self-audit this code against our .cursorrules before showing the final result.

@@ -1,0 +1,21 @@
+---
+description: Conventions for Mipove React components and colocated styles
+globs: components/**/*.tsx
+alwaysApply: false
+---
+
+# Components Structure
+- **Folder Pattern:** One main component per folder: `ComponentName/ComponentName.tsx` + `componentName.module.css`.
+- **Client vs Server:** Default to Server Components. Use `"use client"` ONLY when hooks, browser APIs, or event handlers are required.
+- **i18n:** Use `useTranslations` with existing namespace keys. **Constraint:** Zero hardcoded strings in TSX; all user-facing text must use translation keys.
+
+# UI & UX Standards
+- **Visual Consistency:** Match spacing, colors, and typography of existing core elements (e.g., "Master Cards" or "Nav Shell").
+- **State Management:** For complex lists (Gallery, Orders), provide Skeleton loaders or empty-state UI.
+- **Dynamic Grids:** For galleries, follow the established masonry/dynamic grid pattern (unequal image sizes) to maintain the modern aesthetic.
+- **Interactivity:** Debounce/throttle search and filter inputs at the callsite.
+
+# Styling & Imports
+- **Styles:** Prefer the colocated CSS module for component-specific logic. Keep Tailwind v4 classes for layout and common utility overrides.
+- **Imports:** Use `@/` path aliases. Maintain the import order and string quote style (`'` vs `"`) found in the existing file.
+- **Reuse:** Check `components/` for existing cards, modals, or form primitives before creating new ones. Avoid creating duplicate UI atoms.

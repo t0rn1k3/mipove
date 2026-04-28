@@ -1,0 +1,61 @@
+﻿# Dependencies & package managers
+node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Build & framework output
+.next/
+out/
+dist/
+build/
+.vercel/
+
+# Caches & tooling artifacts
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache
+*.tsbuildinfo
+
+# Tests & reports
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Logs & debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS & editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Env (secrets; not useful for code context)
+.env
+.env.*
+!.env.example
+
+# Large binary / archive patterns (if present in repo)
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.iso
+*.dmg
+
+# Scratch / temp dirs (if used)
+tmp/
+temp/
