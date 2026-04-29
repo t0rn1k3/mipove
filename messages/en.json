@@ -29,7 +29,12 @@
     "websitePlaceholder": "https://",
     "saving": "Saving...",
     "saveChanges": "Save changes",
-    "portfolioMaxImages": "You can have up to {currentCount} portfolio images."
+    "portfolioMaxImages": "You can have up to {currentCount} portfolio images.",
+    "requestFailed": "Something went wrong. Please try again.",
+    "loadingEllipsis": "Loading…",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "emDash": "—"
   },
   "nav": {
     "home": "Home",
@@ -168,7 +173,14 @@
     "deletingOrder": "Deleting...",
     "saveOrderChanges": "Save changes",
     "deleteOrderConfirm": "Delete this order?",
-    "deleteOrderFailed": "Failed to delete order."
+    "deleteOrderFailed": "Failed to delete order.",
+    "failedToLoadCategories": "Could not load categories. Please refresh or try again later.",
+    "failedToLoadOrders": "Could not load orders. Please try again.",
+    "validationTitleRequired": "Title is required.",
+    "validationBudgetNonNegative": "Budget must be zero or greater.",
+    "unlockContactFailed": "Could not unlock contact. Try again or buy credits.",
+    "filterBudgetMinAria": "Minimum budget",
+    "filterBudgetMaxAria": "Maximum budget"
   },
   "orderForm": {
     "pageTitle": "Submit your project",
@@ -235,7 +247,8 @@
     "errorContactPhone": "Enter a phone number.",
     "errorLocation": "Select a location",
     "errorBudget": "Set a valid min–max range (₾0 – ₾5,000) or mark price negotiable",
-    "errorDeadline": "Choose a timeline"
+    "errorDeadline": "Choose a timeline",
+    "currencyCodePlaceholder": "GEL"
   },
   "hero": {
     "title": "Find Your Wanted Craftsperson",
@@ -351,7 +364,8 @@
     "myOrdersEmpty": "You have not posted any orders yet.",
     "myOrdersViewOrders": "Open orders page",
     "removePhoto": "Remove photo",
-    "portfolioImage": "Portfolio image"
+    "portfolioImage": "Portfolio image",
+    "portfolioDeleteFailed": "Could not delete that image. Try again."
   },
   "profileRedirect": {
     "message": "Redirecting to your profile..."
@@ -510,7 +524,35 @@
     "failedToFetchUsers": "Failed to fetch users",
     "failedToBlockUser": "Failed to block user",
     "failedToUnblockUser": "Failed to unblock user",
-    "failedToLoadDashboard": "Failed to load dashboard"
+    "failedToLoadDashboard": "Failed to load dashboard",
+    "mastersPageTitle": "Masters",
+    "usersPageTitle": "Users",
+    "creditsPanelTitle": "{name} — Credits",
+    "creditsButton": "Credits",
+    "currentBalanceLabel": "Current balance",
+    "adjustAmountLabel": "Amount (+/-)",
+    "adjustAmountPlaceholder": "e.g. 20 or -5",
+    "adjustNoteLabel": "Note",
+    "adjustNotePlaceholder": "Reason for adjustment",
+    "adjustCreditsSubmit": "Adjust credits",
+    "adjustingCredits": "Saving…",
+    "transactionHistoryTitle": "Transaction history",
+    "noCreditTransactions": "No credit transactions found.",
+    "colDate": "Date",
+    "colType": "Type",
+    "colAction": "Action",
+    "colAmount": "Amount",
+    "colBalance": "Balance",
+    "colNote": "Note",
+    "pagerInfo": "Page {page} of {pages}",
+    "filterTabAll": "All",
+    "filterTabActive": "Active",
+    "filterTabBlocked": "Blocked",
+    "filterTabNew": "New",
+    "enterNonZeroAmount": "Enter a non-zero amount.",
+    "failedToLoadCredits": "Could not load credits data.",
+    "failedToAdjustCredits": "Could not adjust credits.",
+    "colRole": "Role"
   },
   "professions": {
     "painter": "Painter",

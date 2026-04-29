@@ -69,11 +69,11 @@ export default function PortfolioSection({
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     for (const f of arr) {
       if (!allowedTypes.includes(f.type)) {
-        setPortfolioError("Only JPG, PNG, or WebP images are allowed.");
+        setPortfolioError(t("portfolioFormatError"));
         return;
       }
       if (f.size > 4 * 1024 * 1024) {
-        setPortfolioError("Each image must be 4MB or smaller.");
+        setPortfolioError(t("portfolioSizeError"));
         return;
       }
     }
@@ -106,8 +106,8 @@ export default function PortfolioSection({
       const list = await uploadPortfolioImages(selectedPortfolioFiles);
       onPortfolioImagesChange(list);
       clearSelectedPortfolio();
-    } catch (err) {
-      setPortfolioError(err instanceof Error ? err.message : "Upload failed");
+    } catch {
+      setPortfolioError(t("uploadFailed"));
       if (userRole === "master" && isOwnProfile) {
         try {
           const list = await fetchMyPortfolio();
@@ -129,8 +129,8 @@ export default function PortfolioSection({
     try {
       const list = await deletePortfolioImages({ url });
       onPortfolioImagesChange(list);
-    } catch (err) {
-      setPortfolioError(err instanceof Error ? err.message : "Delete failed");
+    } catch {
+      setPortfolioError(t("portfolioDeleteFailed"));
       if (userRole === "master" && isOwnProfile) {
         try {
           const list = await fetchMyPortfolio();
@@ -181,7 +181,7 @@ export default function PortfolioSection({
               <div key={src} className={styles.portfolioThumb}>
                 <Image
                   src={src}
-                  alt="Selected portfolio"
+                  alt={t("selectedPortfolioAlt")}
                   width={160}
                   height={160}
                   className={styles.portfolioThumbImg}

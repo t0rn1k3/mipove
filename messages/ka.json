@@ -29,7 +29,12 @@
     "websitePlaceholder": "https://",
     "saving": "ინახება...",
     "saveChanges": "ცვლილებების შენახვა",
-    "portfolioMaxImages": "სურათების მაქსიმალური რაოდენობა {currentCount}."
+    "portfolioMaxImages": "სურათების მაქსიმალური რაოდენობა {currentCount}.",
+    "requestFailed": "რაღაც შეცდომა მოხდა. სცადეთ ხელახლა.",
+    "loadingEllipsis": "იტვირთება…",
+    "previousPage": "წინა",
+    "nextPage": "შემდეგი",
+    "emDash": "—"
   },
   "nav": {
     "home": "მთავარი",
@@ -168,7 +173,14 @@
     "deletingOrder": "იშლება...",
     "saveOrderChanges": "ცვლილებების შენახვა",
     "deleteOrderConfirm": "წავშალოთ ეს შეკვეთა?",
-    "deleteOrderFailed": "შეკვეთის წაშლა ვერ მოხერხდა."
+    "deleteOrderFailed": "შეკვეთის წაშლა ვერ მოხერხდა.",
+    "failedToLoadCategories": "კატეგორიების ჩატვირთვა ვერ მოხერხდა. განაახლეთ გვერდი ან ცადეთ მოგვიანებით.",
+    "failedToLoadOrders": "შეკვეთების ჩატვირთვა ვერ მოხერხდა. სცადეთ ხელახლა.",
+    "validationTitleRequired": "სათაური სავალდებულოა.",
+    "validationBudgetNonNegative": "ბიუჯეტი უნდა იყოს ნულზე მეტი ან ნული.",
+    "unlockContactFailed": "კონტაქტის გახსნა ვერ მოხერხდა. სცადეთ ხელახლა ან იყიდეთ კრედიტები.",
+    "filterBudgetMinAria": "ბიუჯეტის ქვედა ზღვარი",
+    "filterBudgetMaxAria": "ბიუჯეტის ზედა ზღვარი"
   },
   "orderForm": {
     "pageTitle": "პროექტის გაგზავნა",
@@ -235,7 +247,8 @@
     "errorContactPhone": "შეიყვანეთ ტელეფონის ნომერი.",
     "errorLocation": "აირჩიეთ მდებარეობა",
     "errorBudget": "მიუთითეთ სწორი მინ–მაქს (₾0 – ₾5,000) ან მონიშნეთ შეთანხმებით",
-    "errorDeadline": "აირჩიეთ ვადა"
+    "errorDeadline": "აირჩიეთ ვადა",
+    "currencyCodePlaceholder": "GEL"
   },
   "hero": {
     "title": "იპოვეთ თქვენთვის სასურველი ოსტატი",
@@ -351,7 +364,8 @@
     "myOrdersEmpty": "არ გაბოლოება შეკვეთები.",
     "myOrdersViewOrders": "შეკვეთების გვერდი",
     "removePhoto": "ფოტოს წაშლა",
-    "portfolioImage": "პორტფოლიოს სურათი"
+    "portfolioImage": "პორტფოლიოს სურათი",
+    "portfolioDeleteFailed": "სურათის წაშლა ვერ მოხერხდა. სცადეთ ხელახლა."
   },
   "profileRedirect": {
     "message": "მიმართვა თქვენს პროფილზე..."
@@ -510,7 +524,35 @@
     "failedToFetchUsers": "მომხმარებლების ჩატვირთვა ვერ მოხერხდა",
     "failedToBlockUser": "მომხმარებლის ბლოკირება ვერ მოხერხდა",
     "failedToUnblockUser": "მომხმარებლის განბლოკვა ვერ მოხერხდა",
-    "failedToLoadDashboard": "პანელის ჩატვირთვა ვერ მოხერხდა"
+    "failedToLoadDashboard": "პანელის ჩატვირთვა ვერ მოხერხდა",
+    "mastersPageTitle": "ოსტატები",
+    "usersPageTitle": "მომხმარებლები",
+    "creditsPanelTitle": "{name} — კრედიტები",
+    "creditsButton": "კრედიტები",
+    "currentBalanceLabel": "მიმდინარე ბალანსი",
+    "adjustAmountLabel": "თანხა (+/-)",
+    "adjustAmountPlaceholder": "მაგ. 20 ან -5",
+    "adjustNoteLabel": "შენიშვნა",
+    "adjustNotePlaceholder": "კორექტირების მიზეზი",
+    "adjustCreditsSubmit": "კრედიტების კორექტირება",
+    "adjustingCredits": "ინახება…",
+    "transactionHistoryTitle": "ტრანზაქციების ისტორია",
+    "noCreditTransactions": "ტრანზაქციები არ მოიძებნა.",
+    "colDate": "თარიღი",
+    "colType": "ტიპი",
+    "colAction": "მოქმედება",
+    "colAmount": "თანხა",
+    "colBalance": "ბალანსი",
+    "colNote": "შენიშვნა",
+    "pagerInfo": "გვერდი {page} / {pages}",
+    "filterTabAll": "ყველა",
+    "filterTabActive": "აქტიური",
+    "filterTabBlocked": "დაბლოკილი",
+    "filterTabNew": "ახალი",
+    "enterNonZeroAmount": "შეიყვანეთ ნულისგან განსხვავებული თანხა.",
+    "failedToLoadCredits": "კრედიტების მონაცემების ჩატვირთვა ვერ მოხერხდა.",
+    "failedToAdjustCredits": "კრედიტების კორექტირება ვერ მოხერხდა.",
+    "colRole": "როლი"
   },
   "professions": {
     "painter": "მხატვარი",

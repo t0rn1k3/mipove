@@ -436,7 +436,7 @@ export default function OrderSubmissionForm({
             type="text"
             value={form.budgetCurrency}
             onChange={(e) => setField("budgetCurrency", e.target.value.toUpperCase())}
-            placeholder="GEL"
+            placeholder={t("currencyCodePlaceholder")}
             maxLength={8}
           />
 

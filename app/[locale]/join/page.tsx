@@ -108,7 +108,7 @@ export default function JoinPage() {
       let json: Awaited<ReturnType<typeof registerUser>>;
       if (isAdminMode) {
         if (!registerForm.adminSecret) {
-          setError("Admin secret is required");
+          setError(t("adminSecretRequired"));
           setLoading(false);
           return;
         }

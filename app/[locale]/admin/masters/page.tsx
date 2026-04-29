@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   getAdminMasters,
   blockAdminMaster,
@@ -16,6 +17,8 @@ import CityAutocomplete from "@/components/CityAutocomplete/CityAutocomplete";
 import styles from "../admin.module.css";
 
 export default function AdminMastersPage() {
+  const t = useTranslations("admin");
+  const tCommon = useTranslations("common");
   const CREDIT_HISTORY_PAGE_SIZE = 10;
   const [masters, setMasters] = useState<AdminMaster[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,8 +52,8 @@ export default function AdminMastersPage() {
     try {
       const data = await getAdminMasters();
       setMasters(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch masters");
+    } catch {
+      setError(t("failedToFetchMasters"));
       setMasters([]);
     } finally {
       setLoading(false);
@@ -66,8 +69,8 @@ export default function AdminMastersPage() {
     try {
       await blockAdminMaster(id);
       await loadMasters();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to block master");
+    } catch {
+      setError(t("failedToBlockMaster"));
     } finally {
       setActionId(null);
     }
@@ -78,8 +81,8 @@ export default function AdminMastersPage() {
     try {
       await unblockAdminMaster(id);
       await loadMasters();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to unblock master");
+    } catch {
+      setError(t("failedToUnblockMaster"));
     } finally {
       setActionId(null);
     }
@@ -101,8 +104,8 @@ export default function AdminMastersPage() {
       setShowCreate(false);
       setCreateForm({ name: "", email: "", phone: "", password: "", specialty: "", location: "" });
       await loadMasters();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create master");
+    } catch {
+      setError(t("failedToCreateMaster"));
     } finally {
       setCreateLoading(false);
     }
@@ -120,8 +123,8 @@ export default function AdminMastersPage() {
       setCreditTransactions(historyRes.transactions);
       setCreditPage(historyRes.page);
       setCreditPages(Math.max(1, historyRes.pages));
-    } catch (err) {
-      setCreditsError(err instanceof Error ? err.message : "Failed to load credits data");
+    } catch {
+      setCreditsError(t("failedToLoadCredits"));
       setCreditsBalance(null);
       setCreditTransactions([]);
       setCreditPages(1);
@@ -142,7 +145,7 @@ export default function AdminMastersPage() {
     if (!selectedMaster) return;
     const amount = Number(adjustAmount);
     if (!Number.isFinite(amount) || amount === 0) {
-      setCreditsError("Enter a non-zero amount");
+      setCreditsError(t("enterNonZeroAmount"));
       return;
     }
     setAdjustLoading(true);
@@ -157,8 +160,8 @@ export default function AdminMastersPage() {
       await loadMasters();
       setAdjustAmount("");
       setAdjustNote("");
-    } catch (err) {
-      setCreditsError(err instanceof Error ? err.message : "Failed to adjust credits");
+    } catch {
+      setCreditsError(t("failedToAdjustCredits"));
     } finally {
       setAdjustLoading(false);
     }
@@ -175,18 +178,18 @@ export default function AdminMastersPage() {
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Masters</h1>
+        <h1 className={styles.pageTitle}>{t("mastersPageTitle")}</h1>
       </div>
 
       {error && <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>}
 
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Master List</h2>
+          <h2 className={styles.tableTitle}>{t("masterList")}</h2>
           <div className={styles.tableHeaderActions}>
             <input
               type="search"
-              placeholder="Search masters..."
+              placeholder={t("searchMasters")}
               className={styles.searchInput}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -196,7 +199,7 @@ export default function AdminMastersPage() {
               className={styles.createBtn}
               onClick={() => setShowCreate(true)}
             >
-              Create Master
+              {t("createMaster")}
             </button>
           </div>
         </div>
@@ -207,7 +210,7 @@ export default function AdminMastersPage() {
             className={styles.createForm}
           >
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Name *</label>
+              <label className={styles.createFormLabel}>{t("nameLabel")}</label>
               <input
                 type="text"
                 required
@@ -217,7 +220,7 @@ export default function AdminMastersPage() {
               />
             </div>
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Email *</label>
+              <label className={styles.createFormLabel}>{t("emailLabel")}</label>
               <input
                 type="email"
                 required
@@ -227,7 +230,7 @@ export default function AdminMastersPage() {
               />
             </div>
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Password *</label>
+              <label className={styles.createFormLabel}>{t("passwordLabel")}</label>
               <input
                 type="password"
                 required
@@ -237,7 +240,7 @@ export default function AdminMastersPage() {
               />
             </div>
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Phone</label>
+              <label className={styles.createFormLabel}>{t("phoneLabel")}</label>
               <input
                 type="tel"
                 value={createForm.phone}
@@ -246,7 +249,7 @@ export default function AdminMastersPage() {
               />
             </div>
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Specialty</label>
+              <label className={styles.createFormLabel}>{t("specialtyLabel")}</label>
               <input
                 type="text"
                 value={createForm.specialty}
@@ -255,38 +258,38 @@ export default function AdminMastersPage() {
               />
             </div>
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Location</label>
+              <label className={styles.createFormLabel}>{t("locationLabel")}</label>
               <CityAutocomplete
                 value={createForm.location}
                 onChange={(v) => setCreateForm((p) => ({ ...p, location: v }))}
-                placeholder="Start typing a city..."
+                placeholder={tCommon("startTypingCity")}
               />
             </div>
             <div className={styles.createFormActions}>
               <button type="submit" className={styles.createBtn} disabled={createLoading}>
-                {createLoading ? "Creating..." : "Create"}
+                {createLoading ? t("creating") : t("create")}
               </button>
               <button type="button" onClick={() => setShowCreate(false)}>
-                Cancel
+                {tCommon("cancel")}
               </button>
             </div>
           </form>
         )}
 
         {loading ? (
-          <div className={styles.emptyState}>Loading...</div>
+          <div className={styles.emptyState}>{t("loading")}</div>
         ) : filteredMasters.length === 0 ? (
-          <div className={styles.emptyState}>No masters found</div>
+          <div className={styles.emptyState}>{t("noMastersFound")}</div>
         ) : (
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Specialty</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{tCommon("name")}</th>
+                <th>{tCommon("email")}</th>
+                <th>{tCommon("specialty")}</th>
+                <th>{tCommon("location")}</th>
+                <th>{t("status")}</th>
+                <th>{t("actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -294,15 +297,15 @@ export default function AdminMastersPage() {
                 <tr key={m._id}>
                   <td>{m.name}</td>
                   <td>{m.email}</td>
-                  <td>{m.specialty ?? "—"}</td>
-                  <td>{m.location ?? "—"}</td>
+                  <td>{m.specialty ?? tCommon("emDash")}</td>
+                  <td>{m.location ?? tCommon("emDash")}</td>
                   <td>
                     <span
                       className={
                         m.blocked ? styles.badgeBlocked : styles.badgeActive
                       }
                     >
-                      {m.blocked ? "Blocked" : "Active"}
+                      {m.blocked ? tCommon("blocked") : tCommon("active")}
                     </span>
                   </td>
                   <td>
@@ -310,7 +313,7 @@ export default function AdminMastersPage() {
                       href={m.slug ? `/profile/${m.slug}` : "#"}
                       className={`${styles.createBtn} ${styles.viewLink}`}
                     >
-                      View
+                      {tCommon("view")}
                     </Link>
                     <button
                       type="button"
@@ -318,7 +321,7 @@ export default function AdminMastersPage() {
                       onClick={() => void handleOpenCredits(m)}
                       disabled={creditsLoading && selectedMaster?._id === m._id}
                     >
-                      Credits
+                      {t("creditsButton")}
                     </button>
                     {m.blocked ? (
                       <button
@@ -327,7 +330,7 @@ export default function AdminMastersPage() {
                         onClick={() => handleUnblock(m._id)}
                         disabled={actionId === m._id}
                       >
-                        Unblock
+                        {t("unblock")}
                       </button>
                     ) : (
                       <button
@@ -336,7 +339,7 @@ export default function AdminMastersPage() {
                         onClick={() => handleBlock(m._id)}
                         disabled={actionId === m._id}
                       >
-                        Block
+                        {t("block")}
                       </button>
                     )}
                   </td>
@@ -351,34 +354,34 @@ export default function AdminMastersPage() {
         <section className={styles.creditPanel}>
           <div className={styles.creditPanelHeader}>
             <h2 className={styles.tableTitle}>
-              {selectedMaster.name} - Credits
+              {t("creditsPanelTitle", { name: selectedMaster.name })}
             </h2>
             <button
               type="button"
               className={styles.creditPanelClose}
               onClick={() => setSelectedMaster(null)}
             >
-              Close
+              {tCommon("close")}
             </button>
           </div>
 
-          {creditsLoading ? <p className={styles.emptyState}>Loading...</p> : null}
+          {creditsLoading ? <p className={styles.emptyState}>{t("loading")}</p> : null}
           {creditsError ? (
           <p className="mipoveGuestText mipoveGuestText--errorLight">{creditsError}</p>
         ) : null}
 
           {!creditsLoading ? (
             <div className={styles.creditSummary}>
-              <span className={styles.creditSummaryLabel}>Current Balance</span>
+              <span className={styles.creditSummaryLabel}>{t("currentBalanceLabel")}</span>
               <strong className={styles.creditSummaryValue}>
-                {creditsBalance ?? "—"}
+                {creditsBalance ?? tCommon("emDash")}
               </strong>
             </div>
           ) : null}
 
           <form className={styles.creditAdjustForm} onSubmit={handleAdjustCredits}>
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Amount (+/-)</label>
+              <label className={styles.createFormLabel}>{t("adjustAmountLabel")}</label>
               <input
                 type="number"
                 step="1"
@@ -386,40 +389,40 @@ export default function AdminMastersPage() {
                 value={adjustAmount}
                 onChange={(e) => setAdjustAmount(e.target.value)}
                 className={`${styles.searchInput} ${styles.createFormInput}`}
-                placeholder="e.g. 20 or -5"
+                placeholder={t("adjustAmountPlaceholder")}
               />
             </div>
             <div className={styles.createFormField}>
-              <label className={styles.createFormLabel}>Note</label>
+              <label className={styles.createFormLabel}>{t("adjustNoteLabel")}</label>
               <input
                 type="text"
                 value={adjustNote}
                 onChange={(e) => setAdjustNote(e.target.value)}
                 className={`${styles.searchInput} ${styles.createFormInput}`}
-                placeholder="Reason for adjustment"
+                placeholder={t("adjustNotePlaceholder")}
               />
             </div>
             <div className={styles.createFormActions}>
               <button type="submit" className={styles.createBtn} disabled={adjustLoading || !selectedMaster}>
-                {adjustLoading ? "Saving..." : "Adjust credits"}
+                {adjustLoading ? t("adjustingCredits") : t("adjustCreditsSubmit")}
               </button>
             </div>
           </form>
 
           <div className={styles.creditHistoryWrap}>
-            <h3 className={styles.creditHistoryTitle}>Transaction history</h3>
+            <h3 className={styles.creditHistoryTitle}>{t("transactionHistoryTitle")}</h3>
             {creditTransactions.length === 0 && !creditsLoading ? (
-              <p className={styles.emptyState}>No credit transactions found.</p>
+              <p className={styles.emptyState}>{t("noCreditTransactions")}</p>
             ) : (
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Action</th>
-                    <th>Amount</th>
-                    <th>Balance</th>
-                    <th>Note</th>
+                    <th>{t("colDate")}</th>
+                    <th>{t("colType")}</th>
+                    <th>{t("colAction")}</th>
+                    <th>{t("colAmount")}</th>
+                    <th>{t("colBalance")}</th>
+                    <th>{t("colNote")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -427,13 +430,13 @@ export default function AdminMastersPage() {
                     <tr key={tx._id}>
                       <td>{new Date(tx.createdAt).toLocaleString()}</td>
                       <td>{tx.type}</td>
-                      <td>{tx.action || "—"}</td>
+                      <td>{tx.action || tCommon("emDash")}</td>
                       <td className={tx.amount >= 0 ? styles.creditAmountPlus : styles.creditAmountMinus}>
                         {tx.amount >= 0 ? "+" : ""}
                         {tx.amount}
                       </td>
                       <td>{tx.balanceAfter}</td>
-                      <td>{tx.metadata?.note ?? "—"}</td>
+                      <td>{tx.metadata?.note ?? tCommon("emDash")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -447,10 +450,10 @@ export default function AdminMastersPage() {
                   disabled={creditPage <= 1 || creditsLoading}
                   onClick={() => selectedMaster && void loadMasterCredits(selectedMaster._id, creditPage - 1)}
                 >
-                  Previous
+                  {tCommon("previousPage")}
                 </button>
                 <span className={styles.creditPagerInfo}>
-                  Page {creditPage} of {creditPages}
+                  {t("pagerInfo", { page: creditPage, pages: creditPages })}
                 </span>
                 <button
                   type="button"
@@ -458,7 +461,7 @@ export default function AdminMastersPage() {
                   disabled={creditPage >= creditPages || creditsLoading}
                   onClick={() => selectedMaster && void loadMasterCredits(selectedMaster._id, creditPage + 1)}
                 >
-                  Next
+                  {tCommon("nextPage")}
                 </button>
               </div>
             ) : null}

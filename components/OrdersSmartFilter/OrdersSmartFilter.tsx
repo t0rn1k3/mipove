@@ -87,7 +87,7 @@ export default function OrdersSmartFilter({
         {categoriesError ? (
           <p className="mipoveGuestText mipoveGuestText--errorLight">{categoriesError}</p>
         ) : categoriesLoading ? (
-          <p className={styles.categoriesHint}>{tCommon("loading")}…</p>
+          <p className={styles.categoriesHint}>{tCommon("loadingEllipsis")}</p>
         ) : (
           <div className={styles.pills}>
             <button
@@ -152,7 +152,7 @@ export default function OrdersSmartFilter({
                 onChange({ ...value, budgetMin: nextMin });
               }}
               className={styles.budgetInput}
-              aria-label="Minimum budget"
+              aria-label={t("filterBudgetMinAria")}
             />
             <input
               type="range"
@@ -165,7 +165,7 @@ export default function OrdersSmartFilter({
                 onChange({ ...value, budgetMax: nextMax });
               }}
               className={styles.budgetInput}
-              aria-label="Maximum budget"
+              aria-label={t("filterBudgetMaxAria")}
             />
           </div>
           <span className={styles.budgetEdge}>₾ {value.budgetMax.toLocaleString()}</span>

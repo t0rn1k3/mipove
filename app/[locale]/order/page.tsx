@@ -232,9 +232,9 @@ export default function OrderPage() {
       .then((rows) => {
         if (!cancelled) setOrderCategories(rows);
       })
-      .catch((err) => {
+      .catch(() => {
         if (!cancelled) {
-          setCategoriesError(err instanceof Error ? err.message : "Failed to load categories");
+          setCategoriesError(t("failedToLoadCategories"));
         }
       })
       .finally(() => {
@@ -243,7 +243,7 @@ export default function OrderPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const ordersFetchCategoriesKey = useMemo(
     () => [...filterState.categories].sort().join("\0"),
@@ -270,9 +270,9 @@ export default function OrderPage() {
         setOrdersHasMore(page.hasMore);
         setOrdersNextOffset(page.nextOffset);
       })
-      .catch((err) => {
+      .catch(() => {
         if (cancelled || requestId !== ordersRequestIdRef.current) return;
-        setOrdersError(err instanceof Error ? err.message : "Failed to load orders");
+        setOrdersError(t("failedToLoadOrders"));
       })
       .finally(() => {
         if (!cancelled && requestId === ordersRequestIdRef.current) setOrdersLoading(false);
@@ -286,6 +286,7 @@ export default function OrderPage() {
     mergeFirstOrdersPage,
     ordersFetchCategoriesKey,
     filterState.categories,
+    t,
   ]);
 
   const loadMoreOrders = useCallback(async () => {
@@ -304,9 +305,9 @@ export default function OrderPage() {
       setOrders((prev) => appendOrdersPage(prev, page.orders));
       setOrdersHasMore(page.hasMore);
       setOrdersNextOffset(page.nextOffset);
-    } catch (err) {
+    } catch {
       if (requestId !== ordersRequestIdRef.current) return;
-      setOrdersError(err instanceof Error ? err.message : "Failed to load orders");
+      setOrdersError(t("failedToLoadOrders"));
     } finally {
       if (requestId === ordersRequestIdRef.current) setOrdersLoadingMore(false);
     }
@@ -318,6 +319,7 @@ export default function OrderPage() {
     ordersLoading,
     ordersLoadingMore,
     ordersNextOffset,
+    t,
   ]);
 
   useEffect(() => {
@@ -454,8 +456,8 @@ export default function OrderPage() {
     scheduledAt: string;
   }) => {
     const title = form.title.trim();
-    if (!title) throw new Error("Title is required");
-    if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error("Price must be zero or greater");
+    if (!title) throw new Error(t("validationTitleRequired"));
+    if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error(t("validationBudgetNonNegative"));
 
     const created = await createOrder({
       title,
@@ -520,8 +522,8 @@ export default function OrderPage() {
   }) => {
     if (!editingOrder) return;
     const title = form.title.trim();
-    if (!title) throw new Error("Title is required");
-    if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error("Price must be zero or greater");
+    if (!title) throw new Error(t("validationTitleRequired"));
+    if (form.budgetMin < 0 || form.budgetMax < 0) throw new Error(t("validationBudgetNonNegative"));
 
     const updated = await updateOrder(editingOrder._id, {
       title,
@@ -575,10 +577,10 @@ export default function OrderPage() {
       pendingLocalOrderIdsRef.current.delete(orderId);
       setOrders((prev) => prev.filter((item) => item._id !== orderId));
       setToast({ type: "success", message: t("orderDeleted") });
-    } catch (err) {
+    } catch {
       setToast({
         type: "error",
-        message: err instanceof Error ? err.message : t("deleteOrderFailed"),
+        message: t("deleteOrderFailed"),
       });
     } finally {
       setBusyKey(null);
@@ -599,10 +601,10 @@ export default function OrderPage() {
         setFavoriteOrderIds((prev) => [...prev, orderId]);
         setToast({ type: "success", message: t("favoriteAdded") });
       }
-    } catch (err) {
+    } catch {
       setToast({
         type: "error",
-        message: err instanceof Error ? err.message : t("favoriteActionFailed"),
+        message: t("favoriteActionFailed"),
       });
     } finally {
       setBusyKey(null);
@@ -635,7 +637,7 @@ export default function OrderPage() {
       }
       setToast({
         type: "error",
-        message: err instanceof Error ? err.message : t("favoriteActionFailed"),
+        message: t("unlockContactFailed"),
       });
     } finally {
       setBusyKey(null);
