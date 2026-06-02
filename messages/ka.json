@@ -83,6 +83,30 @@
       "spend": "ხარჯი",
       "refund": "დაბრუნება",
       "admin_adjust": "კორექცია"
+    },
+    "checkout": {
+      "pageTitle": "კრედიტების ყიდვა",
+      "openForm": "გადახდის ფორმა",
+      "openFullCheckout": "სრული გვერდი",
+      "selectStepTitle": "აირჩიეთ პაკეტი",
+      "reviewStepTitle": "შეამოწმეთ და გადახადეთ",
+      "stepsProgress": "ნაბიჯი {current} / {total}",
+      "packCreditsLine": "{credits} კრედიტი + {bonus} ბონუსი",
+      "summaryPack": "პაკეტი",
+      "summaryCredits": "კრედიტები",
+      "total": "ჯამი",
+      "secureNote": "გადახდის რეკვიზიტებს შეიყვანთ ჩვენი გადახდების პარტნიორის დაცულ გვერდზე. თქვენი ბარათის მონაცემები ჩვენთან არ ინახება.",
+      "continueToReview": "გაგრძელება",
+      "backToSelection": "უკან",
+      "continueToPayment": "დაცულ გადახდის გვერდზე გადასვლა",
+      "selectPackPrompt": "გასაგრძელებლად აირჩიეთ პაკეტი.",
+      "processing": "თქვენ გადაგითმობით გადახდის გვერდზე…",
+      "loadPacksError": "კრედიტის პაკეტების ჩატვირთვა ვერ მოხერხდა. კიდევ სცადეთ.",
+      "purchaseError": "გადახდის დაწყება ვერ მოხერხდა. კიდევ სცადეთ.",
+      "invalidPackParam": "ეს პაკეტი აღარ არის ხელმისაწვდომი. სხვა აირჩიეთ.",
+      "radioGroupLabel": "კრედიტის პაკეტები",
+      "backToCredits": "უკან კრედიტებზე",
+      "noPacks": "კრედიტის პაკეტები ამჟამად მიუწვდომელია. მოგვიანებით სცადეთ."
     }
   },
   "order": {
@@ -552,7 +576,21 @@
     "enterNonZeroAmount": "შეიყვანეთ ნულისგან განსხვავებული თანხა.",
     "failedToLoadCredits": "კრედიტების მონაცემების ჩატვირთვა ვერ მოხერხდა.",
     "failedToAdjustCredits": "კრედიტების კორექტირება ვერ მოხერხდა.",
-    "colRole": "როლი"
+    "colRole": "როლი",
+    "activeMasters": "აქტიური ოსტატები",
+    "newThisWeek": "ახალი ამ კვირაში",
+    "manageUsers": "მომხმარებლების მართვა",
+    "manageMasters": "ოსტატების მართვა",
+    "quickAccess": "სწრაფი წვდომა",
+    "editMaster": "რედაქტირება",
+    "editMasterTitle": "{name} — რედაქტირება",
+    "bioLabel": "ბიო",
+    "savingChanges": "შენახვა…",
+    "saveChanges": "ცვლილებების შენახვა",
+    "failedToUpdateMaster": "ოსტატის განახლება ვერ მოხერხდა.",
+    "masterUpdated": "ოსტატი წარმატებით განახლდა.",
+    "usersCount": "{count} მომხმარებელი",
+    "mastersCount": "{count} ოსტატი"
   },
   "professions": {
     "painter": "მხატვარი",

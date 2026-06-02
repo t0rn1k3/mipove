@@ -83,6 +83,30 @@
       "spend": "Spent",
       "refund": "Refund",
       "admin_adjust": "Adjustment"
+    },
+    "checkout": {
+      "pageTitle": "Buy credits",
+      "openForm": "Open payment",
+      "openFullCheckout": "Full-page checkout",
+      "selectStepTitle": "Choose a pack",
+      "reviewStepTitle": "Review and pay",
+      "stepsProgress": "Step {current} of {total}",
+      "packCreditsLine": "{credits} credits + {bonus} bonus",
+      "summaryPack": "Pack",
+      "summaryCredits": "Credits",
+      "total": "Total",
+      "secureNote": "You will enter your payment details on our payment partner's secure page. We never store your card data.",
+      "continueToReview": "Continue",
+      "backToSelection": "Back",
+      "continueToPayment": "Continue to secure payment",
+      "selectPackPrompt": "Select a pack above to continue.",
+      "processing": "Taking you to payment…",
+      "loadPacksError": "Couldn't load credit packs. Please try again.",
+      "purchaseError": "Payment couldn't be started. Please try again.",
+      "invalidPackParam": "This pack isn't available anymore. Choose another.",
+      "radioGroupLabel": "Credit packs",
+      "backToCredits": "Back to credits",
+      "noPacks": "No credit packs are available right now. Please try again later."
     }
   },
   "order": {
@@ -552,7 +576,21 @@
     "enterNonZeroAmount": "Enter a non-zero amount.",
     "failedToLoadCredits": "Could not load credits data.",
     "failedToAdjustCredits": "Could not adjust credits.",
-    "colRole": "Role"
+    "colRole": "Role",
+    "activeMasters": "Active Masters",
+    "newThisWeek": "New This Week",
+    "manageUsers": "Manage Users",
+    "manageMasters": "Manage Masters",
+    "quickAccess": "Quick access",
+    "editMaster": "Edit",
+    "editMasterTitle": "Edit {name}",
+    "bioLabel": "Bio",
+    "savingChanges": "Saving…",
+    "saveChanges": "Save changes",
+    "failedToUpdateMaster": "Failed to update master.",
+    "masterUpdated": "Master updated successfully.",
+    "usersCount": "{count} users",
+    "mastersCount": "{count} masters"
   },
   "professions": {
     "painter": "Painter",
