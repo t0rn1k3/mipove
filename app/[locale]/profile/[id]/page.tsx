@@ -126,6 +126,9 @@ export default function ProfilePage() {
   const [expandedFavoriteContactKey, setExpandedFavoriteContactKey] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [buyCreditsIntent, setBuyCreditsIntent] = useState<"insufficientCredits" | "purchase">(
+    "insufficientCredits",
+  );
 
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isMasterProfile, setIsMasterProfile] = useState(false);
@@ -418,6 +421,7 @@ export default function ProfilePage() {
             balance: err.balance,
           }),
         );
+        setBuyCreditsIntent("insufficientCredits");
         setBuyCreditsOpen(true);
         return;
       }
@@ -511,7 +515,12 @@ export default function ProfilePage() {
                 onChangePhoto={handleChangePhoto}
                 isUploadingPhoto={photoUploading}
                 onBuyCredits={
-                  isOwnProfile && userRole === "master" ? () => setBuyCreditsOpen(true) : undefined
+                  isOwnProfile && userRole === "master"
+                    ? () => {
+                        setBuyCreditsIntent("purchase");
+                        setBuyCreditsOpen(true);
+                      }
+                    : undefined
                 }
               />
               {photoError && (
@@ -778,6 +787,7 @@ export default function ProfilePage() {
       {toast ? <div className={styles.profileToast}>{toast}</div> : null}
       <BuyCreditsModal
         open={buyCreditsOpen}
+        intent={buyCreditsIntent}
         onClose={() => setBuyCreditsOpen(false)}
         onError={(message) => setToast(message)}
       />

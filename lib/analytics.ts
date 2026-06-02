@@ -28,6 +28,19 @@ export function trackGaLogin(method?: string): void {
   void sendGaEvent("event", "login", method ? { method } : {});
 }
 
+/** GA4 recommended ecommerce event `begin_checkout` before redirect to PSP */
+export function trackGaBeginCheckout(params: {
+  value: number;
+  currency?: string;
+  items?: unknown[];
+}): void {
+  void sendGaEvent("event", "begin_checkout", {
+    currency: params.currency ?? "GEL",
+    value: params.value,
+    ...(params.items ? { items: params.items } : {}),
+  });
+}
+
 /** GA4 recommended event `purchase` — pass currency, value, transaction_id when known */
 export function trackGaPurchase(params: {
   transaction_id: string;

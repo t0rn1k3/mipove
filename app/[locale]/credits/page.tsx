@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
+import { Link } from "@/i18n/navigation";
 import { getCreditBalance, getCreditHistory, getMe } from "@/lib/api";
 import type { CreditTransaction } from "@/lib/types";
-import BuyCreditsModal from "@/components/BuyCreditsModal/BuyCreditsModal";
 import { useCreditBalance } from "@/components/CreditBalanceContext/CreditBalanceContext";
 import styles from "./credits.module.css";
 
@@ -42,7 +43,7 @@ export default function CreditsPage() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
-  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [toast, setToast] = useState("");
 
   const formatActionLabel = (action: string) => {
@@ -50,7 +51,7 @@ export default function CreditsPage() {
     if (slug === "view_contact") return tCredits("actions.view_contact");
     if (slug === "registration") return tCredits("actions.registration");
     const pretty = action.replace(/_/g, " ").trim();
-    return pretty.length > 0 ? pretty : "—";
+    return pretty.length > 0 ? pretty : tCommon("emDash");
   };
 
   const load = useCallback(async () => {
@@ -76,13 +77,13 @@ export default function CreditsPage() {
         setBalance(null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load credits");
+      setError(err instanceof Error ? err.message : tCommon("requestFailed"));
       setTransactions([]);
       setPages(1);
     } finally {
       setLoading(false);
     }
-  }, [page, setContextBalance]);
+  }, [page, setContextBalance, tCommon]);
 
   useEffect(() => {
     void load();
@@ -90,7 +91,7 @@ export default function CreditsPage() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => setToast(""), 2600);
+    const timer = window.setTimeout(() => setToast(""), 3200);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
@@ -114,14 +115,18 @@ export default function CreditsPage() {
                 <p className={styles.balanceValue}>—</p>
               )}
               {isMaster ? (
-                <button
-                  type="button"
-                  className={styles.buyMoreBtn}
-                  onClick={() => setBuyCreditsOpen(true)}
-                  disabled={loading}
-                >
-                  {tCredits("buyMore")}
-                </button>
+                <div className={styles.balanceActions}>
+                  <button
+                    type="button"
+                    className={styles.buyMoreBtn}
+                    onClick={() => setPaymentModalOpen(true)}
+                  >
+                    {tCredits("checkout.openForm")}
+                  </button>
+                  <Link href="/credits/checkout" className={styles.checkoutPageLink}>
+                    {tCredits("checkout.openFullCheckout")}
+                  </Link>
+                </div>
               ) : null}
             </div>
           </div>
@@ -200,9 +205,10 @@ export default function CreditsPage() {
         </div>
       ) : null}
       <BuyCreditsModal
-        open={buyCreditsOpen}
-        onClose={() => setBuyCreditsOpen(false)}
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
         onError={(message) => setToast(message)}
+        intent="purchase"
       />
     </main>
   );

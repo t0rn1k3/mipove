@@ -104,23 +104,23 @@ export default function ProfileSidebar({
                 </div>
                 {onBuyCredits ? (
                   <div className={styles.creditActions}>
-                    {/* <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
-                      {tCredits("buy")}
+                    <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                      {tCredits("checkout.openForm")}
                     </button>
                     <Link href="/credits" className={styles.historyLinkBtn}>
                       {tCredits("history")}
-                    </Link> */}
+                    </Link>
                   </div>
                 ) : null}
               </div>
             ) : onBuyCredits ? (
               <div className={styles.creditActions}>
-                {/* <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
-                  {t("buyCredits")}
+                <button type="button" className={styles.buyCreditsBtn} onClick={onBuyCredits}>
+                  {tCredits("checkout.openForm")}
                 </button>
                 <Link href="/credits" className={styles.historyLinkBtn}>
-                  {t("creditHistory")}
-                </Link> */}
+                  {tCredits("history")}
+                </Link>
               </div>
             ) : null}
           </div>
@@ -153,7 +153,7 @@ export default function ProfileSidebar({
             >
               <Instagram size={20} className={styles.contactIcon} />
               <div className={styles.contactContent}>
-                <span className={styles.contactLabel}>{t("instagram")}</span>
+                <span className={styles.contactLabel}>{tCommon("instagram")}</span>
                 <span className={styles.contactDetail}>@{instagram}</span>
               </div>
             </a>
