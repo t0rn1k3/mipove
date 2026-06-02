@@ -2,13 +2,20 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import {
-  getAdminUsers,
-  blockAdminUser,
-  unblockAdminUser,
-} from "@/lib/api";
+import { getAdminUsers, blockAdminUser, unblockAdminUser } from "@/lib/api";
 import type { AdminUser, AdminUsersFilterStatus } from "@/lib/types";
 import styles from "../admin.module.css";
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0] ?? "")
+    .join("")
+    .toUpperCase();
+}
+
+const FILTER_TABS = ["all", "active", "blocked", "new"] as const;
 
 export default function AdminUsersPage() {
   const t = useTranslations("admin");
@@ -25,7 +32,10 @@ export default function AdminUsersPage() {
     setError("");
     try {
       const statusParam =
-        filter === "active" ? "active" : filter === "blocked" ? "blocked" : filter === "new" ? "new" : undefined;
+        filter === "active" ? "active"
+        : filter === "blocked" ? "blocked"
+        : filter === "new" ? "new"
+        : undefined;
       const data = await getAdminUsers(statusParam ? { status: statusParam } : undefined);
       setUsers(Array.isArray(data) ? data : []);
     } catch {
@@ -36,9 +46,7 @@ export default function AdminUsersPage() {
     }
   }, [filter, t]);
 
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+  useEffect(() => { loadUsers(); }, [loadUsers]);
 
   const handleBlock = async (id: string) => {
     setActionId(id);
@@ -64,6 +72,13 @@ export default function AdminUsersPage() {
     }
   };
 
+  const FILTER_LABEL: Record<(typeof FILTER_TABS)[number], string> = {
+    all: t("filterTabAll"),
+    active: t("filterTabActive"),
+    blocked: t("filterTabBlocked"),
+    new: t("filterTabNew"),
+  };
+
   const filteredUsers = users.filter(
     (u) =>
       !search ||
@@ -71,22 +86,22 @@ export default function AdminUsersPage() {
       u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  const FILTER_TABS = ["all", "active", "blocked", "new"] as const;
-
-  const filterTabLabel = (f: (typeof FILTER_TABS)[number]) => {
-    const keys = {
-      all: "filterTabAll",
-      active: "filterTabActive",
-      blocked: "filterTabBlocked",
-      new: "filterTabNew",
-    } as const;
-    return t(keys[f]);
-  };
-
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{t("usersPageTitle")}</h1>
+        <div className={styles.pageTitleWrap}>
+          <h1 className={styles.pageTitle}>{t("usersPageTitle")}</h1>
+          {!loading && (
+            <span className={styles.pageCount}>{filteredUsers.length}</span>
+          )}
+        </div>
+        <input
+          type="search"
+          placeholder={t("searchUsers")}
+          className={styles.searchInput}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       {error && <p className="mipoveGuestText mipoveGuestText--errorLight">{error}</p>}
@@ -99,7 +114,7 @@ export default function AdminUsersPage() {
             className={`${styles.filterTab} ${filter === f ? styles.filterTabActive : ""}`}
             onClick={() => setFilter(f)}
           >
-            {filterTabLabel(f)}
+            {FILTER_LABEL[f]}
           </button>
         ))}
       </div>
@@ -107,14 +122,8 @@ export default function AdminUsersPage() {
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
           <h2 className={styles.tableTitle}>{t("userList")}</h2>
-          <input
-            type="search"
-            placeholder={t("searchUsers")}
-            className={styles.searchInput}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
         </div>
+
         {loading ? (
           <div className={styles.emptyState}>{t("loading")}</div>
         ) : filteredUsers.length === 0 ? (
@@ -134,16 +143,17 @@ export default function AdminUsersPage() {
             <tbody>
               {filteredUsers.map((u) => (
                 <tr key={u._id}>
-                  <td>{u.name}</td>
+                  <td>
+                    <div className={styles.avatarCell}>
+                      <span className={styles.avatar}>{initials(u.name)}</span>
+                      {u.name}
+                    </div>
+                  </td>
                   <td>{u.email}</td>
                   <td>{u.phone ?? tCommon("emDash")}</td>
                   <td>{u.role}</td>
                   <td>
-                    <span
-                      className={
-                        u.blocked ? styles.badgeBlocked : styles.badgeActive
-                      }
-                    >
+                    <span className={u.blocked ? styles.badgeBlocked : styles.badgeActive}>
                       {u.blocked ? tCommon("blocked") : tCommon("active")}
                     </span>
                   </td>
@@ -151,7 +161,7 @@ export default function AdminUsersPage() {
                     {u.blocked ? (
                       <button
                         type="button"
-                        className={styles.actionBtn + " " + styles.actionBtnUnblock}
+                        className={`${styles.actionBtn} ${styles.actionBtnUnblock}`}
                         onClick={() => handleUnblock(u._id)}
                         disabled={actionId === u._id}
                       >
@@ -160,7 +170,7 @@ export default function AdminUsersPage() {
                     ) : (
                       <button
                         type="button"
-                        className={styles.actionBtn + " " + styles.actionBtnBlock}
+                        className={`${styles.actionBtn} ${styles.actionBtnBlock}`}
                         onClick={() => handleBlock(u._id)}
                         disabled={actionId === u._id}
                       >
