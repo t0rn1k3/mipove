@@ -290,6 +290,15 @@ export type AdminMaster = AdminUser & {
   image?: string;
 };
 
+export type AdminMasterUpdateInput = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  specialty?: string;
+  location?: string;
+  bio?: string;
+};
+
 export type AdminRegisterInput = {
   name: string;
   email: string;

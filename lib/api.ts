@@ -8,6 +8,7 @@ import type {
   AdminStats,
   AdminUser,
   AdminMaster,
+  AdminMasterUpdateInput,
   AdminRegisterInput,
   GeocodeCity,
   Professions,
@@ -1250,6 +1251,19 @@ export async function createAdminMaster(data: {
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || "Failed to create master");
+  return json.data ?? json;
+}
+
+export async function updateAdminMaster(
+  id: string,
+  data: AdminMasterUpdateInput
+): Promise<AdminMaster> {
+  const res = await adminFetch(`/admin/masters/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Failed to update master");
   return json.data ?? json;
 }
 
